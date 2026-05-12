@@ -1,0 +1,15 @@
+.container {
+  display: flex;
+}
+
+.left {
+  width: 20rem;
+  height: 100vh;
+  border: solid red 1px;
+}
+
+.right {
+  width: 100%;
+  border: solid red 1px;
+  overflow: auto;
+}
