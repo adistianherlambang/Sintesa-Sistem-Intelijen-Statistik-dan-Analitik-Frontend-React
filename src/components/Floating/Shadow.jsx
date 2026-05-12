@@ -9,6 +9,7 @@ export default function Shadow() {
     <div style={{
       position: "absolute",
       zIndex: "9",
+      pointerEvents: "none"
     }}>
       <svg style={{
           mixBlendMode: "color-dodge",

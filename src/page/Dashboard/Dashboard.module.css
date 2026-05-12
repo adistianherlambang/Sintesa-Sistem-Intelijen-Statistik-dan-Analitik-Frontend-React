@@ -9,6 +9,9 @@
   height: 100vh;
   border: 1px solid red;
   padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
 }
 
 .right {
