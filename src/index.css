@@ -1,4 +1,21 @@
+:root {
+  --background-color: #030D05;
+  --primaryColor: #34B34A;
+}
+
+.passiveComponent {
+  background-color: #0A180B;
+  border: rgba(255, 255, 255, 0.2)
+}
+
+.activeComponent {
+  background-color: solid rgba(255, 255, 255, 0.2) 1px;
+  border: solid rgba(255, 255, 255, 0.4) 1px;
+}
+
 body {
+  background-color: var(--background-color);
+  color: white;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',

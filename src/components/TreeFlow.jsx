@@ -127,3 +127,13 @@ export default function TreeFlow({ data, width = 900, height = 600, fill, stroke
     </div>
   );
 }
+
+{/* <TreeFlow
+  data={dummyData}
+  width={1200}
+  height={700}
+  fill={"#ffffff"}
+  stroke={"#000000"}
+  textColor={"#23af00"}
+  lineColor={"#ff0000"}
+/> */}

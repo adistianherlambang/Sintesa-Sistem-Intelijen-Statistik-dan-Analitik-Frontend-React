@@ -1,21 +1,29 @@
 import React from 'react';
-import { Router, Route } from 'react-router-dom';
+import { Router, Routes, Route } from 'react-router-dom';
 import TreeFlow from './components/TreeFlow';
 import dummyData from './data/dummy.json';
+
+//page
+import LandingPage from './page/LandingPage/LandingPage';
+
+//dashboard
+import Overview from './page/Dashboard/Overview/Overview';
+
+//component
+import Shadow from './components/Floating/Shadow';
+import Dashboard from './page/Dashboard/Dashboard';
 
 export default function App() {
 
   return (
     <>
-    <TreeFlow
-      data={dummyData}
-      width={1200}
-      height={700}
-      fill={"#ffffff"}
-      stroke={"#000000"}
-      textColor={"#23af00"}
-      lineColor={"#ff0000"}
-    />
+    <Shadow/>
+    <Routes>
+      <Route path='/' element={<LandingPage/>}/>
+      <Route path='/dashboard' element={<Dashboard/>}>
+        <Route index element={<Overview/>} />
+      </Route>
+    </Routes>
     </>
   );
 }
