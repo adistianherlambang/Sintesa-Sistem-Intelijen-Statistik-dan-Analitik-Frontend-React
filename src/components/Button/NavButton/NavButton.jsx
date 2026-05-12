@@ -12,7 +12,7 @@ import {
   LanggananBillingIcon
 } from "../../Icon/Icon";
 
-export default function NavButton({ icon, children }) {
+export default function NavButton({ keyword }) {
 
   const arr = {
     overview: OverviewIcon,
@@ -24,12 +24,19 @@ export default function NavButton({ icon, children }) {
     langgananBilling: LanggananBillingIcon
   };
 
-  const IconComponent = arr[icon];
+  const IconComponent = arr[keyword];
+
+  const capitalize = (str) => {
+    return str
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (c) => c.toUpperCase())
+      .trim();
+  };
 
   return (
     <div className={styles.container}>
       <div className={styles.icon}>{IconComponent && <IconComponent />}</div>
-      <div>{children}</div>
+      <div>{capitalize(keyword)}</div>
     </div>
   );
 }

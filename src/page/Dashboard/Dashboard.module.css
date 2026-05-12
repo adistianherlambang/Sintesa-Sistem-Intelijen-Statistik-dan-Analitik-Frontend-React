@@ -11,7 +11,13 @@
   padding: 3rem 2rem;
   display: flex;
   flex-direction: column;
-  gap: 3rem;
+  gap: 2rem;
+}
+
+.leftWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .right {
