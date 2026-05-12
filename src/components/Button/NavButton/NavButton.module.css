@@ -10,9 +10,16 @@
   align-items: center;
   color: #CACACA;
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .container:hover {
+  background-color: rgba(255,255,255, 0.2);
+  border: 1px solid rgba(255,255,255, 0.4);
+}
+
+.active {
   background-color: rgba(255,255,255, 0.2);
   border: 1px solid rgba(255,255,255, 0.4);
 }
@@ -26,6 +33,10 @@
   justify-content: center;
   border-radius: 4px;
   transition: 300ms ease;
+}
+
+.iconActive {
+  background-color: rgba(255,255,255, 0.2);
 }
 
 .container:hover .icon {

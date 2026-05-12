@@ -8,6 +8,8 @@ import LandingPage from './page/LandingPage/LandingPage';
 
 //dashboard
 import Overview from './page/Dashboard/Overview/Overview';
+import Analisis from './page/Dashboard/Workspace/Analisis';
+import HistoriWorkspace from './page/Dashboard/Workspace/HistoriWorkspace';
 
 //component
 import Shadow from './components/Floating/Shadow';
@@ -22,6 +24,8 @@ export default function App() {
       <Route path='/' element={<LandingPage/>}/>
       <Route path='/dashboard' element={<Dashboard/>}>
         <Route index element={<Overview/>} />
+        <Route path='workspace/analisis' element={<Analisis/>}/>
+        <Route path='workspace/histori' element={<HistoriWorkspace/>}/>
       </Route>
     </Routes>
     </>

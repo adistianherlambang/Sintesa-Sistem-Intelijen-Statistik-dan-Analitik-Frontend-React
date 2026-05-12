@@ -62,4 +62,4 @@ function LanggananBillingIcon() {
   )
 }
 
-export{ OverviewIcon, AnalisisIcon, HistoriIcon, SambungkanAkunIcon, BotKnowledgeIcon, TentangAkunIcon, LanggananBillingIcon }
+export{ OverviewIcon, AnalisisIcon, HistoriIcon, BuatInfografisIcon, SambungkanAkunIcon, BotKnowledgeIcon, TentangAkunIcon, LanggananBillingIcon }
