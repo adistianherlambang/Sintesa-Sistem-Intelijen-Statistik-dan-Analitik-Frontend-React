@@ -36,7 +36,7 @@ export default function NavButton({ keyword, tab }) {
     sambungkanAkun: SambungkanAkunIcon,
     botKnowledge: BotKnowledgeIcon,
     tentangAkun: TentangAkunIcon,
-    langgananBilling: LanggananBillingIcon
+    langgananDanBilling: LanggananBillingIcon
   };
 
   const IconComponent = arr[keyword];
@@ -70,7 +70,7 @@ export default function NavButton({ keyword, tab }) {
       className={`${styles.container} ${isActive ? styles.active : ""}`}
       onClick={handleClick}
     >
-      <div className={styles.icon}>{IconComponent && <IconComponent />}</div>
+      <div className={`${styles.icon} ${isActive ? styles.iconActive : ""}`}>{IconComponent && <IconComponent />}</div>
       <div>{capitalize(keyword)}</div>
     </div>
   );
