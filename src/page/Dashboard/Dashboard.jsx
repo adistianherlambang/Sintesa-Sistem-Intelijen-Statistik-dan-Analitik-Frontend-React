@@ -28,8 +28,16 @@ export default function Dashboard() {
       .trim();
   };
 
-  const tab = capitalize(slash[1])
-  const keyword = capitalize(slash[2])
+  let tab
+  let keyword
+
+  if(slash.length > 2) {
+    tab = slash[2].toUpperCase()
+    keyword = capitalize(slash[3])
+  } else {
+    tab = "DASHBOARD"
+    keyword = "Overview"
+  }
 
   return (
     <div className={styles.container}>
@@ -80,7 +88,9 @@ export default function Dashboard() {
           <p className={styles.keywordIndicator}>/</p>
           <p className={styles.keywordIndicator}>{keyword}</p>
         </div>
-        <Outlet/>
+        <div className={styles.outlet}>
+          <Outlet/>
+        </div>
       </div>
     </div>
   )
