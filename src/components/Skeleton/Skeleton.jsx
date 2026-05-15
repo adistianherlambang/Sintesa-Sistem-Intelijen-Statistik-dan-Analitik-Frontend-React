@@ -1,11 +1,8 @@
 import React from 'react'
 import styles from "./Skeleton.module.css"
 
-export default function Skeleton({width, height}) {
+export default function Skeleton({width = "100%", height = "20px"}) {
   return (
-    <div style={{
-      height: height,
-      width: width
-    }} className={styles.skeleton}></div>
+    <div className={styles.skeleton}></div>
   )
 }
