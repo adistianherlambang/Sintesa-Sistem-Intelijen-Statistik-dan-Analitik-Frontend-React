@@ -7,11 +7,18 @@
   justify-content: center;
   align-items: center;
   display: flex;
-  line-height: 1;
+  line-height: 0;
+  padding: 4px;
   border: 1px solid #000;
+  box-shadow: rgba(52, 179, 73, 0) 0 0 2px;
   gap: 8px;
 }
 
 .container:hover {
-  background-color: #4ac35e;
+  box-shadow: rgba(52, 179, 73, 1) 0 0 40px;
+  background-color: #51cd65;
+}
+
+.container:active {
+  background-color: #34B34A;
 }
