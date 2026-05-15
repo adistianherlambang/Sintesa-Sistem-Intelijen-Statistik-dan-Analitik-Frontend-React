@@ -5,7 +5,6 @@ import styles from "./Dashboard.module.css"
 
 import Logo from '../../components/Logo/Logo'
 import NavButton from '../../components/Button/NavButton/NavButton'
-import Skeleton from '../../components/Skeleton/Skeleton'
 
 export default function Dashboard() {
 
@@ -91,7 +90,6 @@ export default function Dashboard() {
         </div>
         <div className={styles.outlet}>
           <Outlet/>
-          <Skeleton/>
         </div>
       </div>
     </div>

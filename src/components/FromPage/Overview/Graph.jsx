@@ -54,6 +54,55 @@ export default function Graph() {
   
   return (
     <>
+    {load ? "bentar" : gagal ? "gagal" : `${month[Object.keys(tren.datacontent).length - 1]} || ${Object.keys(tren.datacontent).length}`}
+     {load ? "bentar" : gagal ? "gagal" :
+      <div style={{ width: "100%", height: "100%", pointerEvents: "none" }}>
+        <ResponsiveContainer>
+          <AreaChart
+            data={data}
+            margin={{
+              top: 0,
+              right: 0,
+              left: 0,
+              bottom: 0
+            }}
+          >
+            <defs>
+              <linearGradient
+                id="gradient"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop
+                  offset="0%"
+                  stopColor="#13653F"
+                />
+
+                <stop
+                  offset="100%"
+                  stopColor="#26CB7F"
+                />
+              </linearGradient>
+            </defs>
+
+            <YAxis
+              hide
+              domain={['dataMin', 'dataMax']}
+            />
+            <Area
+              type="linear"
+              dataKey="y"
+              stroke="#26CB7F"
+              fill="url(#gradient)"
+              strokeWidth={1}
+              baseValue="dataMin"
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+     }
     </>
   )
 }
