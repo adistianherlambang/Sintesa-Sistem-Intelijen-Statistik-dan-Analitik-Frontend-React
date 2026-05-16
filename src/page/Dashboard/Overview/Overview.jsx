@@ -1,17 +1,41 @@
 import React from 'react'
+import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import styles from "./Overview.module.css"
 
 //component
 import MainButton from '../../../components/Button/MainButton/MainButton'
 import Graph from '../../../components/FromPage/Overview/Graph'
+import Skeleton from '../../../components/Skeleton/Skeleton'
+import Wrapper from '../../../components/Wrapper/Wrapper'
 
 export default function Overview() {
 
+  const [load, setLoad] = useState({})
+
+  const handleLoaded = (id) => {
+    setLoad(prev => ({
+      ...prev,
+      [id]: true
+    }))
+  }
+
+  const components = ["graph"]
+  const allLoad = components.every(id => load[id])
+
   return (
     <>
-    <div>
-      <div className={styles.component}><Graph/></div>
+    {!allLoad && (
+      <div className={styles.container}>
+        
+      </div>
+    )}
+    <div style={{
+      display: allLoad ? "block" : "none"
+    }}>
+      <div className={styles.component}>
+        <Graph onLoad={() => handleLoaded("graph")} />
+      </div>
     </div>
     <MainButton>
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -1,8 +1,9 @@
 import React from 'react'
+import styles from "./Wrapper.module.css"
 
 export default function Wrapper({width, height, children}) {
   return (
-    <div>{children}</div>
+    <div className={styles.container}>{children}</div>
   )
 }
 
