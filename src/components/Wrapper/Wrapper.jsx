@@ -3,7 +3,7 @@ import styles from "./Wrapper.module.css"
 
 export default function Wrapper({width, height, children}) {
   return (
-    <div className={styles.container}>{children}</div>
+    <div style={{width: width, height: height}} className={styles.container}>{children}</div>
   )
 }
 
