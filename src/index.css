@@ -20,7 +20,9 @@ html, body, #root {
   width: 100%;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
+
 
 body {
   background-color: var(--background-color);
@@ -33,6 +35,10 @@ body {
   font-size: 16px;
 }
 
+p {
+  margin: 0;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
@@ -40,11 +46,10 @@ code {
 
 .tabTitle {
   font-size: 36px;
-  line-height: 0;
   font-weight: bold;
+  line-height: 1;
 }
 
 .sectionTitleSize {
   font-size: 24px;
-  line-height: 0;
 }
