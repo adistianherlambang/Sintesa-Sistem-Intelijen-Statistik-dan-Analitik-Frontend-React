@@ -59,13 +59,28 @@ export default function Graph({onLoad}) {
     <>
     {/* {load ? "bentar" : gagal ? "gagal" : `${month[Object.keys(tren.datacontent).length - 1]} || ${Object.keys(tren.datacontent).length}`} */}
     {!load &&
-    <div>
-      <div>
-        <p>Grafik Inflasi {year}</p>
-        <p>Year to Date</p>
-        <p>{month[Object.keys(tren.datacontent).length-1]}</p>
+    <div style={{
+
+    }}>
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        padding: "1rem",
+        gap: "4px",
+        width: 'fit-content'
+      }}>
+        <p style={{color: "#AAAAAA"}}>Grafik Inflasi {year}</p>
+        <div style={{
+          width: 'fit-content',
+          display: "flex", 
+          flexDirection: "column",
+          alignItems: "end",
+        }}>
+          <p style={{fontSize: "24px"}}>Year to Date</p>
+          <i style={{color: "#AAAAAA"}}>{month[Object.keys(tren.datacontent).length-1]}</i>
+        </div>
       </div>
-      <div style={{ width: "100%", height: "300px", pointerEvents: "none" }}>
+      <div style={{ width: "100%", height: "10rem", pointerEvents: "none" }}>
         <ResponsiveContainer>
           <AreaChart
             data={data}

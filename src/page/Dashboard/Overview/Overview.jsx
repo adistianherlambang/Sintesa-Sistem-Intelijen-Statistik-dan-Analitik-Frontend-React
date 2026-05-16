@@ -42,7 +42,7 @@ export default function Overview() {
       <div className={styles.containerr} style={{display: allLoad ? "flex" : "none"}}>
 
         <div className={styles.wrapper}>
-          <p className='sectionTitleSize'>KPI Utama</p>
+          <p className='sectionTitleSize'>KPI Utama <i>(BPS Indicator)</i></p>
           <div className={styles.section}>
             <Wrapper><div className={styles.kpiUtama}>Inflasi</div></Wrapper>
             <Wrapper><div className={styles.kpiUtama}>Inflasi</div></Wrapper>
@@ -52,7 +52,7 @@ export default function Overview() {
 
         <div className={styles.wrapper}>
           <div className={styles.section}>
-            <Wrapper width="50%" padding="1rem 0rem 0 0rem"><Graph onLoad={() => handleLoaded("graph")} /></Wrapper>
+            <Wrapper width="50%" padding="0"><Graph onLoad={() => handleLoaded("graph")} /></Wrapper>
             <div className={styles.wrapper}>
               <Wrapper>bot1</Wrapper>
               <Wrapper>bot2</Wrapper>
@@ -60,7 +60,7 @@ export default function Overview() {
           </div>
         </div>
       </div>
-
+      
     </div>
 
     {/* <MainButton>
