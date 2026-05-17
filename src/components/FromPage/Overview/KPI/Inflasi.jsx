@@ -34,7 +34,7 @@ export default function Inflasi({onLoad}) {
         if (dataContent.length > 1) {
           const selisih = dataContent[dataContent.length - 1] - dataContent[dataContent.length - 2]
 
-          setBeda(selisih)
+          setBeda(selisih.toFixed(2))
           setData(dataContent[dataContent.length - 1])
         } else {
           setBeda(0)

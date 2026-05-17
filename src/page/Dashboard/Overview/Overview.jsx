@@ -12,6 +12,7 @@ import Wrapper from '../../../components/Wrapper/Wrapper'
 //kpi
 import Inflasi from '../../../components/FromPage/Overview/KPI/Inflasi'
 import KomoditasDom from '../../../components/FromPage/Overview/KPI/KomoditasDom'
+import IHK from '../../../components/FromPage/Overview/KPI/IHK'
 
 export default function Overview() {
 
@@ -24,12 +25,11 @@ export default function Overview() {
     }))
   }
 
-  const components = ["graph", "KPI Inflasi"]
+  const components = ["graph", "KPI Inflasi", "KPI IHK"]
   const allLoad = components.every(id => load[id])
 
   return (
     <>
-    <Inflasi onLoad={() => handleLoaded("KPI Inflasi")}/>
     <div className={styles.container}>
       <p className='tabTitle'>Overview</p>
       {!allLoad && (
@@ -50,7 +50,7 @@ export default function Overview() {
           <p className='sectionTitleSize'>KPI Utama <i>(BPS Indicator)</i></p>
           <div className={styles.section}>
             <Wrapper><div className={styles.kpiUtama}><Inflasi onLoad={() => handleLoaded("KPI Inflasi")}/></div></Wrapper>
-            <Wrapper><div className={styles.kpiUtama}>Inflasi</div></Wrapper>
+            <Wrapper><div className={styles.kpiUtama}><IHK onLoad={() => handleLoaded("KPI IHK")}/></div></Wrapper>
             <Wrapper><div className={styles.kpiUtama}>Inflasi</div></Wrapper>
           </div>
         </div>
