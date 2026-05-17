@@ -18,7 +18,7 @@ export default function Graph({onLoad}) {
           const time = 5 //5 kali percobaan setiap 1 detik
   
           for (let i = 0; i<=time; i++) {
-            response = await fetch("http://localhost:5000/test", {method: "POST"})
+            response = await fetch("http://localhost:5000/api/dashboard/overview/inflasi", {method: "POST"})
             if(!response.ok) {
               await new Promise(r => setTimeout(r, time*1000))
               continue
@@ -57,7 +57,6 @@ export default function Graph({onLoad}) {
   
   return (
     <>
-    {/* {load ? "bentar" : gagal ? "gagal" : `${month[Object.keys(tren.datacontent).length - 1]} || ${Object.keys(tren.datacontent).length}`} */}
     {!load &&
     <div style={{
 

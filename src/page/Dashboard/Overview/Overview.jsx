@@ -9,6 +9,10 @@ import Graph from '../../../components/FromPage/Overview/Graph'
 import Skeleton from '../../../components/Skeleton/Skeleton'
 import Wrapper from '../../../components/Wrapper/Wrapper'
 
+//kpi
+import Inflasi from '../../../components/FromPage/Overview/KPI/Inflasi'
+import KomoditasDom from '../../../components/FromPage/Overview/KPI/KomoditasDom'
+
 export default function Overview() {
 
   const [load, setLoad] = useState({})
@@ -20,11 +24,12 @@ export default function Overview() {
     }))
   }
 
-  const components = ["graph"]
+  const components = ["graph", "KPI Inflasi"]
   const allLoad = components.every(id => load[id])
 
   return (
     <>
+    <Inflasi onLoad={() => handleLoaded("KPI Inflasi")}/>
     <div className={styles.container}>
       <p className='tabTitle'>Overview</p>
       {!allLoad && (
@@ -44,7 +49,7 @@ export default function Overview() {
         <div className={styles.wrapper}>
           <p className='sectionTitleSize'>KPI Utama <i>(BPS Indicator)</i></p>
           <div className={styles.section}>
-            <Wrapper><div className={styles.kpiUtama}>Inflasi</div></Wrapper>
+            <Wrapper><div className={styles.kpiUtama}><Inflasi onLoad={() => handleLoaded("KPI Inflasi")}/></div></Wrapper>
             <Wrapper><div className={styles.kpiUtama}>Inflasi</div></Wrapper>
             <Wrapper><div className={styles.kpiUtama}>Inflasi</div></Wrapper>
           </div>
@@ -60,7 +65,7 @@ export default function Overview() {
           </div>
         </div>
       </div>
-      
+
     </div>
 
     {/* <MainButton>
