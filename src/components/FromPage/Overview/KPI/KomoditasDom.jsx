@@ -2,9 +2,10 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
-export default function KomoditasDom() {
+export default function KomoditasDom(onLoad) {
 
   const [data, setData] = useState()
+  const [load, setLoad] = useState(true)
 
   useEffect(() => {
     const getData = async () => {
@@ -18,13 +19,21 @@ export default function KomoditasDom() {
 
         setData(res.data)
 
+        console.log(res.data)
+
       } catch(err) {
         console.log(err.message)
+      } finally {
+        onLoad()
+        setLoad(true)
       }
     }
   })
 
   return (
+    <>
     <pre>{JSON.stringify(data, null, 2)}</pre>
+    {data?.biggest?.value}
+    </>
   )
 }
