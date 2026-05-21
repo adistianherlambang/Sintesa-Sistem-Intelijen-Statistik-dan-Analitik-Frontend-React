@@ -2,6 +2,7 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import { AreaChart, Area, ResponsiveContainer, YAxis } from "recharts";
 import Skeleton from '../../../components/Skeleton/Skeleton'
+import axios from 'axios';
 
 export default function Graph({onLoad}) {
     const [tren, setTren] = useState({})
@@ -13,23 +14,15 @@ export default function Graph({onLoad}) {
         try {
           setGagal(false)
           setLoad(true)
-  
-          let response
-          const time = 5 //5 kali percobaan setiap 1 detik
-  
-          for (let i = 0; i<=time; i++) {
-            response = await fetch("http://localhost:5000/api/dashboard/overview/inflasi", {method: "POST"})
-            if(!response.ok) {
-              await new Promise(r => setTimeout(r, time*1000))
-              continue
-            } else {
-              break
-            }
-          }
+
+          const response = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi`, 
+            {
+              kota: "KOTA METRO"
+            },
+          )
+
+          setTren(response.data)
           
-          const json = await response.json()
-          setTren(json);
-          console.log(json)
         } catch (err) {
           console.error(err.message);
           setGagal(true)
@@ -41,20 +34,25 @@ export default function Graph({onLoad}) {
       getData();
     }, []);
   
-    let data = [0]
+    // let data = Object.values(tren.dashboard).map((item))
   
-    if(!load && tren?.datacontent) {
-      data = Object.values(tren.datacontent).map((item, index) => ({
-        x: index + 1,
-        y: item
-      }));
-    }
+    // if(!load && tren?.datacontent) {
+    //   data = Object.values(tren.datacontent).map((item, index) => ({
+    //     x: index + 1,
+    //     y: item
+    //   }));
+    // }
+
+    const data = tren?.data?.map((item, index) => ({
+      x: index + 1,
+      y: item.value
+    })) || []
 
     const date = new Date()
     const year = date.getFullYear()
   
     const month = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
-  
+
   return (
     <>
     {!load &&
@@ -75,8 +73,8 @@ export default function Graph({onLoad}) {
           flexDirection: "column",
           alignItems: "end",
         }}>
-          <p style={{fontSize: "24px"}}>Year to Date</p>
-          <i style={{color: "#AAAAAA"}}>{month[Object.keys(tren.datacontent).length-1]}</i>
+          <p style={{fontSize: "24px"}}>Month to Month</p>
+          <i style={{color: "#AAAAAA"}}>{month[data.length - 1]}</i>
         </div>
       </div>
       <div style={{ width: "100%", height: "10rem", pointerEvents: "none" }}>

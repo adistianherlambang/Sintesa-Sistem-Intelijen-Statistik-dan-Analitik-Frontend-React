@@ -1,10 +1,10 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
+import axios from 'axios'
 
-export default function IHK({onLoad}) {
+export default function Inflasi({onLoad}) {
 
   const [data, setData] = useState(0)
-  const [beda, setBeda] = useState(0)
   const [load, setLoad] = useState(true)
   const [gagal, setGagal] = useState(false)
 
@@ -12,37 +12,14 @@ export default function IHK({onLoad}) {
     const getData = async () => {
       try {
 
-        let response
-        const time = 5
+        const res = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/ihk`, 
+          {
+            kota: "KOTA METRO"
+          },
+        )
 
-        for (let i = 0; i <= time; i++) {
-          response = await fetch("http://localhost:5000/api/dashboard/overview/ihk", {method: "POST"})
-          if(!response.ok) {
-            await new Promise(r => setTimeout(r, 1000))
-            continue
-          } else {
-            break
-          }
-        }
-
-        if (!response || !response.ok) {
-          throw new Error("Request timeout");
-        }
-
-        const json = await response.json()
-        const dataContent = Object.values(json.datacontent)
-        if (dataContent.length > 1) {
-          const selisih = dataContent[dataContent.length - 1] - dataContent[dataContent.length - 2]
-
-          setBeda(selisih.toFixed(2))
-          setData(dataContent[dataContent.length - 1])
-        } else {
-          setBeda(0)
-          setData(dataContent[0])
-        }
-
-        console.log(dataContent)
-
+        setData(res)
+        
       } catch(err) {
         console.error(err.message)
       } finally {
@@ -55,7 +32,14 @@ export default function IHK({onLoad}) {
     getData()
   }, [])
 
+  const now = data?.data?.dashboard?.now
+  const compare = data?.data?.dashboard?.compare
+
   return (
-    <div>{data} || selisih: {beda}</div>
+    <div>IHK {now} || selisih: {compare}</div>
   )
+
+  // return(
+  //   <pre>{JSON.stringify(data.data, null, 2)}</pre>
+  // )
 }
