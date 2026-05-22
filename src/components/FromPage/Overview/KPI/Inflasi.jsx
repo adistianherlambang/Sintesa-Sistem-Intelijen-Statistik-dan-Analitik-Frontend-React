@@ -25,7 +25,6 @@ export default function Inflasi({onLoad}) {
       } finally {
         setLoad(false)
         onLoad()
-        console.log()
       }
     }
 

@@ -25,7 +25,7 @@ export default function Overview() {
     }))
   }
 
-  const components = ["graph", "KPI Inflasi", "KPI IHK"]
+  const components = ["graph", "KPI Inflasi", "KPI IHK", "Komoditas Dominan"]
   const allLoad = components.every(id => load[id])
 
   return (
@@ -51,7 +51,7 @@ export default function Overview() {
           <div className={styles.section}>
             <Wrapper><div className={styles.kpiUtama}><Inflasi onLoad={() => handleLoaded("KPI Inflasi")}/></div></Wrapper>
             <Wrapper><div className={styles.kpiUtama}><IHK onLoad={() => handleLoaded("KPI IHK")}/></div></Wrapper>
-            <Wrapper><div className={styles.kpiUtama}><KomoditasDom onLoad={() => handleLoaded("KPI IHK")}/></div></Wrapper>
+            <Wrapper><div className={styles.kpiUtama}><KomoditasDom onLoad={() => handleLoaded("Komoditas Dominan")}/></div></Wrapper>
           </div>
         </div>
 
