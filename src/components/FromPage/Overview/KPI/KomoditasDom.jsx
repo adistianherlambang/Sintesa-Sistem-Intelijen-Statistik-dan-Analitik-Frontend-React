@@ -1,6 +1,7 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import styles from "./KomoditasDom.module.css"
 
 export default function KomoditasDom({onLoad}) {
 
@@ -35,12 +36,10 @@ export default function KomoditasDom({onLoad}) {
   const name = data?.biggest?.label
 
   return (
-    <div style={{
-      lineHeight: 0
-    }}>
-    <p>Komoditas Dominan</p>
-    <h1>{biggest}%</h1>
-    <div>{name}</div>
+    <div className={styles.container}>
+      <p className={styles.title}>Komoditas Dominan</p>
+      <h1 className={styles.value}>{biggest}%</h1>
+      <div className={styles.label}>{name}</div>
     </div>
   )
 }

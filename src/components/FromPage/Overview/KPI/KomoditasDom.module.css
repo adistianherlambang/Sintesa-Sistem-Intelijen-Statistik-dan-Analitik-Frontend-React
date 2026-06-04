@@ -1,0 +1,27 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  line-height: 1.2;
+}
+
+.title {
+  font-size: 14px;
+  color: #AAAAAA;
+  margin: 0;
+}
+
+.value {
+  font-size: 32px;
+  font-weight: bold;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.label {
+  font-size: 14px;
+  color: #D5D5D5;
+  font-weight: 500;
+  word-break: break-word;
+  margin-top: 4px;
+}

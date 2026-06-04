@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { AreaChart, Area, ResponsiveContainer, YAxis } from "recharts";
 import Skeleton from '../../../components/Skeleton/Skeleton'
 import axios from 'axios';
+import styles from "./Graph.module.css";
 
 export default function Graph({onLoad}) {
     const [tren, setTren] = useState({})
@@ -56,28 +57,15 @@ export default function Graph({onLoad}) {
   return (
     <>
     {!load &&
-    <div style={{
-
-    }}>
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        padding: "1rem",
-        gap: "4px",
-        width: 'fit-content'
-      }}>
-        <p style={{color: "#AAAAAA"}}>Grafik Inflasi {year}</p>
-        <div style={{
-          width: 'fit-content',
-          display: "flex", 
-          flexDirection: "column",
-          alignItems: "end",
-        }}>
-          <p style={{fontSize: "24px"}}>Month to Month</p>
-          <i style={{color: "#AAAAAA"}}>{month[data.length - 1]}</i>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <p className={styles.subtitle}>Grafik Inflasi {year}</p>
+        <div className={styles.titleBlock}>
+          <p className={styles.title}>Month to Month</p>
+          <i className={styles.monthInfo}>{month[data.length - 1]}</i>
         </div>
       </div>
-      <div style={{ width: "100%", height: "10rem", pointerEvents: "none" }}>
+      <div className={styles.chartWrapper}>
         <ResponsiveContainer>
           <AreaChart
             data={data}

@@ -31,23 +31,23 @@ export default function Overview() {
   return (
     <>
     <div className={styles.container}>
-      <p className='tabTitle'>Overview</p>
+      <p className={styles.tabTitle}>Overview</p>
       {!allLoad && (
         <div className={styles.containerr}>
           <div className={styles.wrapper}>
-            <p className='sectionTitleSize'>KPI Utama</p>
+            <p className={styles.sectionTitle}>KPI Utama</p>
             <div className={styles.section}>
               <Wrapper padding="0"><Skeleton/></Wrapper>
             </div>
           </div>
-          <div style={{height: "50rem", backgroundColor: "blue"}}></div>
+          <div className={styles.placeholderBox}></div>
         </div>
       )}
 
       <div className={styles.containerr} style={{display: allLoad ? "flex" : "none"}}>
 
         <div className={styles.wrapper}>
-          <p className='sectionTitleSize'>KPI Utama <i>(BPS Indicator)</i></p>
+          <p className={styles.sectionTitle}>KPI Utama <i>(BPS Indicator)</i></p>
           <div className={styles.section}>
             <Wrapper><div className={styles.kpiUtama}><Inflasi onLoad={() => handleLoaded("KPI Inflasi")}/></div></Wrapper>
             <Wrapper><div className={styles.kpiUtama}><IHK onLoad={() => handleLoaded("KPI IHK")}/></div></Wrapper>
@@ -63,6 +63,13 @@ export default function Overview() {
               <Wrapper>bot2</Wrapper>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className={styles.containerr} style={{display: allLoad ? "flex" : "none"}}>
+        <div className={styles.section}>
+          <Wrapper>asdado</Wrapper>
+          <Wrapper>asdado</Wrapper>
         </div>
       </div>
 

@@ -1,0 +1,38 @@
+/* .container { */
+/* outer container styling if needed */
+/* } */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: 4px;
+  width: fit-content;
+}
+
+.subtitle {
+  color: #AAAAAA;
+  margin: 0;
+}
+
+.titleBlock {
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.title {
+  font-size: 24px;
+  margin: 0;
+}
+
+.monthInfo {
+  color: #AAAAAA;
+}
+
+.chartWrapper {
+  width: 100%;
+  height: 10rem;
+  pointer-events: none;
+}

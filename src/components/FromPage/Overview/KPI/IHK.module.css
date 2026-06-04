@@ -1,0 +1,37 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  line-height: 1.2;
+}
+
+.title {
+  font-size: 14px;
+  color: #AAAAAA;
+  margin: 0;
+}
+
+.value {
+  font-size: 32px;
+  font-weight: bold;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.comparison {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+  color: #D5D5D5;
+}
+
+.trendUp {
+  color: #4ABB53;
+  font-weight: 600;
+}
+
+.trendDown {
+  color: #D52B2B;
+  font-weight: 600;
+}

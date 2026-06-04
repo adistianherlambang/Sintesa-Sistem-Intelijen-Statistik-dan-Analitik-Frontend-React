@@ -1,0 +1,11 @@
+.container {
+  position: absolute;
+  z-index: 9;
+  pointer-events: none;
+}
+
+.svg {
+  mix-blend-mode: color-dodge;
+  width: 900px;
+  height: auto;
+}
