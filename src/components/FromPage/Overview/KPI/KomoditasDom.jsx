@@ -1,9 +1,9 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
-import styles from "./KomoditasDom.module.css"
+import styles from "./kpi.module.css"
 
-export default function KomoditasDom({onLoad}) {
+export default function KomoditasDom({ onLoad }) {
 
   const [data, setData] = useState()
   const [load, setLoad] = useState(true)
@@ -12,7 +12,7 @@ export default function KomoditasDom({onLoad}) {
     const getData = async () => {
       try {
 
-        const res = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/komoditas`, 
+        const res = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/komoditas`,
           {
             kota: "KOTA METRO"
           }
@@ -21,7 +21,7 @@ export default function KomoditasDom({onLoad}) {
         setData(res.data)
 
 
-      } catch(err) {
+      } catch (err) {
         console.log(err.message)
       } finally {
         onLoad()
