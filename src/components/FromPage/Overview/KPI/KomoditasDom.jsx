@@ -32,13 +32,15 @@ export default function KomoditasDom({onLoad}) {
   }, [])
 
   const biggest = data?.biggest?.value
-  const name = data?.biggest?.nama
+  const name = data?.biggest?.label
 
   return (
-    <>
-    <div>Andil Terbesar Inflasi</div>
-    <div>{biggest}%</div>
+    <div style={{
+      lineHeight: 0
+    }}>
+    <p>Komoditas Dominan</p>
+    <h1>{biggest}%</h1>
     <div>{name}</div>
-    </>
+    </div>
   )
 }
