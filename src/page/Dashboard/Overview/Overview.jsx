@@ -15,6 +15,7 @@ import KomoditasDom from '../../../components/FromPage/Overview/KPI/KomoditasDom
 import IHK from '../../../components/FromPage/Overview/KPI/IHK'
 import UserActivity from '../../../components/FromPage/Overview/UserActivity'
 import AISummary from '../../../components/FromPage/Overview/AISummary'
+import HitoriAnalisis from '../../../components/FromPage/Overview/HitoriAnalisis'
 
 export default function Overview() {
 
@@ -72,6 +73,12 @@ export default function Overview() {
           <div className={styles.section}>
             <Wrapper><UserActivity /></Wrapper>
             <Wrapper><AISummary /></Wrapper>
+          </div>
+        </div>
+
+        <div className={styles.containerr} style={{ display: allLoad ? "flex" : "none" }}>
+          <div className={styles.section}>
+            <Wrapper><HitoriAnalisis /></Wrapper>
           </div>
         </div>
 
