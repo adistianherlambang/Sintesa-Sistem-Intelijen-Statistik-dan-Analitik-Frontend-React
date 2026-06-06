@@ -16,6 +16,7 @@ import IHK from '../../../components/FromPage/Overview/KPI/IHK'
 import UserActivity from '../../../components/FromPage/Overview/UserActivity'
 import AISummary from '../../../components/FromPage/Overview/AISummary'
 import HitoriAnalisis from '../../../components/FromPage/Overview/HitoriAnalisis'
+import HistoriInfografis from '../../../components/FromPage/Overview/HistoriInfografis'
 
 export default function Overview() {
 
@@ -79,6 +80,12 @@ export default function Overview() {
         <div className={styles.containerr} style={{ display: allLoad ? "flex" : "none" }}>
           <div className={styles.section}>
             <Wrapper><HitoriAnalisis /></Wrapper>
+          </div>
+        </div>
+
+        <div className={styles.containerr} style={{ display: allLoad ? "flex" : "none" }}>
+          <div className={styles.section}>
+            <Wrapper><HistoriInfografis /></Wrapper>
           </div>
         </div>
 

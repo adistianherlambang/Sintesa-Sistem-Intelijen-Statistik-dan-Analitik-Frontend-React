@@ -14,6 +14,7 @@ export default function HitoriAnalisis({ onLoad }) {
 
   return (
     <div>
+      <p>Histori Analisis</p>
       <table>
         <tr>
           <td>No</td>
