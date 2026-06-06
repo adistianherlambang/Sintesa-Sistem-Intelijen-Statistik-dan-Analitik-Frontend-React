@@ -23,8 +23,6 @@ export default function AISummary({ onLoad }) {
     fetchData()
   }, [])
 
-  // const summarySementara = "Pada April 2026, Kota Metro mencatatkan IHK sebesar 110.41 dengan data inflasi YoY tidak tersedia, di mana pendorong utamanya adalah kelompok Penyediaan Makanan dan Minuman / Restoran sebesar 1.12%."
-
   return (
     <div>
       <p>Ringkasan AI</p>
