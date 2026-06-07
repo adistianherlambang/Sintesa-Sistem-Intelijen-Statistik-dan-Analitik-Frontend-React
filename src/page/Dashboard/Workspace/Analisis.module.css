@@ -105,6 +105,17 @@
   margin-top: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 0px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.sheetTabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.sheetTabs::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
 }
 
 .sheetTab {

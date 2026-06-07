@@ -110,7 +110,8 @@ function StepTwo(props) {
   const [inflasi, setInflasi] = useState()
   const [ihk, setIhk] = useState()
   const [komoditas, setKomoditas] = useState()
-  const [activeSheet, setActiveSheet] = useState("now") // "now" or "prev"
+  const [activeYear, setActiveYear] = useState("now") // "now" or "prev"
+  const [activeSheet, setActiveSheet] = useState("main") // "main" or commodity index string ("0", "1", ...)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -138,7 +139,7 @@ function StepTwo(props) {
   const handleInflasiChange = (index, val) => {
     setInflasi(prev => {
       if (!prev) return prev
-      if (activeSheet === "now") {
+      if (activeYear === "now") {
         const newData = [...prev.data]
         newData[index] = { ...newData[index], value: val }
         return { ...prev, data: newData }
@@ -153,7 +154,7 @@ function StepTwo(props) {
   const handleIhkChange = (index, val) => {
     setIhk(prev => {
       if (!prev) return prev
-      if (activeSheet === "now") {
+      if (activeYear === "now") {
         const newData = [...prev.data]
         newData[index] = { ...newData[index], value: val }
         return { ...prev, data: newData }
@@ -168,7 +169,7 @@ function StepTwo(props) {
   const handleKomoditasChange = (commodityIndex, monthIndex, val) => {
     setKomoditas(prev => {
       if (!prev) return prev
-      const field = activeSheet === "now" ? "hierarki" : "yoy"
+      const field = activeYear === "now" ? "hierarki" : "yoy"
       const newList = [...prev[field]]
       const targetCommodity = { ...newList[commodityIndex] }
 
@@ -181,6 +182,32 @@ function StepTwo(props) {
       }
 
       newList[commodityIndex] = targetCommodity
+      return { ...prev, [field]: newList }
+    })
+  }
+
+  const handleSubKomoditasChange = (commodityIndex, subIndex, monthIndex, val) => {
+    setKomoditas(prev => {
+      if (!prev) return prev
+      const field = activeYear === "now" ? "hierarki" : "yoy"
+      const newList = [...prev[field]]
+      const targetCommodity = { ...newList[commodityIndex] }
+
+      const newSubs = [...(targetCommodity.sub || [])]
+      const targetSub = { ...newSubs[subIndex] }
+
+      const dataKeys = Object.keys(targetSub.data || {})
+      if (dataKeys[monthIndex]) {
+        targetSub.data = {
+          ...targetSub.data,
+          [dataKeys[monthIndex]]: val
+        }
+      }
+
+      newSubs[subIndex] = targetSub
+      targetCommodity.sub = newSubs
+      newList[commodityIndex] = targetCommodity
+
       return { ...prev, [field]: newList }
     })
   }
@@ -203,84 +230,169 @@ function StepTwo(props) {
   const currentYear = new Date().getFullYear()
   const prevYear = currentYear - 1
 
-  const activeDataInflasi = activeSheet === "now" ? inflasi.data : inflasi.yoy
-  const activeDataIhk = activeSheet === "now" ? ihk.data : ihk.yoy
-  const komoditasList = activeSheet === "now" ? (komoditas?.hierarki || []) : (komoditas?.yoy || [])
+  const activeDataInflasi = activeYear === "now" ? inflasi.data : inflasi.yoy
+  const activeDataIhk = activeYear === "now" ? ihk.data : ihk.yoy
+  const komoditasList = activeYear === "now" ? (komoditas?.hierarki || []) : (komoditas?.yoy || [])
+
+  // Cari commodity item yang aktif jika activeSheet bukan "main"
+  const activeCommodityIndex = activeSheet !== "main" ? Number(activeSheet) : null
+  const activeCommodity = activeCommodityIndex !== null ? komoditasList[activeCommodityIndex] : null
+  const subList = activeCommodity?.sub || []
 
   return (
     <div className={styles.container}>
       <Wrapper>
-        <p style={{ fontSize: "20px", fontWeight: "bold", color: "#F8FAFC", margin: "0 0 1rem 0" }}>
-          Edit Data BPS ({inflasi.kota}) - Tahun {activeSheet === "now" ? currentYear : prevYear}
-        </p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+          <p style={{ fontSize: "20px", fontWeight: "bold", color: "#F8FAFC", margin: 0 }}>
+            {activeSheet === "main"
+              ? `Edit Data BPS (${inflasi.kota}) - Ringkasan`
+              : `Edit Sub-Komoditas BPS (${inflasi.kota}) - ${activeCommodity?.label}`
+            }
+          </p>
+          <div style={{ display: "flex", gap: "8px", background: "rgba(255, 255, 255, 0.05)", padding: "4px", borderRadius: "8px" }}>
+            <button
+              type="button"
+              onClick={() => setActiveYear("now")}
+              style={{
+                padding: "6px 12px",
+                border: "none",
+                borderRadius: "6px",
+                background: activeYear === "now" ? "#3B82F6" : "transparent",
+                color: activeYear === "now" ? "#FFFFFF" : "#94A3B8",
+                fontWeight: "600",
+                cursor: "pointer",
+                transition: "all 0.2s"
+              }}
+            >
+              Tahun {currentYear}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveYear("prev")}
+              style={{
+                padding: "6px 12px",
+                border: "none",
+                borderRadius: "6px",
+                background: activeYear === "prev" ? "#3B82F6" : "transparent",
+                color: activeYear === "prev" ? "#FFFFFF" : "#94A3B8",
+                fontWeight: "600",
+                cursor: "pointer",
+                transition: "all 0.2s"
+              }}
+            >
+              Tahun {prevYear} (YoY)
+            </button>
+          </div>
+        </div>
+
         <div className={styles.tableContainer}>
           <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Bulan</th>
-                <th>Inflasi (%)</th>
-                <th>IHK</th>
-                {komoditasList.map((item, cIndex) => (
-                  <th key={cIndex}>{item.label}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {activeDataInflasi.map((item, index) => (
-                <tr key={index}>
-                  <td style={{ fontWeight: "500" }}>{monthNames[index % 12]}</td>
-                  <td>
-                    <input
-                      type="text"
-                      className={styles.inputField}
-                      value={item.value}
-                      onChange={(e) => handleInflasiChange(index, e.target.value)}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      className={styles.inputField}
-                      value={activeDataIhk[index] ? activeDataIhk[index].value : ""}
-                      onChange={(e) => handleIhkChange(index, e.target.value)}
-                    />
-                  </td>
-                  {komoditasList.map((cItem, cIndex) => {
-                    const dataKeys = Object.keys(cItem.data || {})
-                    const targetKey = dataKeys[index]
-                    const val = targetKey !== undefined ? cItem.data[targetKey] : ""
-                    return (
-                      <td key={cIndex}>
+            {activeSheet === "main" ? (
+              <>
+                <thead>
+                  <tr>
+                    <th>Bulan</th>
+                    <th>Inflasi (%)</th>
+                    <th>IHK</th>
+                    {komoditasList.map((item, cIndex) => (
+                      <th key={cIndex}>{item.label}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeDataInflasi.map((item, index) => (
+                    <tr key={index}>
+                      <td style={{ fontWeight: "500" }}>{monthNames[index % 12]}</td>
+                      <td>
                         <input
                           type="text"
                           className={styles.inputField}
-                          value={val}
-                          onChange={(e) => handleKomoditasChange(cIndex, index, e.target.value)}
+                          value={item.value}
+                          onChange={(e) => handleInflasiChange(index, e.target.value)}
                         />
                       </td>
-                    )
-                  })}
-                </tr>
-              ))}
-            </tbody>
+                      <td>
+                        <input
+                          type="text"
+                          className={styles.inputField}
+                          value={activeDataIhk[index] ? activeDataIhk[index].value : ""}
+                          onChange={(e) => handleIhkChange(index, e.target.value)}
+                        />
+                      </td>
+                      {komoditasList.map((cItem, cIndex) => {
+                        const dataKeys = Object.keys(cItem.data || {})
+                        const targetKey = dataKeys[index]
+                        const val = targetKey !== undefined ? cItem.data[targetKey] : ""
+                        return (
+                          <td key={cIndex}>
+                            <input
+                              type="text"
+                              className={styles.inputField}
+                              value={val}
+                              onChange={(e) => handleKomoditasChange(cIndex, index, e.target.value)}
+                            />
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </>
+            ) : (
+              <>
+                <thead>
+                  <tr>
+                    <th>Bulan</th>
+                    {subList.map((subItem, sIndex) => (
+                      <th key={sIndex}>{subItem.label}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeDataInflasi.map((item, index) => (
+                    <tr key={index}>
+                      <td style={{ fontWeight: "500" }}>{monthNames[index % 12]}</td>
+                      {subList.map((subItem, sIndex) => {
+                        const dataKeys = Object.keys(subItem.data || {})
+                        const targetKey = dataKeys[index]
+                        const val = targetKey !== undefined ? subItem.data[targetKey] : ""
+                        return (
+                          <td key={sIndex}>
+                            <input
+                              type="text"
+                              className={styles.inputField}
+                              value={val}
+                              onChange={(e) => handleSubKomoditasChange(activeCommodityIndex, sIndex, index, e.target.value)}
+                            />
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </>
+            )}
           </table>
         </div>
 
         <div className={styles.sheetTabs}>
           <button
             type="button"
-            onClick={() => setActiveSheet("now")}
-            className={`${styles.sheetTab} ${activeSheet === "now" ? styles.sheetTabActive : ""}`}
+            onClick={() => setActiveSheet("main")}
+            className={`${styles.sheetTab} ${activeSheet === "main" ? styles.sheetTabActive : ""}`}
           >
-            Sheet Tahun {currentYear}
+            Sheet Utama
           </button>
-          <button
-            type="button"
-            onClick={() => setActiveSheet("prev")}
-            className={`${styles.sheetTab} ${activeSheet === "prev" ? styles.sheetTabActive : ""}`}
-          >
-            Sheet Tahun {prevYear} (YoY)
-          </button>
+          {komoditas.hierarki.map((item, index) => (
+            <button
+              key={index}
+              type="button"
+              onClick={() => setActiveSheet(index.toString())}
+              className={`${styles.sheetTab} ${activeSheet === index.toString() ? styles.sheetTabActive : ""}`}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
       </Wrapper>
       {/* <div onClick={() => setStep(2)}>klik</div> */}
