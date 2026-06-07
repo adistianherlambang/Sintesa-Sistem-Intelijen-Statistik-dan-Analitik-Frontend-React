@@ -30,7 +30,7 @@ function StepOne(props) {
 
   const { setStep } = props
 
-  const handleClick = () => {
+  const handleClick = (props) => {
     setStep(1)
   }
 

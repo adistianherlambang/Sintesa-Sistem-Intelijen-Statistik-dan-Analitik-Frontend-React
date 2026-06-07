@@ -15,6 +15,11 @@ export default function Stepper({ item }) {
             key={index}
           >
             <div
+              onClick={() => {
+                if (index <= step) {
+                  setStep(index);
+                }
+              }}
               className={styles.stepper}
               style={{
                 backgroundColor:
