@@ -81,6 +81,7 @@
 
 .inputField {
   width: 100%;
+  min-width: 90px;
   padding: 10px 14px;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);

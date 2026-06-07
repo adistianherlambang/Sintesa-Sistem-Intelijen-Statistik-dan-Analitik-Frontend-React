@@ -165,12 +165,32 @@ function StepTwo(props) {
     })
   }
 
+  const handleKomoditasChange = (commodityIndex, monthIndex, val) => {
+    setKomoditas(prev => {
+      if (!prev) return prev
+      const field = activeSheet === "now" ? "hierarki" : "yoy"
+      const newList = [...prev[field]]
+      const targetCommodity = { ...newList[commodityIndex] }
+
+      const dataKeys = Object.keys(targetCommodity.data || {})
+      if (dataKeys[monthIndex]) {
+        targetCommodity.data = {
+          ...targetCommodity.data,
+          [dataKeys[monthIndex]]: val
+        }
+      }
+
+      newList[commodityIndex] = targetCommodity
+      return { ...prev, [field]: newList }
+    })
+  }
+
   const monthNames = [
     "Januari", "Februari", "Maret", "April", "Mei", "Juni",
     "Juli", "Agustus", "September", "Oktober", "November", "Desember"
   ]
 
-  if (!inflasi || !ihk) {
+  if (!inflasi || !ihk || !komoditas) {
     return (
       <div className={styles.container}>
         <Wrapper>
@@ -185,6 +205,7 @@ function StepTwo(props) {
 
   const activeDataInflasi = activeSheet === "now" ? inflasi.data : inflasi.yoy
   const activeDataIhk = activeSheet === "now" ? ihk.data : ihk.yoy
+  const komoditasList = activeSheet === "now" ? (komoditas?.hierarki || []) : (komoditas?.yoy || [])
 
   return (
     <div className={styles.container}>
@@ -199,6 +220,9 @@ function StepTwo(props) {
                 <th>Bulan</th>
                 <th>Inflasi (%)</th>
                 <th>IHK</th>
+                {komoditasList.map((item, cIndex) => (
+                  <th key={cIndex}>{item.label}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -221,6 +245,21 @@ function StepTwo(props) {
                       onChange={(e) => handleIhkChange(index, e.target.value)}
                     />
                   </td>
+                  {komoditasList.map((cItem, cIndex) => {
+                    const dataKeys = Object.keys(cItem.data || {})
+                    const targetKey = dataKeys[index]
+                    const val = targetKey !== undefined ? cItem.data[targetKey] : ""
+                    return (
+                      <td key={cIndex}>
+                        <input
+                          type="text"
+                          className={styles.inputField}
+                          value={val}
+                          onChange={(e) => handleKomoditasChange(cIndex, index, e.target.value)}
+                        />
+                      </td>
+                    )
+                  })}
                 </tr>
               ))}
             </tbody>
