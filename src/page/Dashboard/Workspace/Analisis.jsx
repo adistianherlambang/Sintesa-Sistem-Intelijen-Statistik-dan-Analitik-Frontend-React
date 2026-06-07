@@ -7,6 +7,7 @@ import styles from "./Analisis.module.css"
 import Stepper from '../../../components/Stepper/Stepper'
 import Wrapper from '../../../components/Wrapper/Wrapper'
 import Hierarchy from '../../../components/Hierarchy/Hierarchy'
+import MainButton from '../../../components/MainButton/MainButton'
 
 export default function Analisis() {
 
@@ -462,6 +463,7 @@ function StepTwo(props) {
           </div>
         </div>
       </Wrapper>
+      <MainButton>Simpan</MainButton>
       {/* <div onClick={() => setStep(2)}>klik</div> */}
     </div>
   )
