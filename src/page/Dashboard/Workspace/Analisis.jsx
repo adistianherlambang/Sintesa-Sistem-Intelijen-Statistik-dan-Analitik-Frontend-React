@@ -110,17 +110,18 @@ function StepTwo(props) {
   const [inflasi, setInflasi] = useState()
   const [ihk, setIhk] = useState()
   const [komoditas, setKomoditas] = useState()
+  const [activeSheet, setActiveSheet] = useState("now") // "now" or "prev"
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const resInflasi = await axios.post(`${process.env.REACT_APP_URL_SERVER}/5000/api/dashboard/overview/inflasi`,
+        const resInflasi = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi`,
           { kota: "KOTA METRO" }
         )
-        const resIhk = await axios.post(`${process.env.REACT_APP_URL_SERVER}/5000/api/dashboard/overview/ihk`,
+        const resIhk = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/ihk`,
           { kota: "KOTA METRO" }
         )
-        const resKomoditas = await axios.post(`${process.env.REACT_APP_URL_SERVER}/5000/api/dashboard/overview/komoditas`,
+        const resKomoditas = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/komoditas`,
           { kota: "KOTA METRO" }
         )
 
@@ -134,14 +135,113 @@ function StepTwo(props) {
     fetchData()
   }, [])
 
+  const handleInflasiChange = (index, val) => {
+    setInflasi(prev => {
+      if (!prev) return prev
+      if (activeSheet === "now") {
+        const newData = [...prev.data]
+        newData[index] = { ...newData[index], value: val }
+        return { ...prev, data: newData }
+      } else {
+        const newYoy = [...prev.yoy]
+        newYoy[index] = { ...newYoy[index], value: val }
+        return { ...prev, yoy: newYoy }
+      }
+    })
+  }
+
+  const handleIhkChange = (index, val) => {
+    setIhk(prev => {
+      if (!prev) return prev
+      if (activeSheet === "now") {
+        const newData = [...prev.data]
+        newData[index] = { ...newData[index], value: val }
+        return { ...prev, data: newData }
+      } else {
+        const newYoy = [...prev.yoy]
+        newYoy[index] = { ...newYoy[index], value: val }
+        return { ...prev, yoy: newYoy }
+      }
+    })
+  }
+
+  const monthNames = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ]
+
+  if (!inflasi || !ihk) {
+    return (
+      <div className={styles.container}>
+        <Wrapper>
+          <p style={{ color: "#E2E8F0" }}>Memuat data...</p>
+        </Wrapper>
+      </div>
+    )
+  }
+
+  const currentYear = new Date().getFullYear()
+  const prevYear = currentYear - 1
+
+  const activeDataInflasi = activeSheet === "now" ? inflasi.data : inflasi.yoy
+  const activeDataIhk = activeSheet === "now" ? ihk.data : ihk.yoy
+
   return (
     <div className={styles.container}>
       <Wrapper>
-        <p>Preview</p>
-        <div>
-          {inflasi.map((item) => (
-            <div>{item.kota}</div>
-          ))}
+        <p style={{ fontSize: "20px", fontWeight: "bold", color: "#F8FAFC", margin: "0 0 1rem 0" }}>
+          Edit Data BPS ({inflasi.kota}) - Tahun {activeSheet === "now" ? currentYear : prevYear}
+        </p>
+        <div className={styles.tableContainer}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Bulan</th>
+                <th>Inflasi (%)</th>
+                <th>IHK</th>
+              </tr>
+            </thead>
+            <tbody>
+              {activeDataInflasi.map((item, index) => (
+                <tr key={index}>
+                  <td style={{ fontWeight: "500" }}>{monthNames[index % 12]}</td>
+                  <td>
+                    <input
+                      type="text"
+                      className={styles.inputField}
+                      value={item.value}
+                      onChange={(e) => handleInflasiChange(index, e.target.value)}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      className={styles.inputField}
+                      value={activeDataIhk[index] ? activeDataIhk[index].value : ""}
+                      onChange={(e) => handleIhkChange(index, e.target.value)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className={styles.sheetTabs}>
+          <button
+            type="button"
+            onClick={() => setActiveSheet("now")}
+            className={`${styles.sheetTab} ${activeSheet === "now" ? styles.sheetTabActive : ""}`}
+          >
+            Sheet Tahun {currentYear}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveSheet("prev")}
+            className={`${styles.sheetTab} ${activeSheet === "prev" ? styles.sheetTabActive : ""}`}
+          >
+            Sheet Tahun {prevYear} (YoY)
+          </button>
         </div>
       </Wrapper>
       {/* <div onClick={() => setStep(2)}>klik</div> */}
