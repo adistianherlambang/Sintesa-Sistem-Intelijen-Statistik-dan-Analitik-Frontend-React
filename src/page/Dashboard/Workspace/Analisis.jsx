@@ -16,10 +16,11 @@ export default function Analisis() {
     { label: "StepThree", content: StepThree },
   ]
 
+  const req = []
+
   return (
     <div className={styles.container}>
       <p className={styles.tabTitle}>Analisis</p>
-      <Wrapper>asdia</Wrapper>
       <Stepper item={item} />
     </div>
   )
@@ -32,7 +33,7 @@ function StepOne(props) {
   return (
     <div className={styles.container}>
       <Wrapper>satu</Wrapper>
-      <div onClick={() => setStep(1)}>klik</div>
+      <div onClick={() => setStep(1)}>aw</div>
     </div>
   )
 }
