@@ -1,5 +1,6 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
+import axios from 'axios'
 import styles from "./Analisis.module.css"
 
 // component
@@ -106,10 +107,44 @@ function StepTwo(props) {
 
   const { setStep } = props
 
+  const [inflasi, setInflasi] = useState()
+  const [ihk, setIhk] = useState()
+  const [komoditas, setKomoditas] = useState()
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const resInflasi = await axios.post(`${process.env.REACT_APP_URL_SERVER}/5000/api/dashboard/overview/inflasi`,
+          { kota: "KOTA METRO" }
+        )
+        const resIhk = await axios.post(`${process.env.REACT_APP_URL_SERVER}/5000/api/dashboard/overview/ihk`,
+          { kota: "KOTA METRO" }
+        )
+        const resKomoditas = await axios.post(`${process.env.REACT_APP_URL_SERVER}/5000/api/dashboard/overview/komoditas`,
+          { kota: "KOTA METRO" }
+        )
+
+        setInflasi(resInflasi.data)
+        setIhk(resIhk.data)
+        setKomoditas(resKomoditas.data)
+      } catch (err) {
+        console.error(err.message)
+      }
+    }
+    fetchData()
+  }, [])
+
   return (
     <div className={styles.container}>
-      <Wrapper>dua</Wrapper>
-      <div onClick={() => setStep(2)}>klik</div>
+      <Wrapper>
+        <p>Preview</p>
+        <div>
+          {inflasi.map((item) => (
+            <div>{item.kota}</div>
+          ))}
+        </div>
+      </Wrapper>
+      {/* <div onClick={() => setStep(2)}>klik</div> */}
     </div>
   )
 }
