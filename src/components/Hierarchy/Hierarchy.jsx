@@ -1,10 +1,9 @@
 import React from 'react';
-import styles from './TreeFlow.module.css';
+import styles from './Hierarchy.module.css';
 
-const NODE_WIDTH = 80;
-const NODE_HEIGHT = 40;
-const H_GAP = 140;
-const V_GAP = 60;
+const NODE_WIDTH = 180;
+const H_GAP = 320;
+const V_GAP = 90;
 
 function getTreeHeight(node) {
   if (!node || Object.keys(node).length === 0) return 1;
@@ -13,6 +12,24 @@ function getTreeHeight(node) {
     (sum, child) => sum + getTreeHeight(child),
     0
   );
+}
+
+function wrapText(text, maxChars = 22) {
+  if (!text) return [];
+  const words = text.split(' ');
+  const lines = [];
+  let currentLine = '';
+
+  words.forEach(word => {
+    if ((currentLine + ' ' + word).trim().length <= maxChars) {
+      currentLine = (currentLine + ' ' + word).trim();
+    } else {
+      if (currentLine) lines.push(currentLine);
+      currentLine = word;
+    }
+  });
+  if (currentLine) lines.push(currentLine);
+  return lines;
 }
 
 function layoutTree(data, depth = 0, startY = 0) {
@@ -57,7 +74,7 @@ function layoutTree(data, depth = 0, startY = 0) {
   return { nodes, edges };
 }
 
-export default function TreeFlow({ data, width = 900, height = 600, fill, stroke, lineColor, textColor }) {
+export default function Hierarchy({ data, width = 900, height = 600, fill, stroke, lineColor, textColor }) {
   if (!data || typeof data !== 'object') return null;
 
   const { nodes, edges } = layoutTree(data);
@@ -92,7 +109,7 @@ export default function TreeFlow({ data, width = 900, height = 600, fill, stroke
               key={i}
               d={path}
               className={styles.edge}
-              style={{stroke: lineColor}}
+              style={{ stroke: lineColor }}
               fill="none"
               markerEnd="url(#arrow)"
             />
@@ -100,40 +117,47 @@ export default function TreeFlow({ data, width = 900, height = 600, fill, stroke
         })}
 
         {/* nodes */}
-        {nodes.map((node) => (
-          <g key={node.id}>
-            <rect
-              x={node.x}
-              y={node.y - NODE_HEIGHT / 2}
-              width={NODE_WIDTH}
-              height={NODE_HEIGHT}
-              className={styles.nodeRect}
-              style={{fill: fill, stroke: !stroke && !fill ? "#333" : stroke && fill ? stroke : ""}}
-              rx="6"
-              ry="6"
-            />
-            <text
-              x={node.x + NODE_WIDTH / 2}
-              y={node.y}
-              className={styles.nodeText}
-              style={{fill: textColor}}
-            >
-              {node.label}
-            </text>
-          </g>
-        ))}
+        {nodes.map((node) => {
+          const lines = wrapText(node.label, 20);
+          const nodeHeight = lines.length * 15 + 20;
+
+          return (
+            <g key={node.id}>
+              <rect
+                x={node.x}
+                y={node.y - nodeHeight / 2}
+                width={NODE_WIDTH}
+                height={nodeHeight}
+                className={styles.nodeRect}
+                style={{ fill: fill, stroke: !stroke && !fill ? "#333" : stroke && fill ? stroke : "" }}
+                rx="6"
+                ry="6"
+              />
+              <text
+                x={node.x + NODE_WIDTH / 2}
+                y={node.y}
+                className={styles.nodeText}
+                style={{ fill: textColor }}
+              >
+                {lines.map((line, lineIdx) => {
+                  const lineHeight = 15;
+                  const dy = (lineIdx - (lines.length - 1) / 2) * lineHeight;
+                  return (
+                    <tspan
+                      key={lineIdx}
+                      x={node.x + NODE_WIDTH / 2}
+                      dy={lineIdx === 0 ? `${dy}px` : `${lineHeight}px`}
+                    >
+                      {line}
+                    </tspan>
+                  );
+                })}
+              </text>
+            </g>
+          );
+        })}
 
       </svg>
     </div>
   );
 }
-
-{/* <TreeFlow
-  data={dummyData}
-  width={1200}
-  height={700}
-  fill={"#ffffff"}
-  stroke={"#000000"}
-  textColor={"#23af00"}
-  lineColor={"#ff0000"}
-/> */}

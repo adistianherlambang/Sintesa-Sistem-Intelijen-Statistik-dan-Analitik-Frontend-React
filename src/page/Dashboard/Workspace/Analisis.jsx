@@ -6,6 +6,7 @@ import styles from "./Analisis.module.css"
 // component
 import Stepper from '../../../components/Stepper/Stepper'
 import Wrapper from '../../../components/Wrapper/Wrapper'
+import Hierarchy from '../../../components/Hierarchy/Hierarchy'
 
 export default function Analisis() {
 
@@ -112,6 +113,39 @@ function StepTwo(props) {
   const [komoditas, setKomoditas] = useState()
   const [activeYear, setActiveYear] = useState("now") // "now" or "prev"
   const [activeSheet, setActiveSheet] = useState("main") // "main" or commodity index string ("0", "1", ...)
+
+  const countTreeLeaves = (node) => {
+    if (!node || typeof node !== 'object') return 0
+    const keys = Object.keys(node)
+    if (keys.length === 0) return 1
+    return Object.values(node).reduce((sum, child) => sum + countTreeLeaves(child), 0)
+  }
+
+  const buildHierarchyData = () => {
+    if (!inflasi || !ihk || !komoditas) return {}
+
+    const rootLabel = "Umum"
+    const rootChildren = {}
+
+    komoditasList.forEach(c => {
+      const cLabel = c.label
+
+      const cChildren = {}
+      if (c.sub && Array.isArray(c.sub)) {
+        c.sub.forEach(subItem => {
+          const subLabel = subItem.label
+
+          cChildren[subLabel] = {}
+        })
+      }
+
+      rootChildren[cLabel] = cChildren
+    })
+
+    return {
+      [rootLabel]: rootChildren
+    }
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -238,6 +272,9 @@ function StepTwo(props) {
   const activeCommodityIndex = activeSheet !== "main" ? Number(activeSheet) : null
   const activeCommodity = activeCommodityIndex !== null ? komoditasList[activeCommodityIndex] : null
   const subList = activeCommodity?.sub || []
+
+  const hierarchyData = buildHierarchyData()
+  const treeHeight = Math.max(600, countTreeLeaves(hierarchyData) * 90 + 100)
 
   return (
     <div className={styles.container}>
@@ -393,6 +430,36 @@ function StepTwo(props) {
               {item.label}
             </button>
           ))}
+        </div>
+      </Wrapper>
+      <Wrapper>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <p style={{ fontSize: "20px", fontWeight: "bold", color: "#F8FAFC", margin: 0 }}>
+              Visualisasi Struktur Hierarki Komoditas BPS
+            </p>
+          </div>
+
+          <div style={{
+            width: '100%',
+            overflow: 'auto',
+            maxHeight: '600px',
+            background: 'rgba(0, 0, 0, 0.2)',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            padding: '1rem',
+            boxSizing: 'border-box'
+          }}>
+            <Hierarchy
+              data={hierarchyData}
+              width={1050}
+              height={treeHeight}
+              fill={"rgba(59, 130, 246, 0.15)"}
+              stroke={"#3B82F6"}
+              textColor={"#F8FAFC"}
+              lineColor={"rgba(255, 255, 255, 0.15)"}
+            />
+          </div>
         </div>
       </Wrapper>
       {/* <div onClick={() => setStep(2)}>klik</div> */}
