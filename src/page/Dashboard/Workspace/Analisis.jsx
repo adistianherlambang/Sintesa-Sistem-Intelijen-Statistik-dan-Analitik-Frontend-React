@@ -7,7 +7,8 @@ import Wrapper from '../../../components/Wrapper/Wrapper'
 export default function Analisis() {
 
   return (
-    <div>
+    <div className={styles.container}>
+      <p className={styles.tabTitle}>Analisis</p>
       <Wrapper>asdia</Wrapper>
     </div>
   )
