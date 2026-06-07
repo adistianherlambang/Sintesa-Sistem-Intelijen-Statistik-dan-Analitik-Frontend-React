@@ -1,9 +1,9 @@
 import React from 'react'
 import styles from "./Wrapper.module.css"
 
-export default function Wrapper({width, height, padding, children}) {
+export default function Wrapper({ width, height, padding, children, onClick }) {
   return (
-    <div style={{width: width, height: height, padding: padding ? padding : "16px"}} className={styles.container}>{children}</div>
+    <div style={{ width: width, height: height, padding: padding ? padding : "16px" }} onClick={onClick} className={styles.container}>{children}</div>
   )
 }
 
