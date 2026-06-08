@@ -5,7 +5,8 @@ export default function Input({
   value,
   setValue,
   type,
-  placeholder
+  placeholder,
+  disabled
 }) {
   const [internalValue, setInternalValue] = useState("");
 
@@ -29,6 +30,7 @@ export default function Input({
       value={currentValue}
       onChange={handleChange}
       placeholder={placeholder || "input"}
+      disabled={disabled}
     />
   );
 }

@@ -206,11 +206,10 @@ export default function TentangAkun() {
               </div>
               <div className={styles.inputWrapper}>
                 <p>Wilayah Kerja (Klaim)</p>
-                <input 
+                <Input 
                   type="text" 
                   value={wilayah} 
                   disabled 
-                  className={styles.disabledInput}
                 />
               </div>
             </div>
@@ -246,11 +245,10 @@ export default function TentangAkun() {
               </div>
               <div className={styles.inputWrapper}>
                 <p>Email Admin Wilayah</p>
-                <input 
+                <Input 
                   type="text" 
                   value={picEmail} 
                   disabled 
-                  className={styles.disabledInput}
                 />
               </div>
               <div className={styles.inputWrapper}>
