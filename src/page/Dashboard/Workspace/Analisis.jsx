@@ -345,6 +345,7 @@ function StepTwo(props) {
                       <td>
                         <Input
                           type="text"
+                          placeholder="Masukkan nilai"
                           value={item.value}
                           setValue={(val) => handleInflasiChange(index, val)}
                         />
@@ -352,6 +353,7 @@ function StepTwo(props) {
                       <td>
                         <Input
                           type="text"
+                          placeholder="Masukkan nilai"
                           value={activeDataIhk[index] ? activeDataIhk[index].value : ""}
                           setValue={(val) => handleIhkChange(index, val)}
                         />
@@ -364,6 +366,7 @@ function StepTwo(props) {
                           <td key={cIndex}>
                             <Input
                               type="text"
+                              placeholder="Masukkan nilai"
                               value={val}
                               setValue={(newVal) => handleKomoditasChange(cIndex, index, newVal)}
                             />
@@ -396,6 +399,7 @@ function StepTwo(props) {
                           <td key={sIndex}>
                             <Input
                               type="text"
+                              placeholder="Masukkan nilai"
                               value={val}
                               setValue={(newVal) => handleSubKomoditasChange(activeCommodityIndex, sIndex, index, newVal)}
                             />

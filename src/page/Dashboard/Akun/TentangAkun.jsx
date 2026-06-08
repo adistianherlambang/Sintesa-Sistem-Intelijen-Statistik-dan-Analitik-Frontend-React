@@ -13,7 +13,20 @@ export default function TentangAkun() {
         <div className={styles.section}>
           <Wrapper>
             <p className={styles.sectionTitle}>Informasi Instansi</p>
-            <Input type={"text"} />
+            <div className={styles.inputContainer}>
+              <div className={styles.inputWrapper}>
+                <p>Nama Instansi</p>
+                <Input type={"text"} />
+              </div>
+              <div className={styles.inputWrapper}>
+                <p>Jenis Instansi</p>
+                <Input type={"text"} />
+              </div>
+              <div className={styles.inputWrapper}>
+                <p>Wilayah</p>
+                <Input type={"text"} />
+              </div>
+            </div>
           </Wrapper>
         </div>
       </div>

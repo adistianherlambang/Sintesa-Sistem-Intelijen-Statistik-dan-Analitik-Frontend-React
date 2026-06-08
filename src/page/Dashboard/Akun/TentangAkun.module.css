@@ -39,3 +39,18 @@
   color: #D5D5D5;
   margin: 0;
 }
+
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.inputWrapper {
+  width: 100%;
+}
+
+.inputWrapper p {
+  color: #AAAAAA;
+  font-size: 12px;
+}
