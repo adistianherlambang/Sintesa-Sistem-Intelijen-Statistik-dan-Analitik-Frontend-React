@@ -66,7 +66,7 @@ export default function App() {
           <Route index element={<Overview />} />
           <Route path='workspace/analisis' element={<Analisis />} />
           <Route path='workspace/histori' element={<HistoriWorkspace />} />
-          <Route path='akun/tentangakun' element={<TentangAkun />} />
+          <Route path='akun/tentangAkun' element={<TentangAkun />} />
           <Route path='akun/langgananDanBilling' element={<Billing />} />
         </Route>
         <Route path='*' element={<Navigate to="/" replace />} />

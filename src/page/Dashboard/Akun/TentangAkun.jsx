@@ -1,78 +1,187 @@
 import { useState, useEffect } from "react";
-import styles from "./TentangAkun.module.css"
+import axios from "axios";
+import { userStore } from "../../../logic/state/store";
+import styles from "./TentangAkun.module.css";
 
-//component
+// Components
 import Wrapper from "../../../components/Wrapper/Wrapper";
 import Input from "../../../components/Input/Input";
+import MainButton from "../../../components/MainButton/MainButton";
 
 export default function TentangAkun() {
+  const user = userStore((state) => state.user);
+  const login = userStore((state) => state.login);
+  const logout = userStore((state) => state.logout);
 
-  const tanggalBergabungDummy = "2026-06-09";
-  const lastChangeDummy = "5/06/2026 18:00";
+  // Instansi States
+  const [instansiName, setInstansiName] = useState(user?.profile?.name || "");
+  const [instansiType, setInstansiType] = useState(user?.profile?.instansiType || "");
+  const [wilayah] = useState(user?.location?.name || "");
 
-  function timeAgo(dateString) {
-    const [datePart, timePart] = dateString.split(" ");
+  // PIC States
+  const [picName, setPicName] = useState(user?.profile?.picName || "");
+  const [picEmail] = useState(user?.email || "");
+  const [picPhone, setPicPhone] = useState(user?.profile?.picPhone || "");
 
-    const [dd, mm, yyyy] = datePart.split("/");
-    const [hh, min] = timePart.split(":");
+  // Password States
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
-    const target = new Date(
-      Number(yyyy),
-      Number(mm) - 1,
-      Number(dd),
-      Number(hh),
-      Number(min)
-    );
+  // Alert/Status States
+  const [profileMessage, setProfileMessage] = useState("");
+  const [profileError, setProfileError] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
-    const diffMs = Date.now() - target.getTime();
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
 
-    const minutes = Math.floor(diffMs / 60000);
-    const hours = Math.floor(diffMs / 3600000);
-    const days = Math.floor(diffMs / 86400000);
+  // Parse User Agent details for session view
+  const [userAgentInfo, setUserAgentInfo] = useState({
+    browser: "Chrome",
+    device: "Desktop PC",
+    address: "127.0.0.1",
+  });
 
-    if (days > 0) return `${days} hari lalu`;
-    if (hours > 0) return `${hours} jam lalu`;
-    if (minutes > 0) return `${minutes} menit lalu`;
+  useEffect(() => {
+    // Basic UserAgent parsing
+    const ua = navigator.userAgent;
+    let browser = "Unknown Browser";
+    let device = "Desktop PC";
 
-    return "baru saja";
-  }
+    if (ua.includes("Firefox")) browser = "Mozilla Firefox";
+    else if (ua.includes("SamsungBrowser")) browser = "Samsung Browser";
+    else if (ua.includes("Opera") || ua.includes("OPR")) browser = "Opera";
+    else if (ua.includes("Edge")) browser = "Microsoft Edge";
+    else if (ua.includes("Chrome")) browser = "Google Chrome";
+    else if (ua.includes("Safari")) browser = "Apple Safari";
 
-  const sessionDummy = [
-    {
-      browser: "Chrome",
-      adress: "162.198.0.1",
-      device: "Android (Samsung S25)",
-      lastLogin: "16:00 25/2/2026"
-    },
-    {
-      browser: "Safari",
-      adress: "103.45.78.21",
-      device: "iPhone 16 Pro",
-      lastLogin: "09:15 26/2/2026"
-    },
-    {
-      browser: "Firefox",
-      adress: "192.168.10.45",
-      device: "Windows 11 (ASUS Vivobook)",
-      lastLogin: "13:42 26/2/2026"
-    },
-    {
-      browser: "Edge",
-      adress: "172.16.5.88",
-      device: "Windows 11 (Dell XPS 15)",
-      lastLogin: "20:30 26/2/2026"
-    },
-    {
-      browser: "Chrome",
-      adress: "10.0.0.125",
-      device: "MacBook Air M4",
-      lastLogin: "07:55 27/2/2026"
+    if (/Mobi|Android|iPhone/i.test(ua)) {
+      device = ua.includes("iPhone") ? "iPhone" : "Android Device";
+    } else if (/Macintosh/i.test(ua)) {
+      device = "macOS Device";
+    } else if (/Windows/i.test(ua)) {
+      device = "Windows PC";
     }
-  ];
+
+    setUserAgentInfo({
+      browser,
+      device,
+      address: "127.0.0.1", // Standard local host representation
+    });
+  }, []);
+
+  const handleSaveProfile = async () => {
+    setProfileError("");
+    setProfileMessage("");
+    setSavingProfile(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000";
+      const response = await axios.post(
+        `${serverUrl}/api/users/profile`,
+        {
+          name: instansiName,
+          instansiType,
+          picName,
+          picPhone,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Update local Zustand store
+      login(response.data.user);
+      setProfileMessage("Profil instansi berhasil diperbarui.");
+    } catch (err) {
+      setProfileError(
+        err.response?.data?.message || "Gagal menyimpan data profil."
+      );
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    setPasswordError("");
+    setPasswordMessage("");
+
+    if (!oldPassword || !newPassword) {
+      setPasswordError("Sandi lama dan sandi baru wajib diisi");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError("Sandi baru minimal harus 6 karakter");
+      return;
+    }
+
+    setUpdatingPassword(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000";
+      await axios.post(
+        `${serverUrl}/api/users/profile/password`,
+        {
+          oldPassword,
+          newPassword,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setPasswordMessage("Kata sandi berhasil diperbarui.");
+      setOldPassword("");
+      setNewPassword("");
+    } catch (err) {
+      setPasswordError(
+        err.response?.data?.message || "Sandi lama salah atau gagal memperbarui sandi."
+      );
+    } finally {
+      setUpdatingPassword(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    logout();
+  };
+
+  const formatJoinedDate = (isoString) => {
+    if (!isoString) return "-";
+    const date = new Date(isoString);
+    return date.toLocaleDateString("id-ID", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const formatLastLogin = (isoString) => {
+    if (!isoString) return "Baru saja";
+    const date = new Date(isoString);
+    return date.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }) + " " + date.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
   return (
     <div className={styles.container}>
       <p className={styles.tabTitle}>Tentang Akun</p>
+      
       <div className={styles.section}>
         <Wrapper>
           <div className={styles.content}>
@@ -80,85 +189,161 @@ export default function TentangAkun() {
             <div className={styles.inputContainer}>
               <div className={styles.inputWrapper}>
                 <p>Nama Instansi</p>
-                <Input type={"text"} />
+                <Input 
+                  type="text" 
+                  value={instansiName} 
+                  setValue={setInstansiName} 
+                />
               </div>
               <div className={styles.inputWrapper}>
                 <p>Jenis Instansi</p>
-                <Input type={"text"} />
+                <Input 
+                  type="text" 
+                  value={instansiType} 
+                  setValue={setInstansiType} 
+                  placeholder="Contoh: BPS Kota, Bappeda, dll"
+                />
               </div>
               <div className={styles.inputWrapper}>
-                <p>Wilayah</p>
-                <Input type={"text"} />
+                <p>Wilayah Kerja (Klaim)</p>
+                <input 
+                  type="text" 
+                  value={wilayah} 
+                  disabled 
+                  className={styles.disabledInput}
+                />
               </div>
             </div>
-            <p style={{
-              color: "#AAAAAA",
-              fontSize: "12px"
-            }}>Tanggal bergabung: {tanggalBergabungDummy}</p>
+            
+            <div className={styles.profileMeta}>
+              <p className={styles.joinedDate}>
+                Tanggal bergabung: {formatJoinedDate(user?.createdAt)}
+              </p>
+              {profileError && <span className={styles.errorText}>{profileError}</span>}
+              {profileMessage && <span className={styles.successText}>{profileMessage}</span>}
+              <div className={styles.saveBtnWrapper}>
+                <MainButton onClick={handleSaveProfile}>
+                  {savingProfile ? "Menyimpan..." : "Simpan Profil Instansi"}
+                </MainButton>
+              </div>
+            </div>
           </div>
         </Wrapper>
       </div>
+
       <div className={styles.section}>
         <Wrapper>
           <div className={styles.content}>
-            <p className={styles.sectionTitle}>Informasi PIC</p>
+            <p className={styles.sectionTitle}>Informasi PIC (Penanggung Jawab)</p>
             <div className={styles.inputContainer}>
               <div className={styles.inputWrapper}>
-                <p>Nama PIC</p>
-                <Input type={"text"} />
+                <p>Nama Lengkap PIC</p>
+                <Input 
+                  type="text" 
+                  value={picName} 
+                  setValue={setPicName} 
+                />
               </div>
               <div className={styles.inputWrapper}>
-                <p>Email</p>
-                <Input type={"text"} />
+                <p>Email Admin Wilayah</p>
+                <input 
+                  type="text" 
+                  value={picEmail} 
+                  disabled 
+                  className={styles.disabledInput}
+                />
               </div>
               <div className={styles.inputWrapper}>
-                <p>Kontak Utama</p>
-                <Input type={"text"} />
+                <p>Kontak WhatsApp PIC</p>
+                <Input 
+                  type="text" 
+                  value={picPhone} 
+                  setValue={setPicPhone} 
+                  placeholder="Contoh: 0812xxxxxxxx"
+                />
               </div>
             </div>
-            <p style={{
-              color: "#AAAAAA",
-              fontSize: "12px"
-            }}>Tanggal bergabung: {tanggalBergabungDummy}</p>
           </div>
         </Wrapper>
       </div>
+
       <div className={styles.section}>
         <Wrapper>
           <div className={styles.content}>
             <p className={styles.sectionTitle}>Keamanan Akun</p>
-            <div>
-              <p>Kelola dan perbarui kata sandi untuk menjaga keamanan akun Anda</p>
-              <p>Password terakhir diubah: {timeAgo(lastChangeDummy)}</p>
+            <p className={styles.description}>
+              Kelola dan perbarui kata sandi untuk menjaga keamanan akun instansi Anda.
+            </p>
+            <div className={styles.passwordForm}>
+              <div className={styles.inputWrapper}>
+                <p>Kata Sandi Lama</p>
+                <Input 
+                  type="password" 
+                  value={oldPassword} 
+                  setValue={setOldPassword} 
+                  placeholder="••••••••"
+                />
+              </div>
+              <div className={styles.inputWrapper}>
+                <p>Kata Sandi Baru</p>
+                <Input 
+                  type="password" 
+                  value={newPassword} 
+                  setValue={setNewPassword} 
+                  placeholder="Minimal 6 karakter"
+                />
+              </div>
+              
+              <div className={styles.passwordMeta}>
+                {passwordError && <span className={styles.errorText}>{passwordError}</span>}
+                {passwordMessage && <span className={styles.successText}>{passwordMessage}</span>}
+                <div className={styles.saveBtnWrapper}>
+                  <MainButton onClick={handleUpdatePassword}>
+                    {updatingPassword ? "Memperbarui..." : "Perbarui Kata Sandi"}
+                  </MainButton>
+                </div>
+              </div>
             </div>
           </div>
         </Wrapper>
+
         <Wrapper>
           <div className={styles.content}>
-            <p className={styles.sectionTitle}>Kelola Session</p>
-            <table>
-              <tr>
-                <td>No</td>
-                <td>Browser</td>
-                <td>Address</td>
-                <td>Device</td>
-                <td>Last Login</td>
-                <td>Action</td>
-              </tr>
-              {sessionDummy.map((item, index) => (
-                <tr>
-                  <td>{index + 1}</td>
-                  <td>{item.browser}</td>
-                  <td>{item.adress}</td>
-                  <td>{item.device}</td>
-                  <td>{item.lastLogin}</td>
-                  <td><button>Logout</button></td>
-                </tr>
-              ))}
-            </table>
+            <p className={styles.sectionTitle}>Kelola Sesi Aktif</p>
+            <div className={styles.tableResponsive}>
+              <table className={styles.sessionTable}>
+                <thead>
+                  <tr>
+                    <th>Browser</th>
+                    <th>Perangkat</th>
+                    <th>IP Address</th>
+                    <th>Login Terakhir</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className={styles.activeLabel}>
+                      {userAgentInfo.browser} <span className={styles.badge}>Sesi Ini</span>
+                    </td>
+                    <td>{userAgentInfo.device}</td>
+                    <td>{userAgentInfo.address}</td>
+                    <td>{formatLastLogin(user?.lastLogin || user?.updatedAt)}</td>
+                    <td>
+                      <button 
+                        onClick={handleLogout} 
+                        className={styles.logoutBtn}
+                      >
+                        Logout
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </Wrapper>
       </div>
     </div>
-  )
+  );
 }
