@@ -463,7 +463,7 @@ function StepTwo(props) {
           </div>
         </div>
       </Wrapper>
-      <MainButton>Simpan</MainButton>
+      <MainButton onClick={() => setStep(2)}>Simpan</MainButton>
       {/* <div onClick={() => setStep(2)}>klik</div> */}
     </div>
   )
@@ -475,8 +475,10 @@ function StepThree(props) {
 
   return (
     <div className={styles.container}>
-      <Wrapper>tiga</Wrapper>
-      <div onClick={() => setStep(0)}>klik</div>
+      <Wrapper>
+        <p>Ringkasan AI</p>
+      </Wrapper>
+      {/* <div onClick={() => setStep(0)}>klik</div> */}
     </div>
   )
 }
