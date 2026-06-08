@@ -1,0 +1,103 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--background-color);
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.cardContainer {
+  width: 100%;
+  max-width: 440px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.logoWrapper {
+  width: 180px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #aaaaaa;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.inputField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #aaaaaa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.buttonWrapper {
+  margin-top: 0.5rem;
+}
+
+.errorAlert {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  padding: 10px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.footer {
+  text-align: center;
+  font-size: 14px;
+  color: #aaaaaa;
+  margin-top: 0.5rem;
+}
+
+.link {
+  color: var(--primaryColor);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 200ms ease;
+}
+
+.link:hover {
+  color: #4cd164;
+  text-decoration: underline;
+}

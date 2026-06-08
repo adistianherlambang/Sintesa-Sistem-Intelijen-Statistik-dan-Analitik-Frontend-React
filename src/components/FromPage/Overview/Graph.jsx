@@ -4,11 +4,13 @@ import { AreaChart, Area, ResponsiveContainer, YAxis } from "recharts";
 import Skeleton from '../../../components/Skeleton/Skeleton'
 import axios from 'axios';
 import styles from "./Graph.module.css";
+import { userStore } from "../../../logic/state/store"
 
 export default function Graph({ onLoad }) {
   const [tren, setTren] = useState({})
   const [load, setLoad] = useState(true)
   const [gagal, setGagal] = useState(false)
+  const user = userStore((state) => state.user)
 
   useEffect(() => {
     const getData = async () => {
@@ -16,9 +18,10 @@ export default function Graph({ onLoad }) {
         setGagal(false)
         setLoad(true)
 
+        const userCity = user?.location?.name || "KOTA METRO"
         const response = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi`,
           {
-            kota: "KOTA METRO"
+            kota: userCity
           },
         )
 

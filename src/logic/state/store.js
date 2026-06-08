@@ -7,6 +7,9 @@ export const userStore = create(
       user: null,
       login: (data) => set({ user: data }),
       logout: () => set({user: null})
-    })
+    }),
+    {
+      name: "user-storage"
+    }
   )
 )

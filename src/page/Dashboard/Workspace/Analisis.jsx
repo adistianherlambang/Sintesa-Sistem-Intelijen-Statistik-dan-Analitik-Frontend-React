@@ -2,6 +2,7 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import styles from "./Analisis.module.css"
+import { userStore } from "../../../logic/state/store"
 
 // component
 import Stepper from '../../../components/Stepper/Stepper'
@@ -109,6 +110,7 @@ function StepOne(props) {
 function StepTwo(props) {
 
   const { setStep } = props
+  const user = userStore((state) => state.user)
 
   const [inflasi, setInflasi] = useState()
   const [ihk, setIhk] = useState()
@@ -152,14 +154,15 @@ function StepTwo(props) {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const userCity = user?.location?.name || "KOTA METRO"
         const resInflasi = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi`,
-          { kota: "KOTA METRO" }
+          { kota: userCity }
         )
         const resIhk = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/ihk`,
-          { kota: "KOTA METRO" }
+          { kota: userCity }
         )
         const resKomoditas = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/komoditas`,
-          { kota: "KOTA METRO" }
+          { kota: userCity }
         )
 
         setInflasi(resInflasi.data)
@@ -170,7 +173,7 @@ function StepTwo(props) {
       }
     }
     fetchData()
-  }, [])
+  }, [user])
 
   const handleInflasiChange = (index, val) => {
     setInflasi(prev => {

@@ -2,20 +2,22 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import styles from "./kpi.module.css"
+import { userStore } from "../../../../logic/state/store"
 
 export default function IHK({ onLoad }) {
 
   const [data, setData] = useState(0)
   const [load, setLoad] = useState(true)
   const [gagal, setGagal] = useState(false)
+  const user = userStore((state) => state.user)
 
   useEffect(() => {
     const getData = async () => {
       try {
-
+        const userCity = user?.location?.name || "KOTA METRO"
         const res = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/ihk`,
           {
-            kota: "KOTA METRO"
+            kota: userCity
           },
         )
 

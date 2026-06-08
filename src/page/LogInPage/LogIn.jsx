@@ -1,0 +1,112 @@
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+import { userStore } from "../../logic/state/store";
+import styles from "./LogIn.module.css";
+
+// Components
+import Logo from "../../components/Logo/Logo";
+import Input from "../../components/Input/Input";
+import MainButton from "../../components/MainButton/MainButton";
+import Wrapper from "../../components/Wrapper/Wrapper";
+
+export default function LogIn() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+  const login = userStore((state) => state.login);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!email || !password) {
+      setError("Email dan password wajib diisi");
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    try {
+      const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000";
+      const response = await axios.post(`${serverUrl}/api/users/login`, {
+        email,
+        password,
+      });
+
+      const { token, user } = response.data;
+
+      // Save token and user details to localStorage/store
+      localStorage.setItem("token", token);
+      login(user);
+
+      // Redirect to dashboard
+      navigate("/dashboard");
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        "Gagal masuk. Silakan periksa koneksi Anda."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.cardContainer}>
+        <Wrapper padding="2.5rem">
+          <div className={styles.content}>
+            <div className={styles.logoWrapper}>
+              <Logo />
+            </div>
+            
+            <div className={styles.header}>
+              <h1 className={styles.title}>Selamat Datang</h1>
+              <p className={styles.subtitle}>Masuk untuk mengakses dasbor Sistem Intelijen Statistik</p>
+            </div>
+
+            {error && <div className={styles.errorAlert}>{error}</div>}
+
+            <form onSubmit={handleSubmit} className={styles.form}>
+              <div className={styles.inputField}>
+                <label className={styles.label}>Email Instansi</label>
+                <Input
+                  type="email"
+                  placeholder="name@instansi.go.id"
+                  value={email}
+                  setValue={setEmail}
+                />
+              </div>
+
+              <div className={styles.inputField}>
+                <label className={styles.label}>Kata Sandi</label>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  setValue={setPassword}
+                />
+              </div>
+
+              <div className={styles.buttonWrapper}>
+                <MainButton onClick={handleSubmit}>
+                  {loading ? "Memproses..." : "Masuk"}
+                </MainButton>
+              </div>
+            </form>
+
+            <div className={styles.footer}>
+              <span>Belum memiliki akun?</span>{" "}
+              <Link to="/signup" className={styles.link}>
+                Daftar Wilayah Baru
+              </Link>
+            </div>
+          </div>
+        </Wrapper>
+      </div>
+    </div>
+  );
+}
