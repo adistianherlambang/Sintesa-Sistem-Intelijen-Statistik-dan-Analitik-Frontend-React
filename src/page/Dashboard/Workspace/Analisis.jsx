@@ -8,6 +8,7 @@ import Stepper from '../../../components/Stepper/Stepper'
 import Wrapper from '../../../components/Wrapper/Wrapper'
 import Hierarchy from '../../../components/Hierarchy/Hierarchy'
 import MainButton from '../../../components/MainButton/MainButton'
+import Input from '../../../components/Input/Input'
 
 export default function Analisis() {
 
@@ -342,19 +343,17 @@ function StepTwo(props) {
                     <tr key={index}>
                       <td style={{ fontWeight: "500" }}>{monthNames[index % 12]}</td>
                       <td>
-                        <input
+                        <Input
                           type="text"
-                          className={styles.inputField}
                           value={item.value}
-                          onChange={(e) => handleInflasiChange(index, e.target.value)}
+                          setValue={(val) => handleInflasiChange(index, val)}
                         />
                       </td>
                       <td>
-                        <input
+                        <Input
                           type="text"
-                          className={styles.inputField}
                           value={activeDataIhk[index] ? activeDataIhk[index].value : ""}
-                          onChange={(e) => handleIhkChange(index, e.target.value)}
+                          setValue={(val) => handleIhkChange(index, val)}
                         />
                       </td>
                       {komoditasList.map((cItem, cIndex) => {
@@ -363,11 +362,10 @@ function StepTwo(props) {
                         const val = targetKey !== undefined ? cItem.data[targetKey] : ""
                         return (
                           <td key={cIndex}>
-                            <input
+                            <Input
                               type="text"
-                              className={styles.inputField}
                               value={val}
-                              onChange={(e) => handleKomoditasChange(cIndex, index, e.target.value)}
+                              setValue={(newVal) => handleKomoditasChange(cIndex, index, newVal)}
                             />
                           </td>
                         )
@@ -396,11 +394,10 @@ function StepTwo(props) {
                         const val = targetKey !== undefined ? subItem.data[targetKey] : ""
                         return (
                           <td key={sIndex}>
-                            <input
+                            <Input
                               type="text"
-                              className={styles.inputField}
                               value={val}
-                              onChange={(e) => handleSubKomoditasChange(activeCommodityIndex, sIndex, index, e.target.value)}
+                              setValue={(newVal) => handleSubKomoditasChange(activeCommodityIndex, sIndex, index, newVal)}
                             />
                           </td>
                         )
