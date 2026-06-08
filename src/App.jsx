@@ -11,6 +11,7 @@ import Overview from './page/Dashboard/Overview/Overview';
 import Analisis from './page/Dashboard/Workspace/Analisis';
 import HistoriWorkspace from './page/Dashboard/Workspace/HistoriWorkspace';
 import TentangAkun from './page/Dashboard/Akun/TentangAkun';
+import Billing from './page/Dashboard/Akun/Billing';
 
 //component
 import Shadow from './components/Floating/Shadow';
@@ -28,6 +29,7 @@ export default function App() {
           <Route path='workspace/analisis' element={<Analisis />} />
           <Route path='workspace/histori' element={<HistoriWorkspace />} />
           <Route path='akun/tentangakun' element={<TentangAkun />} />
+          <Route path='akun/langgananDanBilling' element={<Billing />} />
         </Route>
       </Routes>
     </>
