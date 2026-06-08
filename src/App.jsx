@@ -10,6 +10,7 @@ import LandingPage from './page/LandingPage/LandingPage';
 import Overview from './page/Dashboard/Overview/Overview';
 import Analisis from './page/Dashboard/Workspace/Analisis';
 import HistoriWorkspace from './page/Dashboard/Workspace/HistoriWorkspace';
+import TentangAkun from './page/Dashboard/Akun/TentangAkun';
 
 //component
 import Shadow from './components/Floating/Shadow';
@@ -19,15 +20,16 @@ export default function App() {
 
   return (
     <>
-    <Shadow/>
-    <Routes>
-      <Route path='/' element={<LandingPage/>}/>
-      <Route path='/dashboard' element={<Dashboard/>}>
-        <Route index element={<Overview/>} />
-        <Route path='workspace/analisis' element={<Analisis/>}/>
-        <Route path='workspace/histori' element={<HistoriWorkspace/>}/>
-      </Route>
-    </Routes>
+      <Shadow />
+      <Routes>
+        <Route path='/' element={<LandingPage />} />
+        <Route path='/dashboard' element={<Dashboard />}>
+          <Route index element={<Overview />} />
+          <Route path='workspace/analisis' element={<Analisis />} />
+          <Route path='workspace/histori' element={<HistoriWorkspace />} />
+          <Route path='akun/tentangakun' element={<TentangAkun />} />
+        </Route>
+      </Routes>
     </>
   );
 }
