@@ -40,25 +40,17 @@ export default function SambungkanAkun() {
     fetchSession();
   }, []);
 
-  // Poll session status when connecting to update QR code or connected status automatically
+  // Poll session status every 3 seconds when connecting/disconnected, or every 10 seconds when connected
   useEffect(() => {
-    let interval;
-    if (session && (session.status === "connecting" || (session.status === "disconnected" && session.qrCode))) {
-      interval = setInterval(async () => {
-        try {
-          const res = await axios.get(`${serverUrl}/api/users/bot/session`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          setSession(res.data);
-        } catch (err) {
-          console.error("Polling error:", err.message);
-        }
-      }, 3000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [session]);
+    if (!token) return;
+
+    const intervalTime = session?.status === "connected" ? 10000 : 3000;
+    const interval = setInterval(() => {
+      fetchSession();
+    }, intervalTime);
+
+    return () => clearInterval(interval);
+  }, [token, serverUrl, session?.status]);
 
   const handleConnect = async () => {
     setActionLoading(true);
