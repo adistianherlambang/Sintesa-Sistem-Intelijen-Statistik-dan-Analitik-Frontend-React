@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { userStore } from './logic/state/store';
+import axios from 'axios';
 
 //page
 import LandingPage from './page/LandingPage/LandingPage';
@@ -19,6 +20,19 @@ import BotKnowledge from './page/Dashboard/Bot/BotKnowledge';
 //component
 import Shadow from './components/Floating/Shadow';
 import Dashboard from './page/Dashboard/Dashboard';
+
+// Global Axios interceptor to handle expired/invalid session tokens (401 Unauthorized)
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      console.warn("Session expired or invalid token. Redirecting to login...");
+      userStore.getState().logout();
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
 
 function ProtectedRoute({ children }) {
   const user = userStore((state) => state.user);

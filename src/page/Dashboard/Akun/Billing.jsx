@@ -55,7 +55,7 @@ export default function Billing() {
         "Modul Analisis Interaktif (IHK/YoY)",
         "Visualisasi D3 Hierarchy Komoditas",
         "Limit pesan: 1500 pesan masuk/keluar",
-        "Kuota analisis: 50 berkas/bln",
+        "Kuota analisis: 10 berkas/bln",
       ],
     },
     {
@@ -69,7 +69,7 @@ export default function Billing() {
         "Modul Analisis Interaktif (IHK/YoY)",
         "Visualisasi D3 Hierarchy Komoditas",
         "Limit pesan: 1500 pesan masuk/keluar",
-        "Kuota analisis: 600 berkas/thn",
+        "Kuota analisis: 10 berkas/thn",
         "Prioritas respon Bot & Laporan",
       ],
     },
