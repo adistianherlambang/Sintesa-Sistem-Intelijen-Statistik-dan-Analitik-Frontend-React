@@ -5,8 +5,16 @@ import styles from "./Dashboard.module.css"
 
 import Logo from '../../components/Logo/Logo'
 import NavButton from '../../components/Button/NavButton/NavButton'
+import { userStore } from '../../logic/state/store'
 
 export default function Dashboard() {
+  const logout = userStore((state) => state.logout);
+
+  const handleLogout = () => {
+    if (window.confirm("Apakah Anda yakin ingin keluar dari akun?")) {
+      logout();
+    }
+  };
 
   const [active, setActive] = useState({
     overview: true,
@@ -77,6 +85,17 @@ export default function Dashboard() {
             <NavButton keyword="langgananDanBilling" tab="akun"/>
           </div>
         </div>
+        
+        <button onClick={handleLogout} className={styles.logoutBtn}>
+          <div className={styles.logoutIcon}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </div>
+          Logout
+        </button>
       </div>
       <div className={styles.line}></div>
       <div className={styles.right}>

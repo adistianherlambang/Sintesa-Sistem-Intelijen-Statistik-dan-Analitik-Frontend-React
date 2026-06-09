@@ -6,7 +6,11 @@ export const userStore = create(
     (set) => ({
       user: null,
       login: (data) => set({ user: data }),
-      logout: () => set({user: null})
+      logout: () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user-storage");
+        set({ user: null });
+      }
     }),
     {
       name: "user-storage"
