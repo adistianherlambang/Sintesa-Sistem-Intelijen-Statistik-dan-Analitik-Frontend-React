@@ -7,7 +7,6 @@ import styles from "./SignUp.module.css";
 import Logo from "../../components/Logo/Logo";
 import Input from "../../components/Input/Input";
 import MainButton from "../../components/MainButton/MainButton";
-import Wrapper from "../../components/Wrapper/Wrapper";
 
 export default function SignUp() {
   const [name, setName] = useState("");
@@ -74,11 +73,32 @@ export default function SignUp() {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.cardContainer}>
-        <Wrapper padding="2.5rem">
+    <div className={styles.pageContainer}>
+      <div className={styles.leftSection}>
+        <div className={styles.brandContent}>
+          <div className={styles.brandLogo}>
+            <Logo />
+          </div>
+          <h2 className={styles.brandTitle}>Sintesa</h2>
+          <p className={styles.brandDescription}>
+            Sistem Intelijen Statistik dan Analitik terintegrasi untuk membantu pengambilan keputusan berbasis data yang cepat, akurat, dan andal.
+          </p>
+          
+          {/* Area Konten Custom */}
+          <div className={styles.customContentArea}>
+            <div className={styles.illustrationCard}>
+              <div className={styles.chartGlow}></div>
+              <h3>Visualisasi Data Instan</h3>
+              <p>Otomatisasi pengolahan dataset dan pembuatan ringkasan eksekutif berbasis kecerdasan artifisial.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.rightSection}>
+        <div className={styles.signUpCardWrapper}>
           <div className={styles.content}>
-            <div className={styles.logoWrapper}>
+            <div className={styles.mobileLogo}>
               <Logo />
             </div>
 
@@ -164,7 +184,7 @@ export default function SignUp() {
               </Link>
             </div>
           </div>
-        </Wrapper>
+        </div>
       </div>
     </div>
   );
