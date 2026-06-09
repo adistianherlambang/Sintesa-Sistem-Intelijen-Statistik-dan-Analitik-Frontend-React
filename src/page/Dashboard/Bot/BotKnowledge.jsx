@@ -321,7 +321,7 @@ export default function BotKnowledge() {
                 <button type="button" className={styles.closeBtn} onClick={() => setIsModalOpen(false)}>
                   Batal
                 </button>
-                <MainButton type="submit" disabled={saving}>
+                <MainButton onClick={handleSave}>
                   {saving ? "Menyimpan..." : "Simpan Data"}
                 </MainButton>
               </div>
