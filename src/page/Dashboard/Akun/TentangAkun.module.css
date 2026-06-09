@@ -61,7 +61,8 @@
 
 
 
-.profileMeta, .passwordMeta {
+.profileMeta,
+.passwordMeta {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -115,6 +116,7 @@
 }
 
 .sessionTable td {
+  min-width: 10rem;
   padding: 16px;
   font-size: 14px;
   color: #d5d5d5;

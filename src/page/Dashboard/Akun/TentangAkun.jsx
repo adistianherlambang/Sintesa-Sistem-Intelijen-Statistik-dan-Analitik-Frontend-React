@@ -181,7 +181,7 @@ export default function TentangAkun() {
   return (
     <div className={styles.container}>
       <p className={styles.tabTitle}>Tentang Akun</p>
-      
+
       <div className={styles.section}>
         <Wrapper>
           <div className={styles.content}>
@@ -189,42 +189,43 @@ export default function TentangAkun() {
             <div className={styles.inputContainer}>
               <div className={styles.inputWrapper}>
                 <p>Nama Instansi</p>
-                <Input 
-                  type="text" 
-                  value={instansiName} 
-                  setValue={setInstansiName} 
+                <Input
+                  type="text"
+                  value={instansiName}
+                  setValue={setInstansiName}
                 />
               </div>
               <div className={styles.inputWrapper}>
                 <p>Jenis Instansi</p>
-                <Input 
-                  type="text" 
-                  value={instansiType} 
-                  setValue={setInstansiType} 
+                <Input
+                  type="text"
+                  value={instansiType}
+                  setValue={setInstansiType}
                   placeholder="Contoh: BPS Kota, Bappeda, dll"
                 />
               </div>
               <div className={styles.inputWrapper}>
                 <p>Wilayah Kerja (Klaim)</p>
-                <Input 
-                  type="text" 
-                  value={wilayah} 
-                  disabled 
+                <Input
+                  type="text"
+                  value={wilayah}
+                  disabled
                 />
               </div>
             </div>
-            
+
             <div className={styles.profileMeta}>
               <p className={styles.joinedDate}>
                 Tanggal bergabung: {formatJoinedDate(user?.createdAt)}
               </p>
               {profileError && <span className={styles.errorText}>{profileError}</span>}
               {profileMessage && <span className={styles.successText}>{profileMessage}</span>}
-              <div className={styles.saveBtnWrapper}>
-                <MainButton onClick={handleSaveProfile}>
-                  {savingProfile ? "Menyimpan..." : "Simpan Profil Instansi"}
-                </MainButton>
-              </div>
+
+            </div>
+            <div className={styles.saveBtnWrapper}>
+              <MainButton onClick={handleSaveProfile}>
+                {savingProfile ? "Menyimpan..." : "Simpan Profil Instansi"}
+              </MainButton>
             </div>
           </div>
         </Wrapper>
@@ -237,26 +238,26 @@ export default function TentangAkun() {
             <div className={styles.inputContainer}>
               <div className={styles.inputWrapper}>
                 <p>Nama Lengkap PIC</p>
-                <Input 
-                  type="text" 
-                  value={picName} 
-                  setValue={setPicName} 
+                <Input
+                  type="text"
+                  value={picName}
+                  setValue={setPicName}
                 />
               </div>
               <div className={styles.inputWrapper}>
                 <p>Email Admin Wilayah</p>
-                <Input 
-                  type="text" 
-                  value={picEmail} 
-                  disabled 
+                <Input
+                  type="text"
+                  value={picEmail}
+                  disabled
                 />
               </div>
               <div className={styles.inputWrapper}>
                 <p>Kontak WhatsApp PIC</p>
-                <Input 
-                  type="text" 
-                  value={picPhone} 
-                  setValue={setPicPhone} 
+                <Input
+                  type="text"
+                  value={picPhone}
+                  setValue={setPicPhone}
                   placeholder="Contoh: 0812xxxxxxxx"
                 />
               </div>
@@ -275,31 +276,31 @@ export default function TentangAkun() {
             <div className={styles.passwordForm}>
               <div className={styles.inputWrapper}>
                 <p>Kata Sandi Lama</p>
-                <Input 
-                  type="password" 
-                  value={oldPassword} 
-                  setValue={setOldPassword} 
+                <Input
+                  type="password"
+                  value={oldPassword}
+                  setValue={setOldPassword}
                   placeholder="••••••••"
                 />
               </div>
               <div className={styles.inputWrapper}>
                 <p>Kata Sandi Baru</p>
-                <Input 
-                  type="password" 
-                  value={newPassword} 
-                  setValue={setNewPassword} 
+                <Input
+                  type="password"
+                  value={newPassword}
+                  setValue={setNewPassword}
                   placeholder="Minimal 6 karakter"
                 />
               </div>
-              
+
               <div className={styles.passwordMeta}>
                 {passwordError && <span className={styles.errorText}>{passwordError}</span>}
                 {passwordMessage && <span className={styles.successText}>{passwordMessage}</span>}
-                <div className={styles.saveBtnWrapper}>
-                  <MainButton onClick={handleUpdatePassword}>
-                    {updatingPassword ? "Memperbarui..." : "Perbarui Kata Sandi"}
-                  </MainButton>
-                </div>
+              </div>
+              <div className={styles.saveBtnWrapper}>
+                <MainButton onClick={handleUpdatePassword}>
+                  {updatingPassword ? "Memperbarui..." : "Perbarui Kata Sandi"}
+                </MainButton>
               </div>
             </div>
           </div>
@@ -328,8 +329,8 @@ export default function TentangAkun() {
                     <td>{userAgentInfo.address}</td>
                     <td>{formatLastLogin(user?.lastLogin || user?.updatedAt)}</td>
                     <td>
-                      <button 
-                        onClick={handleLogout} 
+                      <button
+                        onClick={handleLogout}
                         className={styles.logoutBtn}
                       >
                         Logout

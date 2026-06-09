@@ -4,6 +4,7 @@ export default function MainButton({ children, onClick }) {
   return (
     <div onClick={onClick} style={{
       backgroundColor: "#34B34A",
+      width: "100%",
       color: "white",
       height: "32px",
       borderRadius: "4px",
