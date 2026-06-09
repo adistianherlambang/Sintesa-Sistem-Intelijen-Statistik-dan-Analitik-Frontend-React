@@ -247,7 +247,7 @@ function StepTwo(props) {
     <div className={styles.container}>
       <Wrapper>
         <div className={styles.editHeader}>
-          <p className={styles.editTitle}>
+          <p className={styles.sectionTitle}>
             {activeSheet === "main"
               ? `Edit Data BPS (${inflasi.kota}) - Ringkasan`
               : `Edit Sub-Komoditas BPS (${inflasi.kota}) - ${activeCommodity?.label}`
@@ -384,22 +384,21 @@ function StepTwo(props) {
       <Wrapper>
         <div className={styles.hierarchyContainer}>
           <div className={styles.hierarchyHeader}>
-            <p className={styles.editTitle}>
-              Visualisasi Struktur Hierarki Komoditas BPS
+            <p className={styles.sectionTitle}>
+              Preview Hierarki
             </p>
           </div>
-
-          <div className={styles.hierarchyWrapper}>
-            <Hierarchy
-              data={hierarchyData}
-              width={1050}
-              height={treeHeight}
-              fill={"rgba(59, 130, 246, 0.15)"}
-              stroke={"#3B82F6"}
-              textColor={"#F8FAFC"}
-              lineColor={"rgba(255, 255, 255, 0.15)"}
-            />
-          </div>
+          <Hierarchy
+            data={hierarchyData}
+            width={1050}
+            height={treeHeight}
+            fill={"rgba(255, 255, 255, 0.04)"}
+            stroke={"rgba(255, 255, 255, 0.2)"}
+            textColor={"#F8FAFC"}
+            lineColor={"rgba(255, 255, 255, 0.15)"}
+          />
+          {/* <div className={styles.hierarchyWrapper}>
+          </div> */}
         </div>
       </Wrapper>
       <MainButton onClick={() => setStep(2)}>Simpan</MainButton>

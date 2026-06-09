@@ -73,16 +73,33 @@ function layoutTree(data, depth = 0, startY = 0) {
 
   return { nodes, edges };
 }
-
 export default function Hierarchy({ data, width = 900, height = 600, fill, stroke, lineColor, textColor }) {
   if (!data || typeof data !== 'object') return null;
 
-  const { nodes, edges } = layoutTree(data);
+  const { nodes: rawNodes, edges } = layoutTree(data);
+
+  if (rawNodes.length === 0) return null;
+
+  // Calculate actual bounding box of tree to center it perfectly
+  const nodeHeights = rawNodes.map(n => wrapText(n.label, 20).length * 15 + 20);
+  const actualMinY = Math.min(...rawNodes.map((n, i) => n.y - nodeHeights[i] / 2));
+  const actualMaxY = Math.max(...rawNodes.map((n, i) => n.y + nodeHeights[i] / 2));
+  const actualTreeHeight = actualMaxY - actualMinY;
+
+  const maxX = Math.max(...rawNodes.map(n => n.x)) + NODE_WIDTH;
+
+  const shiftX = Math.max(0, (width - maxX) / 2);
+  const shiftY = Math.max(0, (height - actualTreeHeight) / 2) - actualMinY;
+
+  const nodes = rawNodes.map(node => ({
+    ...node,
+    x: node.x + shiftX,
+    y: node.y + shiftY
+  }));
 
   return (
     <div className={styles.container}>
-      <svg className={styles.svg} width={width} height={height}>
-
+      <svg className={styles.svg} width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
         {/* edges (CURVED) */}
         {edges.map((edge, i) => {
           const from = nodes.find(n => n.id === edge.from);
@@ -156,7 +173,6 @@ export default function Hierarchy({ data, width = 900, height = 600, fill, strok
             </g>
           );
         })}
-
       </svg>
     </div>
   );
