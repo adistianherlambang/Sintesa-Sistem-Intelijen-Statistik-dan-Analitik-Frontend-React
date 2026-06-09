@@ -8,7 +8,6 @@ import styles from "./LogIn.module.css";
 import Logo from "../../components/Logo/Logo";
 import Input from "../../components/Input/Input";
 import MainButton from "../../components/MainButton/MainButton";
-import Wrapper from "../../components/Wrapper/Wrapper";
 
 export default function LogIn() {
   const [email, setEmail] = useState("");
@@ -79,55 +78,53 @@ export default function LogIn() {
 
       <div className={styles.rightSection}>
         <div className={styles.loginCardWrapper}>
-          <Wrapper padding="2.5rem">
-            <div className={styles.content}>
-              <div className={styles.mobileLogo}>
-                <Logo />
-              </div>
-              
-              <div className={styles.header}>
-                <h1 className={styles.title}>Selamat Datang</h1>
-                <p className={styles.subtitle}>Masuk untuk mengakses dasbor Sistem Intelijen Statistik</p>
-              </div>
-
-              {error && <div className={styles.errorAlert}>{error}</div>}
-
-              <form onSubmit={handleSubmit} className={styles.form}>
-                <div className={styles.inputField}>
-                  <label className={styles.label}>Email Instansi</label>
-                  <Input
-                    type="email"
-                    placeholder="name@instansi.go.id"
-                    value={email}
-                    setValue={setEmail}
-                  />
-                </div>
-
-                <div className={styles.inputField}>
-                  <label className={styles.label}>Kata Sandi</label>
-                  <Input
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    setValue={setPassword}
-                  />
-                </div>
-
-                <div className={styles.buttonWrapper}>
-                  <MainButton onClick={handleSubmit}>
-                    {loading ? "Memproses..." : "Masuk"}
-                  </MainButton>
-                </div>
-              </form>
-
-              <div className={styles.footer}>
-                <span>Belum memiliki akun?</span>{" "}
-                <Link to="/signup" className={styles.link}>
-                  Daftar Wilayah Baru
-                </Link>
-              </div>
+          <div className={styles.content}>
+            <div className={styles.mobileLogo}>
+              <Logo />
             </div>
-          </Wrapper>
+            
+            <div className={styles.header}>
+              <h1 className={styles.title}>Selamat Datang</h1>
+              <p className={styles.subtitle}>Masuk untuk mengakses dasbor Sistem Intelijen Statistik</p>
+            </div>
+
+            {error && <div className={styles.errorAlert}>{error}</div>}
+
+            <form onSubmit={handleSubmit} className={styles.form}>
+              <div className={styles.inputField}>
+                <label className={styles.label}>Email Instansi</label>
+                <Input
+                  type="email"
+                  placeholder="name@instansi.go.id"
+                  value={email}
+                  setValue={setEmail}
+                />
+              </div>
+
+              <div className={styles.inputField}>
+                <label className={styles.label}>Kata Sandi</label>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  setValue={setPassword}
+                />
+              </div>
+
+              <div className={styles.buttonWrapper}>
+                <MainButton onClick={handleSubmit}>
+                  {loading ? "Memproses..." : "Masuk"}
+                </MainButton>
+              </div>
+            </form>
+
+            <div className={styles.footer}>
+              <span>Belum memiliki akun?</span>{" "}
+              <Link to="/signup" className={styles.link}>
+                Daftar Wilayah Baru
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>

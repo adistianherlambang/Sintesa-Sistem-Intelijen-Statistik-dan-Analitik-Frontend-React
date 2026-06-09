@@ -127,14 +127,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  padding: 4rem;
   box-sizing: border-box;
   background-color: var(--background-color);
 }
 
 .loginCardWrapper {
   width: 100%;
-  max-width: 440px;
+  max-width: 400px;
 }
 
 .content {
