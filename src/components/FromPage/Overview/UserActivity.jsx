@@ -27,16 +27,20 @@ export default function UserActivity({ onLoad }) {
   ]
 
   return (
-    <div>
-      <p>Aktivitas</p>
-      <table>
-        {activity.map((item) => (
-          <tr>
-            <td>{item.createdAt}</td>
-            <td>{item.title}</td>
-          </tr>
-        ))}
-      </table>
+    <div className={styles.content}>
+      <p className={styles.sectionTitle}>Aktivitas</p>
+      <div className={styles.tableResponsive}>
+        <table className={styles.activityTable}>
+          <tbody>
+            {activity.map((item, index) => (
+              <tr key={index}>
+                <td className={styles.dateCol}>{item.createdAt}</td>
+                <td>{item.title}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

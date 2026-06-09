@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import style from "./AISummary"
+import styles from "./HitoriAnalisis.module.css";
 
 export default function HitoriAnalisis({ onLoad }) {
   const [data, setData] = useState("")
@@ -13,22 +13,28 @@ export default function HitoriAnalisis({ onLoad }) {
   ]
 
   return (
-    <div>
-      <p>Histori Analisis</p>
-      <table>
-        <tr>
-          <td>No</td>
-          <td>Judul</td>
-          <td>Tanggal Dibuat</td>
-        </tr>
-        {dummyHistory.map((item, index) => (
-          <tr key={index}>
-            <td>{index + 1}</td>
-            <td>{item.title}</td>
-            <td>{item.createdAt}</td>
-          </tr>
-        ))}
-      </table>
+    <div className={styles.content}>
+      <p className={styles.sectionTitle}>Histori Analisis</p>
+      <div className={styles.tableResponsive}>
+        <table className={styles.historyTable}>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Judul</th>
+              <th>Tanggal Dibuat</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dummyHistory.map((item, index) => (
+              <tr key={index}>
+                <td className={styles.noCol}>{index + 1}</td>
+                <td>{item.title}</td>
+                <td>{item.createdAt}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
