@@ -22,16 +22,17 @@ export default function Stepper({ item }) {
               }}
               className={styles.stepper}
               style={{
-                backgroundColor:
-                  index < step ? "blue" :
-                    index === step ? "red" : ""
+                opacity: index <= step ? 1 : ""
               }}
             >
               {index + 1}
             </div>
 
             {index !== item.length - 1 && (
-              <div className={styles.stepperLine} />
+              <div
+                className={styles.stepperLine}
+                style={{ opacity: index < step ? 1 : "" }}
+              />
             )}
           </div>
         ))}

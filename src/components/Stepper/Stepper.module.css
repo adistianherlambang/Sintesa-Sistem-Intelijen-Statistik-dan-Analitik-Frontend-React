@@ -42,7 +42,8 @@
 }
 
 .stepper {
-  background-color: rgb(255, 255, 255);
+  background-color: #34B34A;
+  opacity: 0.4;
   color: rgb(0, 0, 0);
   width: 2rem;
   height: 2rem;
@@ -53,6 +54,7 @@
 }
 
 .stepperLine {
+  opacity: 0.4;
   margin: 0 1rem;
   height: 1px;
   width: 5rem;
