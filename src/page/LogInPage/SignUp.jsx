@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import styles from "./SignUp.module.css";
@@ -21,6 +21,23 @@ export default function SignUp() {
   const [fetchingCities, setFetchingCities] = useState(true);
 
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredCities = cities.filter((city) =>
+    city.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -141,29 +158,60 @@ export default function SignUp() {
                 />
               </div>
 
-              <div className={styles.inputField}>
-                <label className={styles.label}>Pilih Wilayah Tugas</label>
-                <div className={styles.selectWrapper}>
-                  <select
-                    value={selectedCity}
-                    onChange={(e) => setSelectedCity(e.target.value)}
-                    className={styles.select}
-                    disabled={fetchingCities}
+              <div className={styles.inputField} ref={dropdownRef}>
+                <label className={styles.label}>Pilih Kota</label>
+                <div className={styles.customSelectContainer}>
+                  <div
+                    className={`${styles.selectBox} ${isOpen ? styles.selectBoxActive : ""} ${fetchingCities ? styles.selectBoxDisabled : ""}`}
+                    onClick={() => !fetchingCities && setIsOpen(!isOpen)}
                   >
-                    <option value="">
-                      {fetchingCities ? "Memuat wilayah..." : "-- Pilih Wilayah --"}
-                    </option>
-                    {cities.map((city) => (
-                      <option
-                        key={city.id}
-                        value={city.id}
-                        disabled={city.claimed}
-                        className={city.claimed ? styles.claimedOption : ""}
-                      >
-                        {city.name} {city.claimed ? "(Sudah Terklaim)" : ""}
-                      </option>
-                    ))}
-                  </select>
+                    <span>
+                      {selectedCity
+                        ? cities.find(c => c.id === selectedCity)?.name
+                        : (fetchingCities ? "Memuat kota..." : "-- Pilih Kota --")
+                      }
+                    </span>
+                    <svg className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ""}`} width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M1 1L5 5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+
+                  {isOpen && (
+                    <div className={styles.dropdownMenu}>
+                      <div className={styles.searchWrapper}>
+                        <input
+                          type="text"
+                          placeholder="Cari kota..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className={styles.searchInput}
+                          autoFocus
+                        />
+                      </div>
+                      <div className={styles.optionsList}>
+                        {filteredCities.length > 0 ? (
+                          filteredCities.map((city) => (
+                            <div
+                              key={city.id}
+                              onClick={() => {
+                                if (!city.claimed) {
+                                  setSelectedCity(city.id);
+                                  setIsOpen(false);
+                                  setSearchQuery("");
+                                }
+                              }}
+                              className={`${styles.optionItem} ${city.claimed ? styles.optionClaimed : ""} ${selectedCity === city.id ? styles.optionSelected : ""}`}
+                            >
+                              <span>{city.name}</span>
+                              {city.claimed && <span className={styles.claimedBadge}>Sudah Terklaim</span>}
+                            </div>
+                          ))
+                        ) : (
+                          <div className={styles.noOptions}>Kota tidak ditemukan</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <small className={styles.hint}>
                   * 1 wilayah hanya dapat diklaim dan dikelola oleh 1 akun instansi.
