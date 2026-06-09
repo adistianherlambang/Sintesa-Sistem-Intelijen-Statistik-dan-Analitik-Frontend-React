@@ -55,57 +55,80 @@ export default function LogIn() {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.cardContainer}>
-        <Wrapper padding="2.5rem">
-          <div className={styles.content}>
-            <div className={styles.logoWrapper}>
-              <Logo />
-            </div>
-            
-            <div className={styles.header}>
-              <h1 className={styles.title}>Selamat Datang</h1>
-              <p className={styles.subtitle}>Masuk untuk mengakses dasbor Sistem Intelijen Statistik</p>
-            </div>
-
-            {error && <div className={styles.errorAlert}>{error}</div>}
-
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <div className={styles.inputField}>
-                <label className={styles.label}>Email Instansi</label>
-                <Input
-                  type="email"
-                  placeholder="name@instansi.go.id"
-                  value={email}
-                  setValue={setEmail}
-                />
-              </div>
-
-              <div className={styles.inputField}>
-                <label className={styles.label}>Kata Sandi</label>
-                <Input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  setValue={setPassword}
-                />
-              </div>
-
-              <div className={styles.buttonWrapper}>
-                <MainButton onClick={handleSubmit}>
-                  {loading ? "Memproses..." : "Masuk"}
-                </MainButton>
-              </div>
-            </form>
-
-            <div className={styles.footer}>
-              <span>Belum memiliki akun?</span>{" "}
-              <Link to="/signup" className={styles.link}>
-                Daftar Wilayah Baru
-              </Link>
+    <div className={styles.pageContainer}>
+      <div className={styles.leftSection}>
+        <div className={styles.brandContent}>
+          <div className={styles.brandLogo}>
+            <Logo />
+          </div>
+          <h2 className={styles.brandTitle}>Sintesa</h2>
+          <p className={styles.brandDescription}>
+            Sistem Intelijen Statistik dan Analitik terintegrasi untuk membantu pengambilan keputusan berbasis data yang cepat, akurat, dan andal.
+          </p>
+          
+          {/* Area Konten Custom */}
+          <div className={styles.customContentArea}>
+            <div className={styles.illustrationCard}>
+              <div className={styles.chartGlow}></div>
+              <h3>Visualisasi Data Instan</h3>
+              <p>Otomatisasi pengolahan dataset dan pembuatan ringkasan eksekutif berbasis kecerdasan artifisial.</p>
             </div>
           </div>
-        </Wrapper>
+        </div>
+      </div>
+
+      <div className={styles.rightSection}>
+        <div className={styles.loginCardWrapper}>
+          <Wrapper padding="2.5rem">
+            <div className={styles.content}>
+              <div className={styles.mobileLogo}>
+                <Logo />
+              </div>
+              
+              <div className={styles.header}>
+                <h1 className={styles.title}>Selamat Datang</h1>
+                <p className={styles.subtitle}>Masuk untuk mengakses dasbor Sistem Intelijen Statistik</p>
+              </div>
+
+              {error && <div className={styles.errorAlert}>{error}</div>}
+
+              <form onSubmit={handleSubmit} className={styles.form}>
+                <div className={styles.inputField}>
+                  <label className={styles.label}>Email Instansi</label>
+                  <Input
+                    type="email"
+                    placeholder="name@instansi.go.id"
+                    value={email}
+                    setValue={setEmail}
+                  />
+                </div>
+
+                <div className={styles.inputField}>
+                  <label className={styles.label}>Kata Sandi</label>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    setValue={setPassword}
+                  />
+                </div>
+
+                <div className={styles.buttonWrapper}>
+                  <MainButton onClick={handleSubmit}>
+                    {loading ? "Memproses..." : "Masuk"}
+                  </MainButton>
+                </div>
+              </form>
+
+              <div className={styles.footer}>
+                <span>Belum memiliki akun?</span>{" "}
+                <Link to="/signup" className={styles.link}>
+                  Daftar Wilayah Baru
+                </Link>
+              </div>
+            </div>
+          </Wrapper>
+        </div>
       </div>
     </div>
   );
