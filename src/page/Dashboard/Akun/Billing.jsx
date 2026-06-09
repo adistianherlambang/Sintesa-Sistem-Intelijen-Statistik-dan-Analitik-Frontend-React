@@ -28,7 +28,7 @@ export default function Billing() {
         "Akses Bot WhatsApp Utama",
         "Unggah berkas database ke Bot",
         "Satu perangkat WhatsApp saja",
-        "Kuota pesan: 30 laporan/bln",
+        "Limit pesan: 1000 pesan masuk/keluar",
       ],
     },
     {
@@ -41,7 +41,7 @@ export default function Billing() {
         "Akses Bot WhatsApp Utama",
         "Unggah berkas database ke Bot",
         "Satu perangkat WhatsApp saja",
-        "Kuota pesan: 365 laporan/thn",
+        "Limit pesan: 1000 pesan masuk/keluar",
         "Prioritas respon Bot",
       ],
     },
@@ -54,6 +54,7 @@ export default function Billing() {
         "Semua fitur Bot WhatsApp",
         "Modul Analisis Interaktif (IHK/YoY)",
         "Visualisasi D3 Hierarchy Komoditas",
+        "Limit pesan: 1500 pesan masuk/keluar",
         "Kuota analisis: 50 berkas/bln",
       ],
     },
@@ -67,6 +68,7 @@ export default function Billing() {
         "Semua fitur Bot WhatsApp",
         "Modul Analisis Interaktif (IHK/YoY)",
         "Visualisasi D3 Hierarchy Komoditas",
+        "Limit pesan: 1500 pesan masuk/keluar",
         "Kuota analisis: 600 berkas/thn",
         "Prioritas respon Bot & Laporan",
       ],
@@ -201,7 +203,17 @@ export default function Billing() {
                 </div>
                 <div className={styles.activeSubDetails}>
                   <div className={styles.detailItem}>
-                    <span>Sisa Kuota:</span>
+                    <span>Limit Pesan Bot WA:</span>
+                    <strong>
+                      {subStatus.subscriptionId?.startsWith("wa_only")
+                        ? "1.000 Pesan"
+                        : subStatus.subscriptionId?.startsWith("wa_analisis")
+                        ? "1.500 Pesan"
+                        : "-"}
+                    </strong>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span>Sisa Kuota Analisis:</span>
                     <strong>{subStatus.quota} Laporan/Aksi</strong>
                   </div>
                   <div className={styles.detailItem}>

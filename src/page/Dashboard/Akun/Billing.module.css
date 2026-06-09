@@ -75,7 +75,7 @@
 
 .activeSubDetails {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   padding-top: 1.5rem;
