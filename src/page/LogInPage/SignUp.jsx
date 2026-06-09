@@ -167,7 +167,7 @@ export default function SignUp() {
                   >
                     <span>
                       {selectedCity
-                        ? cities.find(c => c.id === selectedCity)?.name
+                        ? selectedCity
                         : (fetchingCities ? "Memuat kota..." : "-- Pilih Kota --")
                       }
                     </span>
@@ -192,15 +192,15 @@ export default function SignUp() {
                         {filteredCities.length > 0 ? (
                           filteredCities.map((city) => (
                             <div
-                              key={city.id}
+                              key={city.name}
                               onClick={() => {
                                 if (!city.claimed) {
-                                  setSelectedCity(city.id);
+                                  setSelectedCity(city.name);
                                   setIsOpen(false);
                                   setSearchQuery("");
                                 }
                               }}
-                              className={`${styles.optionItem} ${city.claimed ? styles.optionClaimed : ""} ${selectedCity === city.id ? styles.optionSelected : ""}`}
+                              className={`${styles.optionItem} ${city.claimed ? styles.optionClaimed : ""} ${selectedCity === city.name ? styles.optionSelected : ""}`}
                             >
                               <span>{city.name}</span>
                               {city.claimed && <span className={styles.claimedBadge}>Sudah Terklaim</span>}
