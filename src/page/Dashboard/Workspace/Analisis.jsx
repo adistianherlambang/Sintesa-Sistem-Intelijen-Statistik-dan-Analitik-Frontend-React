@@ -79,6 +79,7 @@ function StepTwo(props) {
   const [komoditas, setKomoditas] = useState()
   const [activeYear, setActiveYear] = useState("now") // "now" or "prev"
   const [activeSheet, setActiveSheet] = useState("main") // "main" or commodity index string ("0", "1", ...)
+  const [forecastingEnabled, setForecastingEnabled] = useState(false)
 
   const countTreeLeaves = (node) => {
     if (!node || typeof node !== 'object') return 0
@@ -405,6 +406,56 @@ function StepTwo(props) {
           </div>
         </div>
       </Wrapper>
+
+      {/* ─── Wrapper Forecasting ─── */}
+      <Wrapper>
+        <div className={styles.forecastingContainer}>
+          <div className={styles.forecastingHeader}>
+            <div>
+              <p className={styles.sectionTitle}>Forecasting (Prediksi)</p>
+              <p className={styles.forecastingDesc}>
+                Aktifkan untuk menghasilkan prediksi inflasi periode berikutnya menggunakan model Machine Learning.
+              </p>
+            </div>
+            <div className={styles.sliderToggle}>
+              <div
+                className={`${styles.sliderTrack} ${forecastingEnabled ? styles.sliderTrackActive : ""}`}
+                role="group"
+                aria-label="Pilih opsi forecasting"
+              >
+                {/* sliding pill indicator */}
+                <span
+                  className={`${styles.sliderPill} ${forecastingEnabled ? styles.sliderPillRight : styles.sliderPillLeft}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setForecastingEnabled(true)}
+                  className={`${styles.sliderBtn} ${forecastingEnabled ? styles.sliderBtnActiveYa : ""}`}
+                  aria-pressed={forecastingEnabled}
+                >
+                  Ya
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setForecastingEnabled(false)}
+                  className={`${styles.sliderBtn} ${!forecastingEnabled ? styles.sliderBtnActiveTidak : ""}`}
+                  aria-pressed={!forecastingEnabled}
+                >
+                  Tidak
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {forecastingEnabled && (
+            <div className={styles.forecastingNote}>
+              <span className={styles.forecastingNoteIcon}>✦</span>
+              <p>Prediksi akan dijalankan setelah data disimpan. Hasilnya tersedia di tab <strong>StepThree</strong>.</p>
+            </div>
+          )}
+        </div>
+      </Wrapper>
+
       <MainButton onClick={() => setStep(2)}>Simpan</MainButton>
       {/* <div onClick={() => setStep(2)}>klik</div> */}
     </div>
