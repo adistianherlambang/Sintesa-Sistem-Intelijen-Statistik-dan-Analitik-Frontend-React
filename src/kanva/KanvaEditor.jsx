@@ -89,6 +89,72 @@ export default function KanvaEditor() {
     const zoomRef = useRef(zoom);
     zoomRef.current = zoom;
 
+    // Clipboard state for copy/paste
+    const [clipboard, setClipboard] = useState(null);
+
+    const copySelected = () => {
+        if (!selectedUniqueId) return;
+        const el = (activePage?.children || [])?.find((e) => e?.id === selectedUniqueId);
+        if (el) {
+            setClipboard(el);
+        }
+    };
+
+    const pasteSelected = () => {
+        if (!clipboard) return;
+        
+        const copiedEl = JSON.parse(JSON.stringify(clipboard));
+        const newId = `${copiedEl.id}-copy-${Date.now()}`;
+        copiedEl.id = newId;
+        copiedEl.x = (copiedEl.x || 0) + 20;
+        copiedEl.y = (copiedEl.y || 0) + 20;
+
+        const assignNewIds = (element) => {
+            if (element.children && Array.isArray(element.children)) {
+                element.children = element.children.map(child => {
+                    const newChild = { ...child, id: `${child.id}-copy-${Date.now()}` };
+                    return assignNewIds(newChild);
+                });
+            }
+            return element;
+        };
+        const elementToPaste = assignNewIds(copiedEl);
+
+        setPagesWithHistory((prev) => {
+            const cp = JSON.parse(JSON.stringify(prev));
+            const page = cp[activeIndex] || { children: [] };
+            page.children = page.children || [];
+            page.children.push(elementToPaste);
+            cp[activeIndex] = page;
+            return cp;
+        });
+
+        setClipboard(elementToPaste);
+        openMiniFor(newId);
+    };
+
+    const selectAll = () => {
+        const bannerEl = (activePage?.children || [])?.find(e => e?.type === 'banner');
+        if (bannerEl) {
+            openMiniFor(bannerEl.id);
+        } else if (activePage?.children?.length > 0) {
+            openMiniFor(activePage.children[0].id);
+        }
+    };
+
+    // Refs to expose latest functions in keydown event listener without stale closures
+    const copySelectedRef = useRef(copySelected);
+    copySelectedRef.current = copySelected;
+
+    const pasteSelectedRef = useRef(pasteSelected);
+    pasteSelectedRef.current = pasteSelected;
+
+    const selectAllRef = useRef(selectAll);
+    selectAllRef.current = selectAll;
+
+    const duplicateSelectedRef = useRef(null);
+    const deleteSelectedRef = useRef(null);
+
     // Load templates if ID provided
     useEffect(() => {
         if (tplId && savedTemplates) {
@@ -130,16 +196,55 @@ export default function KanvaEditor() {
     // Global keyboard and window mouseup listeners
     useEffect(() => {
         const handleKeyDown = (e) => {
+            const activeEl = document.activeElement;
+            const isTyping = activeEl && (
+                activeEl.tagName === "INPUT" || 
+                activeEl.tagName === "TEXTAREA" || 
+                activeEl.isContentEditable
+            );
+
             if (e.code === "Space") {
-                const activeEl = document.activeElement;
-                if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA" || activeEl.isContentEditable)) {
-                    return;
-                }
+                if (isTyping) return;
                 e.preventDefault();
                 setIsSpacePressed(true);
             }
             if (e.key === "Alt") {
                 setIsAltPressed(true);
+            }
+
+            if (!isTyping) {
+                const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+                const keyLower = e.key.toLowerCase();
+
+                // Ctrl/Cmd + C (Copy)
+                if (isCtrlOrCmd && keyLower === "c") {
+                    e.preventDefault();
+                    if (copySelectedRef.current) copySelectedRef.current();
+                }
+
+                // Ctrl/Cmd + V (Paste)
+                if (isCtrlOrCmd && keyLower === "v") {
+                    e.preventDefault();
+                    if (pasteSelectedRef.current) pasteSelectedRef.current();
+                }
+
+                // Ctrl/Cmd + D (Duplicate)
+                if (isCtrlOrCmd && keyLower === "d") {
+                    e.preventDefault();
+                    if (duplicateSelectedRef.current) duplicateSelectedRef.current();
+                }
+
+                // Ctrl/Cmd + A (Select All)
+                if (isCtrlOrCmd && keyLower === "a") {
+                    e.preventDefault();
+                    if (selectAllRef.current) selectAllRef.current();
+                }
+
+                // Delete / Backspace (Delete selected element)
+                if (e.key === "Delete" || e.key === "Backspace") {
+                    e.preventDefault();
+                    if (deleteSelectedRef.current) deleteSelectedRef.current();
+                }
             }
         };
 
@@ -358,6 +463,7 @@ export default function KanvaEditor() {
         dispatch(setSelectedUniqueId(null));
         dispatch(setPopUp(false));
     };
+    deleteSelectedRef.current = deleteSelected;
 
     const duplicateSelected = () => {
         if (!selectedUniqueId) return;
@@ -375,6 +481,7 @@ export default function KanvaEditor() {
         });
         openMiniFor(id);
     };
+    duplicateSelectedRef.current = duplicateSelected;
 
     const handleNavClick = (panelName) => {
         dispatch(setSelectedUniqueId(null));
