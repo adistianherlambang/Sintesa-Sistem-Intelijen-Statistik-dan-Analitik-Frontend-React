@@ -709,9 +709,13 @@ function StepTwoAvailable(props) {
 }
 
 function StepThree(props) {
-  const { setStep, datasetSource, uploadedDataset, brsPreview, setBrsPreview } = props
-  const [loadingBRS, setLoadingBRS] = useState(false)
-  const [downloadData, setDownloadData] = useState(null)
+  const { setStep, datasetSource, uploadedDataset } = props
+  const [loadingSummary, setLoadingSummary] = useState(false)
+  const [aiSummary, setAiSummary] = useState(null)
+  const [generatingBRS, setGeneratingBRS] = useState(false)
+  const [pdfPreviewBase64, setPdfPreviewBase64] = useState(null)
+  const [savedHistoryId, setSavedHistoryId] = useState(null)
+  const [error, setError] = useState("")
 
   // Parameters extracted from manual dataset
   const dataRows = uploadedDataset?.parsedData || []
@@ -737,7 +741,7 @@ function StepThree(props) {
     }
   });
 
-  // Extract BPS divisions (2-digit commodity code, e.g. 01 to 11) for Recharts visualization
+  // Extract BPS divisions for chart
   const divisionData = dataRows.filter(row => {
     const code = String(row[4]);
     return code.length === 2 && code !== "0";
@@ -749,52 +753,112 @@ function StepThree(props) {
                   .replace(/REKREASI, OLAHRAGA, DAN BUDAYA/i, "Rekreasi & Budaya")
                   .replace(/JASA PELAYANAN MAKANAN DAN MINUMAN/i, "Restoran/Kuliner")
                   .substring(0, 18),
-    inflasi: parseFloat(row[9]) || (Math.random() * 0.4 - 0.1) // fallback mock inflation if blank
+    inflasi: parseFloat(row[9]) || 0
   }));
 
+  // Fetch structured JSON AI summary on mount/load
   useEffect(() => {
-    if (datasetSource === "manual" && uploadedDataset && uploadedDataset.valid === "ya" && !brsPreview) {
-      const fetchBRS = async () => {
-        setLoadingBRS(true);
+    if (datasetSource === "manual" && uploadedDataset && uploadedDataset.valid === "ya" && !aiSummary) {
+      const fetchSummary = async () => {
+        setLoadingSummary(true);
+        setError("");
         try {
-          const res = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/generate-brs`, {
+          const res = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/generate-summary`, {
             city: uploadedDataset.context.city,
-            monthIndex: uploadedDataset.context.monthIndex,
-            year: uploadedDataset.context.year,
+            periode: uploadedDataset.context.period,
             inflasiMoM: inflasiValue,
             inflasiYoY: yoyValue,
             ihkNow: ihkValue,
-            komoditasPendorong: pendorong
+            komoditasPendorong: pendorong,
+            divisionData: divisionData
           });
-          setBrsPreview(res.data.previewText);
-          setDownloadData({
-            fileData: res.data.fileData,
-            fileName: res.data.fileName
-          });
+          setAiSummary(res.data);
         } catch (err) {
-          console.error("Error generating BRS preview:", err.message);
+          console.error("Error generating AI summary:", err.message);
+          setError("Gagal menghasilkan ringkasan AI: " + err.message);
         } finally {
-          setLoadingBRS(false);
+          setLoadingSummary(false);
         }
       };
-      fetchBRS();
+      fetchSummary();
     }
-  }, [uploadedDataset, datasetSource, brsPreview, setBrsPreview, inflasiValue, yoyValue, ihkValue, pendorong]);
+  }, [uploadedDataset, datasetSource, aiSummary, inflasiValue, yoyValue, ihkValue, pendorong, divisionData]);
 
-  const handleDownload = () => {
-    if (!downloadData) return;
-    const byteCharacters = atob(downloadData.fileData);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
+  const handleSaveAndGenerate = async () => {
+    if (!aiSummary) return;
+    setGeneratingBRS(true);
+    setError("");
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/generate-and-save-brs`,
+        {
+          city: uploadedDataset.context.city,
+          monthIndex: uploadedDataset.context.monthIndex,
+          year: uploadedDataset.context.year,
+          inflasiMoM: inflasiValue,
+          inflasiYoY: yoyValue,
+          ihkNow: ihkValue,
+          komoditasPendorong: pendorong,
+          aiSummary: aiSummary.sections,
+          divisionData: divisionData
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      setPdfPreviewBase64(res.data.pdfData);
+      setSavedHistoryId(res.data.historyId);
+    } catch (err) {
+      console.error("Error generating/saving BRS report:", err.message);
+      setError("Gagal men-generate BRS & PDF: " + (err.response?.data?.message || err.message));
+    } finally {
+      setGeneratingBRS(false);
     }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: "application/octet-stream" });
-    
-    const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    link.download = downloadData.fileName;
-    link.click();
+  };
+
+  const handleDownloadIDML = async () => {
+    if (!savedHistoryId) return;
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `${process.env.REACT_APP_URL_SERVER}/api/users/analysis/${savedHistoryId}/download`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: 'blob'
+        }
+      );
+      const blob = new Blob([response.data], { type: 'application/octet-stream' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `perkembanganIHK_${uploadedDataset.context.city.replace(/\s+/g, '_')}_${uploadedDataset.context.period.replace(/\s+/g, '_')}.idml`;
+      link.click();
+    } catch (err) {
+      console.error("Gagal mengunduh IDML:", err.message);
+      setError("Gagal mengunduh file IDML.");
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!savedHistoryId) return;
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `${process.env.REACT_APP_URL_SERVER}/api/users/analysis/${savedHistoryId}/download/pdf`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: 'blob'
+        }
+      );
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `perkembanganIHK_${uploadedDataset.context.city.replace(/\s+/g, '_')}_${uploadedDataset.context.period.replace(/\s+/g, '_')}.pdf`;
+      link.click();
+    } catch (err) {
+      console.error("Gagal mengunduh PDF:", err.message);
+      setError("Gagal mengunduh file PDF.");
+    }
   };
 
   if (datasetSource === "available") {
@@ -854,7 +918,7 @@ function StepThree(props) {
 
   return (
     <div className={styles.container}>
-      {loadingBRS ? (
+      {loadingSummary ? (
         <Wrapper>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 0', gap: '16px' }}>
             <div style={{
@@ -865,19 +929,36 @@ function StepThree(props) {
               borderRadius: '50%',
               animation: 'spin 1s linear infinite',
             }} />
-            <p className={styles.loadingText}>Membuat ringkasan laporan BRS dengan AI...</p>
+            <p className={styles.loadingText}>Menganalisis data & membuat ringkasan AI...</p>
+            <style>{`
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
+            `}</style>
           </div>
         </Wrapper>
       ) : (
         <>
-          <Wrapper>
-            <p className={styles.sectionTitle}>Ringkasan AI (Laporan Manual)</p>
-            <div style={{ background: 'rgba(52, 179, 74, 0.04)', padding: '20px', borderRadius: '8px', border: '1px solid rgba(52, 179, 74, 0.25)' }}>
-              <p style={{ margin: 0, color: '#B8F5C2', lineHeight: 1.6, fontSize: 15, fontStyle: 'italic' }}>
-                "{brsPreview}"
+          {aiSummary && (
+            <Wrapper>
+              <p className={styles.sectionTitle}>Ringkasan AI (Laporan Manual)</p>
+              <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: 13, marginBottom: '16px' }}>
+                Berikut adalah butir-butir ringkasan kondisi perekonomian wilayah Anda yang dihasilkan oleh AI:
               </p>
-            </div>
-          </Wrapper>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {aiSummary.sections?.map((section, idx) => (
+                  <Wrapper key={idx} style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', padding: '16px' }}>
+                    <h4 style={{ color: '#34B34A', margin: '0 0 8px 0', fontSize: '15px', fontWeight: 600 }}>
+                      {section.title}
+                    </h4>
+                    <p style={{ color: 'rgba(255, 255, 255, 0.8)', margin: 0, fontSize: '14px', lineHeight: 1.5 }}>
+                      {section.content}
+                    </p>
+                  </Wrapper>
+                ))}
+              </div>
+            </Wrapper>
+          )}
 
           {divisionData.length > 0 && (
             <Wrapper>
@@ -913,7 +994,7 @@ function StepThree(props) {
 
           <Wrapper>
             <p className={styles.sectionTitle}>Ringkasan Parameter Data Utama</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginTop: '16px' }}>
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>IHK Terakhir</span>
                 <span style={{ fontSize: 16, color: '#fff', fontWeight: 600 }}>{ihkValue}</span>
@@ -932,18 +1013,21 @@ function StepThree(props) {
               </div>
             </div>
 
-            {downloadData && (
+            {error && <p style={{ color: '#ef4444', marginTop: 16, fontSize: 14 }}>{error}</p>}
+
+            {!pdfPreviewBase64 && (
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
                 <button
-                  onClick={handleDownload}
+                  onClick={handleSaveAndGenerate}
+                  disabled={generatingBRS || !aiSummary}
                   style={{
-                    background: '#34B34A',
+                    background: generatingBRS ? '#1f6a2c' : '#34B34A',
                     color: '#fff',
                     padding: '12px 28px',
                     borderRadius: '8px',
                     fontSize: 15,
                     fontWeight: 600,
-                    cursor: 'pointer',
+                    cursor: generatingBRS ? 'not-allowed' : 'pointer',
                     border: 'none',
                     boxShadow: '0 4px 14px rgba(52, 179, 74, 0.4)',
                     transition: 'transform 0.2s, background 0.2s',
@@ -951,19 +1035,113 @@ function StepThree(props) {
                     alignItems: 'center',
                     gap: '8px'
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.background = '#2da140'}
-                  onMouseOut={(e) => e.currentTarget.style.background = '#34B34A'}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                  Generate BRS (Download IDML)
+                  {generatingBRS ? (
+                    <>
+                      <div style={{
+                        width: '18px',
+                        height: '18px',
+                        border: '2px solid rgba(255, 255, 255, 0.1)',
+                        borderTopColor: '#fff',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                      }} />
+                      Men-generate Laporan BRS...
+                    </>
+                  ) : (
+                    <>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      Setujui & Generate Laporan BRS
+                    </>
+                  )}
                 </button>
               </div>
             )}
           </Wrapper>
+
+          {pdfPreviewBase64 && (
+            <Wrapper style={{ marginTop: '24px' }}>
+              <p className={styles.sectionTitle}>Pratinjau PDF Laporan BRS</p>
+              <div style={{
+                width: '100%',
+                height: '600px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                marginTop: '16px',
+                background: '#fff'
+              }}>
+                <iframe
+                  src={`data:application/pdf;base64,${pdfPreviewBase64}`}
+                  width="100%"
+                  height="100%"
+                  title="PDF Preview"
+                  style={{ border: 'none' }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginTop: '24px' }}>
+                <button
+                  onClick={handleDownloadIDML}
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid #34B34A',
+                    color: '#34B34A',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = 'rgba(52, 179, 74, 0.05)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Unduh IDML
+                </button>
+                <button
+                  onClick={handleDownloadPDF}
+                  style={{
+                    background: '#34B34A',
+                    color: '#fff',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    border: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 12px rgba(52, 179, 74, 0.2)',
+                    transition: 'background 0.2s'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = '#2da140'}
+                  onMouseOut={(e) => e.currentTarget.style.background = '#34B34A'}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Unduh PDF
+                </button>
+              </div>
+            </Wrapper>
+          )}
         </>
       )}
     </div>

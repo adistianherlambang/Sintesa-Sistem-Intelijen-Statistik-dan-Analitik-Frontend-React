@@ -1,40 +1,162 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import styles from "./HitoriAnalisis.module.css";
 
 export default function HitoriAnalisis({ onLoad }) {
-  const [data, setData] = useState("")
+  const [historyList, setHistoryList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const dummyHistory = [
-    {
-      title: "Analisis Tren YoY Kota Metro April 2025",
-      periode: "April 2026",
-      createdAt: "16:00 25/2/2026"
+  useEffect(() => {
+    const fetchHistory = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          `${process.env.REACT_APP_URL_SERVER}/api/users/analysis`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        setHistoryList(response.data);
+      } catch (err) {
+        console.error("Gagal memuat histori analisis:", err.message);
+        setError("Gagal memuat histori analisis.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHistory();
+  }, []);
+
+  const handleDownloadIDML = async (id, title) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `${process.env.REACT_APP_URL_SERVER}/api/users/analysis/${id}/download`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: 'blob'
+        }
+      );
+      const blob = new Blob([response.data], { type: 'application/octet-stream' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}.idml`;
+      link.click();
+    } catch (err) {
+      console.error("Gagal mengunduh IDML:", err.message);
+      alert("Gagal mengunduh file IDML.");
     }
-  ]
+  };
+
+  const handleDownloadPDF = async (id, title) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `${process.env.REACT_APP_URL_SERVER}/api/users/analysis/${id}/download/pdf`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: 'blob'
+        }
+      );
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+      link.click();
+    } catch (err) {
+      console.error("Gagal mengunduh PDF:", err.message);
+      alert("Gagal mengunduh file PDF.");
+    }
+  };
+
+  const formatTanggal = (dateStr) => {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    return d.toLocaleString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    }).replace(/\./g, ":");
+  };
 
   return (
     <div className={styles.content}>
       <p className={styles.sectionTitle}>Histori Analisis</p>
-      <div className={styles.tableResponsive}>
-        <table className={styles.historyTable}>
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Judul</th>
-              <th>Tanggal Dibuat</th>
-            </tr>
-          </thead>
-          <tbody>
-            {dummyHistory.map((item, index) => (
-              <tr key={index}>
-                <td className={styles.noCol}>{index + 1}</td>
-                <td>{item.title}</td>
-                <td>{item.createdAt}</td>
+      {loading ? (
+        <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "14px" }}>Memuat histori...</p>
+      ) : error ? (
+        <p style={{ color: "#ef4444", fontSize: "14px" }}>{error}</p>
+      ) : historyList.length === 0 ? (
+        <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "14px" }}>Belum ada riwayat analisis.</p>
+      ) : (
+        <div className={styles.tableResponsive}>
+          <table className={styles.historyTable}>
+            <thead>
+              <tr>
+                <th className={styles.noCol}>No</th>
+                <th>Judul</th>
+                <th>Periode</th>
+                <th>Tanggal Dibuat</th>
+                <th style={{ textAlign: "center", width: "180px" }}>Aksi</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {historyList.map((item, index) => (
+                <tr key={item._id || index}>
+                  <td className={styles.noCol}>{index + 1}</td>
+                  <td>{item.title}</td>
+                  <td>{item.periode}</td>
+                  <td>{formatTanggal(item.createdAt)}</td>
+                  <td style={{ textAlign: "center" }}>
+                    <button
+                      onClick={() => handleDownloadIDML(item._id, item.title)}
+                      style={{
+                        background: 'transparent',
+                        border: '1px solid #34B34A',
+                        color: '#34B34A',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        marginRight: '8px',
+                        transition: 'background 0.2s'
+                      }}
+                      onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(52,179,74,0.1)'; }}
+                      onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      IDML
+                    </button>
+                    <button
+                      onClick={() => handleDownloadPDF(item._id, item.title)}
+                      style={{
+                        background: '#34B34A',
+                        border: 'none',
+                        color: '#fff',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'background 0.2s'
+                      }}
+                      onMouseOver={(e) => { e.currentTarget.style.background = '#2da140'; }}
+                      onMouseOut={(e) => { e.currentTarget.style.background = '#34B34A'; }}
+                    >
+                      PDF
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
-  )
+  );
 }
