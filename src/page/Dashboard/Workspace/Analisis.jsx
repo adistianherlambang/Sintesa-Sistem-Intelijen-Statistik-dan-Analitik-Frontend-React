@@ -823,7 +823,7 @@ function StepThree(props) {
 
   // Fetch structured JSON AI summary on mount/load
   useEffect(() => {
-    if (datasetSource === "manual" && uploadedDataset && uploadedDataset.valid === "ya" && !aiSummary) {
+    if (uploadedDataset && uploadedDataset.valid === "ya" && !aiSummary) {
       const fetchSummary = async () => {
         setLoadingSummary(true);
         setError("");
