@@ -319,8 +319,73 @@ function StepTwoManual(props) {
 }
 
 function StepTwoAvailable(props) {
-  const { setStep } = props
+  const { setStep, setUploadedDataset } = props
   const user = userStore((state) => state.user)
+
+  const handleSave = () => {
+    // Find latest month index that has a value in inflasi.data
+    let monthIndex = 0;
+    const inflasiData = inflasi?.data || [];
+    for (let i = 11; i >= 0; i--) {
+      if (inflasiData[i] && inflasiData[i].value !== undefined && inflasiData[i].value !== "") {
+        monthIndex = i;
+        break;
+      }
+    }
+    
+    const userCity = inflasi?.kota || user?.location?.name || "KOTA METRO";
+    const currentYear = new Date().getFullYear();
+    const periodText = `${monthNames[monthIndex]} ${currentYear}`;
+    
+    const infValue = inflasi?.data?.[monthIndex]?.value || "0.00";
+    const yValue = inflasi?.yoy?.[monthIndex]?.value || "0.00";
+    const iValue = ihk?.data?.[monthIndex]?.value || "100.00";
+
+    const commodityList = komoditas?.hierarki || [];
+    
+    // Construct divisionData from komoditas.hierarki
+    const divisions = commodityList.map(c => {
+      const dataKeys = Object.keys(c.data || {});
+      const targetKey = dataKeys[monthIndex];
+      return {
+        name: c.label,
+        inflasi: parseFloat(c.data?.[targetKey]) || 0
+      };
+    });
+
+    const parsedData = [
+      ["Tahun", "Bulan", "Kode Kota", "Nama Kota", "Kode Komoditas", "Nama Komoditas", "Timbangan", "IHK Lalu", "IHK", "Inflasi", "Inflasi YtD", "Inflasi YoY", "Andil"],
+      // Umum row (Kode Komoditas "0" represents UMUM)
+      [currentYear, monthIndex + 1, "1872", userCity, "0", "UMUM", "100", "100", iValue, infValue, "0", yValue, "0"],
+    ];
+
+    divisions.forEach((div, idx) => {
+      const code = String(idx + 1).padStart(2, "0");
+      parsedData.push([currentYear, monthIndex + 1, "1872", userCity, code, div.name, "10", "10", "100", String(div.inflasi), "0", "0", String(div.inflasi)]);
+    });
+
+    setUploadedDataset({
+      valid: "ya",
+      fileInfo: {
+        name: "Database BPS",
+        size: "N/A",
+        rows: parsedData.length,
+        cols: 13,
+        sheet: "Sheet Utama"
+      },
+      context: {
+        city: userCity,
+        period: periodText,
+        monthIndex: monthIndex,
+        year: currentYear
+      },
+      structure: "BPS Inflasi / IHK",
+      columns: parsedData[0],
+      parsedData: parsedData
+    });
+
+    setStep(2);
+  };
 
   const [inflasi, setInflasi] = useState()
   const [ihk, setIhk] = useState()
@@ -703,7 +768,7 @@ function StepTwoAvailable(props) {
         </div>
       </Wrapper>
 
-      <MainButton onClick={() => setStep(2)}>Simpan</MainButton>
+      <MainButton onClick={handleSave}>Simpan & Lanjutkan</MainButton>
     </div>
   )
 }
@@ -860,24 +925,7 @@ function StepThree(props) {
       setError("Gagal mengunduh file PDF.");
     }
   };
-
-  if (datasetSource === "available") {
-    return (
-      <div className={styles.container}>
-        <Wrapper>
-          <p className={styles.sectionTitle}>Ringkasan AI</p>
-          <p style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.6 }}>
-            Berikut adalah ringkasan AI kondisi perekonomian wilayah Anda berdasarkan dataset BPS terbaru.
-          </p>
-          <div style={{ background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', marginTop: '16px' }}>
-            <p style={{ margin: 0, fontStyle: 'italic', color: '#B8F5C2', lineHeight: 1.6 }}>
-              "Kota Metro pada periode terakhir menunjukkan tingkat inflasi yang stabil dengan pendorong utama di komoditas bahan pangan pokok (beras dan bawang merah), didukung oleh Indeks Harga Konsumen (IHK) yang terjaga di level aman."
-            </p>
-          </div>
-        </Wrapper>
-      </div>
-    )
-  }
+  // Unified AI summary and BRS report generation flow for both sources
 
   // Manual Dataset branch
   if (uploadedDataset && uploadedDataset.valid === "tidak") {
