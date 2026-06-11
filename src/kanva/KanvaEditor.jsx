@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Stage, Layer, Line } from "react-konva";
+import { Stage, Layer, Line, Rect } from "react-konva";
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import {
-    setCollapsed,
     setEditorPages,
     setPopUp,
     setSaveTemplate,
@@ -75,6 +74,21 @@ export default function KanvaEditor() {
     const [lineCap, setLineCap] = useState("round");
     const [showPenDropdown, setShowPenDropdown] = useState(false);
 
+    // Zoom/Pan states
+    const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
+    const [isSpacePressed, setIsSpacePressed] = useState(false);
+    const [isAltPressed, setIsAltPressed] = useState(false);
+    const [isMouseDown, setIsMouseDown] = useState(false);
+
+    const stagePosRef = useRef(stagePos);
+    stagePosRef.current = stagePos;
+
+    const isAltPressedRef = useRef(isAltPressed);
+    isAltPressedRef.current = isAltPressed;
+
+    const zoomRef = useRef(zoom);
+    zoomRef.current = zoom;
+
     // Load templates if ID provided
     useEffect(() => {
         if (tplId && savedTemplates) {
@@ -82,15 +96,6 @@ export default function KanvaEditor() {
             if (tpl) dispatch(setEditorPages(tpl?.pages));
         }
     }, [tplId, savedTemplates, dispatch]);
-
-    // Handle stage resizing on window change
-    useEffect(() => {
-        if (stageRef?.current) {
-            stageRef?.current?.width(canvasSize?.w);
-            stageRef?.current?.height(canvasSize?.h);
-            stageRef?.current?.batchDraw();
-        }
-    }, [canvasSize]);
 
     // ResizeObserver for canvas wrapper
     useEffect(() => {
@@ -107,7 +112,7 @@ export default function KanvaEditor() {
         return () => resizeObserver?.disconnect();
     }, []);
 
-    // Autofit zoom on first load or size changes
+    // Autofit zoom on first load or size changes (sets initial zoom & stage center)
     useEffect(() => {
         if (!canvasSize?.w || !canvasSize?.h || !containerSize?.w || !containerSize?.h) return;
 
@@ -116,7 +121,170 @@ export default function KanvaEditor() {
 
         const newZoom = Math.min(scaleX, scaleY) * 0.9; // 10% padding
         dispatch(setZoom(newZoom));
+        setStagePos({
+            x: (containerSize.w - canvasSize.w * newZoom) / 2,
+            y: (containerSize.h - canvasSize.h * newZoom) / 2
+        });
     }, [canvasSize, containerSize, dispatch]);
+
+    // Global keyboard and window mouseup listeners
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.code === "Space") {
+                const activeEl = document.activeElement;
+                if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA" || activeEl.isContentEditable)) {
+                    return;
+                }
+                e.preventDefault();
+                setIsSpacePressed(true);
+            }
+            if (e.key === "Alt") {
+                setIsAltPressed(true);
+            }
+        };
+
+        const handleKeyUp = (e) => {
+            if (e.code === "Space") {
+                setIsSpacePressed(false);
+            }
+            if (e.key === "Alt") {
+                setIsAltPressed(false);
+            }
+        };
+
+        const handleBlur = () => {
+            setIsSpacePressed(false);
+            setIsAltPressed(false);
+            setIsMouseDown(false);
+        };
+
+        const handleWindowMouseUp = () => {
+            setIsMouseDown(false);
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        window.addEventListener("keyup", handleKeyUp);
+        window.addEventListener("blur", handleBlur);
+        window.addEventListener("mouseup", handleWindowMouseUp);
+
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+            window.removeEventListener("keyup", handleKeyUp);
+            window.removeEventListener("blur", handleBlur);
+            window.removeEventListener("mouseup", handleWindowMouseUp);
+        };
+    }, []);
+
+    // Set up native wheel event listener on stage container for non-passive prevention
+    useEffect(() => {
+        const stage = stageRef.current;
+        if (!stage) return;
+
+        const container = stage.container();
+
+        const handleWheelRaw = (e) => {
+            e.preventDefault();
+
+            const oldScale = zoomRef.current;
+            const rect = container.getBoundingClientRect();
+            const pointer = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top,
+            };
+
+            const currentStagePos = stagePosRef.current;
+            const currentIsAltPressed = isAltPressedRef.current;
+
+            if (e.ctrlKey || e.altKey || currentIsAltPressed) {
+                const scaleBy = 1.05;
+                const mousePointTo = {
+                    x: (pointer.x - currentStagePos.x) / oldScale,
+                    y: (pointer.y - currentStagePos.y) / oldScale,
+                };
+
+                let newScale;
+                if (e.ctrlKey && !e.altKey) {
+                    newScale = oldScale * Math.exp(-e.deltaY * 0.01);
+                } else {
+                    const direction = e.deltaY < 0 ? 1 : -1;
+                    newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+                }
+
+                const clampedScale = Math.min(3, Math.max(0.1, newScale));
+                dispatch(setZoom(clampedScale));
+                setStagePos({
+                    x: pointer.x - mousePointTo.x * clampedScale,
+                    y: pointer.y - mousePointTo.y * clampedScale,
+                });
+            } else {
+                setStagePos((pos) => ({
+                    x: pos.x - e.deltaX,
+                    y: pos.y - e.deltaY,
+                }));
+            }
+        };
+
+        container.addEventListener('wheel', handleWheelRaw, { passive: false });
+        return () => {
+            container.removeEventListener('wheel', handleWheelRaw);
+        };
+    }, [dispatch, canvasSize?.w, canvasSize?.h]);
+
+    const zoomToCenter = (newZoom) => {
+        if (!canvasSize?.w || !containerSize?.w) return;
+        const oldScale = zoom;
+        const clampedZoom = Math.min(3, Math.max(0.1, newZoom));
+        
+        const pointer = {
+            x: containerSize.w / 2,
+            y: containerSize.h / 2
+        };
+
+        const mousePointTo = {
+            x: (pointer.x - stagePos.x) / oldScale,
+            y: (pointer.y - stagePos.y) / oldScale,
+        };
+
+        dispatch(setZoom(clampedZoom));
+        setStagePos({
+            x: pointer.x - mousePointTo.x * clampedZoom,
+            y: pointer.y - mousePointTo.y * clampedZoom,
+        });
+    };
+
+    const resetZoom = () => {
+        if (!canvasSize?.w || !canvasSize?.h || !containerSize?.w || !containerSize?.h) return;
+        const scaleX = containerSize?.w / canvasSize?.w;
+        const scaleY = containerSize?.h / canvasSize?.h;
+        const fitZoom = Math.min(scaleX, scaleY) * 0.9;
+        dispatch(setZoom(fitZoom));
+        setStagePos({
+            x: (containerSize.w - canvasSize.w * fitZoom) / 2,
+            y: (containerSize.h - canvasSize.h * fitZoom) / 2
+        });
+    };
+
+    const getCursorStyle = () => {
+        if (isSpacePressed) {
+            return isMouseDown ? 'grabbing' : 'grab';
+        }
+        if (isAltPressed) {
+            return 'zoom-in';
+        }
+        if (isPenTool) {
+            return 'crosshair';
+        }
+        return 'default';
+    };
+
+    const handleStageDrag = useCallback((e) => {
+        if (e.target === e.target.getStage()) {
+            setStagePos({
+                x: e.target.x(),
+                y: e.target.y()
+            });
+        }
+    }, []);
 
     // Pen drawings logic
     const handleMouseDown = useCallback((e) => {
@@ -211,12 +379,22 @@ export default function KanvaEditor() {
     const handleNavClick = (panelName) => {
         dispatch(setSelectedUniqueId(null));
         dispatch(setPopUp(false));
-        dispatch(setPath(panelName));
+        if (path === panelName) {
+            dispatch(setPath(undefined));
+        } else {
+            dispatch(setPath(panelName));
+        }
     };
 
     const saveTemplate = () => {
         if (stageRef.current) {
-            const preview = stageRef.current.toDataURL({ pixelRatio: 0.3 }); // small thumbnail
+            const preview = stageRef.current.toDataURL({
+                x: stagePos.x,
+                y: stagePos.y,
+                width: canvasSize.w * zoom,
+                height: canvasSize.h * zoom,
+                pixelRatio: 0.3
+            });
             dispatch(
                 setSaveTemplate({
                     id: Date.now(),
@@ -283,7 +461,7 @@ export default function KanvaEditor() {
                             <div className={styles.toolbarGroup}>
                                 <button
                                     className={styles.toolBtn}
-                                    onClick={() => dispatch(setZoom(Math.max(0.2, zoom - 0.1)))}
+                                    onClick={() => zoomToCenter(zoom - 0.1)}
                                     title="Perkecil"
                                 >
                                     <GoZoomOut size={16} />
@@ -291,14 +469,14 @@ export default function KanvaEditor() {
                                 <span className={styles.zoomValue}>{Math.round(zoom * 100)}%</span>
                                 <button
                                     className={styles.toolBtn}
-                                    onClick={() => dispatch(setZoom(Math.min(3, zoom + 0.1)))}
+                                    onClick={() => zoomToCenter(zoom + 0.1)}
                                     title="Perbesar"
                                 >
                                     <GoZoomIn size={16} />
                                 </button>
                                 <button
                                     className={styles.toolBtn}
-                                    onClick={() => dispatch(setZoom(1))}
+                                    onClick={resetZoom}
                                     title="Reset Zoom"
                                 >
                                     <SlReload size={16} />
@@ -397,40 +575,53 @@ export default function KanvaEditor() {
             </div>
 
             {/* Left Nav Menu and Canvas split */}
-            <div style={{ display: 'flex', gap: '16px', marginTop: '16px', height: 'calc(100vh - 200px)' }}>
+            <div style={{ display: 'flex', gap: '16px', marginTop: '16px', height: 'calc(100vh - 200px)', position: 'relative' }}>
                 {/* Left side Nav Menu Panel - wrapped in Wrapper */}
                 <Wrapper width="auto" height="100%" padding="0" hoverable={false}>
-                    <div style={{ display: 'flex', height: '100%' }}>
-                        {/* Left Side Icons Panel */}
-                        <div className={styles.navBar}>
-                            {sidebarTabs.map((tab) => {
-                                const isActive = path === tab.name;
-                                return (
-                                    <div
-                                        key={tab.name}
-                                        className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}
-                                        onClick={() => handleNavClick(tab.name)}
-                                    >
-                                        <span className={styles.navItemIcon}>{tab.icon}</span>
-                                        <span>{tab.label}</span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {/* Sub Panel Content Sidebar */}
-                        <div className={styles.sidebarContainer}>
-                            <Sidebar
-                                selectedEl={selectedEl}
-                                setElement={setElement}
-                                activePage={activePage}
-                                setPagesWithHistory={setPagesWithHistory}
-                                openMiniFor={openMiniFor}
-                                stageRef={stageRef}
-                            />
-                        </div>
+                    {/* Left Side Icons Panel */}
+                    <div className={styles.navBar}>
+                        {sidebarTabs.map((tab) => {
+                            const isActive = path === tab.name;
+                            return (
+                                <div
+                                    key={tab.name}
+                                    className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}
+                                    onClick={() => handleNavClick(tab.name)}
+                                >
+                                    <span className={styles.navItemIcon}>{tab.icon}</span>
+                                    <span>{tab.label}</span>
+                                </div>
+                            );
+                        })}
                     </div>
                 </Wrapper>
+
+                {/* Sub Panel Content Sidebar - Absolute Overlay */}
+                {(path !== undefined || selectedEl !== undefined) && (
+                    <div 
+                        className={styles.sidebarContainer}
+                        style={{
+                            position: 'absolute',
+                            left: '72px',
+                            top: 0,
+                            bottom: 0,
+                            width: '340px',
+                            zIndex: 50,
+                            borderRadius: '8px',
+                            boxShadow: '10px 0 30px rgba(0, 0, 0, 0.5)',
+                            backgroundColor: '#121a21',
+                        }}
+                    >
+                        <Sidebar
+                            selectedEl={selectedEl}
+                            setElement={setElement}
+                            activePage={activePage}
+                            setPagesWithHistory={setPagesWithHistory}
+                            openMiniFor={openMiniFor}
+                            stageRef={stageRef}
+                        />
+                    </div>
+                )}
 
                 {/* Canvas Area Panel - wrapped in Wrapper */}
                 <Wrapper width="100%" height="100%" padding="0" hoverable={false}>
@@ -439,19 +630,23 @@ export default function KanvaEditor() {
                             <Stage
                                 ref={stageRef}
                                 key={`${canvasSize?.w}x${canvasSize?.h}`}
-                                width={canvasSize?.w}
-                                height={canvasSize?.h}
+                                width={containerSize?.w}
+                                height={containerSize?.h}
                                 scale={{ x: zoom, y: zoom }}
-                                x={(containerSize?.w - canvasSize?.w * zoom) / 2}
-                                y={(containerSize?.h - canvasSize?.h * zoom) / 2}
+                                x={stagePos.x}
+                                y={stagePos.y}
+                                draggable={isSpacePressed}
+                                onDragMove={handleStageDrag}
+                                onDragEnd={handleStageDrag}
                                 style={{
-                                    background: activePage?.background || "#ffffff",
-                                    boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+                                    cursor: getCursorStyle(),
                                 }}
                                 onMouseDown={(e) => {
-                                    if (e.target === e.target.getStage()) {
+                                    setIsMouseDown(true);
+                                    if (!isSpacePressed && e.target === e.target.getStage()) {
                                         dispatch(setSelectedUniqueId(null));
                                         dispatch(setPopUp(false));
+                                        dispatch(setPath(undefined));
                                     }
                                     handleMouseDown(e);
                                 }}
@@ -459,11 +654,40 @@ export default function KanvaEditor() {
                                 onMouseUp={handleMouseUp}
                             >
                                 <Layer>
+                                    {/* Template Page Background with shadow */}
+                                    <Rect
+                                        name="page-background"
+                                        x={0}
+                                        y={0}
+                                        width={canvasSize?.w}
+                                        height={canvasSize?.h}
+                                        fill={activePage?.background || "#ffffff"}
+                                        shadowColor="rgba(0,0,0,0.3)"
+                                        shadowBlur={20}
+                                        shadowOffset={{ x: 0, y: 10 }}
+                                        shadowOpacity={0.5}
+                                        listening={true}
+                                        onClick={(e) => {
+                                            if (!isSpacePressed && e.target.name() === 'page-background') {
+                                                dispatch(setSelectedUniqueId(null));
+                                                dispatch(setPopUp(false));
+                                                dispatch(setPath(undefined));
+                                            }
+                                        }}
+                                        onTap={(e) => {
+                                            if (!isSpacePressed && e.target.name() === 'page-background') {
+                                                dispatch(setSelectedUniqueId(null));
+                                                dispatch(setPopUp(false));
+                                                dispatch(setPath(undefined));
+                                            }
+                                        }}
+                                    />
+
                                     {(activePage?.children || []).map((el) => {
                                         if (!el) return null;
                                         let element = { ...el };
 
-                                        if (isPenTool) {
+                                        if (isPenTool || isSpacePressed) {
                                             element['locked'] = true;
                                         } else {
                                             element['locked'] = el?.locked || false;
@@ -475,6 +699,7 @@ export default function KanvaEditor() {
                                                 el={element}
                                                 setElement={setElement}
                                                 stageRef={stageRef}
+                                                isSpacePressed={isSpacePressed}
                                             />
                                         );
                                     })}

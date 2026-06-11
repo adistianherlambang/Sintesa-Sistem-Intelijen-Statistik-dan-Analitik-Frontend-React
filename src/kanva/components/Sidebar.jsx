@@ -57,14 +57,10 @@ const Sidebar = ({ selectedEl, setElement, activePage, setPagesWithHistory, open
             dispatch(setPath(undefined));
         }
 
-        if (path === undefined && selectedEl === undefined) {
-            dispatch(setPath("banner"));
-        }
-
         if (selectedEl?.type === 'icon') {
             dispatch(setPath("element"));
         }
-    }, [selectedEl]);
+    }, [selectedEl, dispatch]);
 
     return (
         <div className={styles.sidebar}>

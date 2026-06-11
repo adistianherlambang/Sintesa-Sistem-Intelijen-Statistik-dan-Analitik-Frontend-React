@@ -6,10 +6,14 @@ import KanvaEditor from '../../../kanva/KanvaEditor';
 
 export default function BuatInfografis() {
   return (
-    <Provider store={kanvaStore}>
-      <PersistGate loading={null} persistor={kanvaPersistor}>
-        <KanvaEditor />
-      </PersistGate>
-    </Provider>
+    <div style={{
+      marginBottom: "5rem"
+    }}>
+      <Provider store={kanvaStore}>
+        <PersistGate loading={null} persistor={kanvaPersistor}>
+          <KanvaEditor />
+        </PersistGate>
+      </Provider>
+    </div>
   );
 }

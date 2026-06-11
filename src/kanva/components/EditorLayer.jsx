@@ -14,7 +14,7 @@ import SelectableArrow from '../react-konva/SelectableArrow';
 import SelectableLine from '../react-konva/SelectableLine';
 import SelectablePolygon from '../react-konva/SelectablePolygon';
 
-const EditorLayer = ({ el, setElement, stageRef }) => {
+const EditorLayer = ({ el, setElement, stageRef, isSpacePressed }) => {
     const dispatch = useDispatch();
     const { selectedUniqueId } = useSelector((state) => state?.editor ?? {});
 
@@ -31,17 +31,8 @@ const EditorLayer = ({ el, setElement, stageRef }) => {
 
     if (!el) return null;
 
-    // Utility to convert possible formats of points to flat number array for Konva Line
-    // const flattenPoints = (points) => {
-    //     if (!points) return [];
-    //     if (!Array.isArray(points)) return [];
-    //     if (points.length === 0) return [];
-    //     if (typeof points[0] === "number") return points;
-    //     // if points are of form [[x,y],[x,y],...] or [ [x,y], x, y, ... ], flatten safely
-    //     return points.flatMap((p) => (Array.isArray(p) ? p : [p]).flat());
-    // };
-
     function handleOnes(id) {
+        if (isSpacePressed) return;
         dispatch(setSelectedUniqueId(id));
         dispatch(setPopUp(false));
     };
@@ -80,13 +71,15 @@ const EditorLayer = ({ el, setElement, stageRef }) => {
                 key={el?.id}
                 x={el?.x || 0}
                 y={el?.y || 0}
-                draggable
+                draggable={!isSpacePressed}
                 onClick={() => handleOnes(el?.id)}
                 onTap={() => handleOnes(el?.id)}
                 onDragMove={(e) => {
+                    if (isSpacePressed) return;
                     handleDragging(e);
                 }}
                 onDragEnd={(e) => {
+                    if (isSpacePressed) return;
                     handleDragEnd(e)
                 }}
             >
@@ -103,6 +96,7 @@ const EditorLayer = ({ el, setElement, stageRef }) => {
                             });
                         }}
                         stageRef={stageRef}
+                        isSpacePressed={isSpacePressed}
                     />
                 ))}
             </Group>
