@@ -16,6 +16,8 @@ import TentangAkun from './page/Dashboard/Akun/TentangAkun';
 import Billing from './page/Dashboard/Akun/Billing';
 import SambungkanAkun from './page/Dashboard/Bot/SambungkanAkun';
 import BotKnowledge from './page/Dashboard/Bot/BotKnowledge';
+import BuatInfografis from './page/Dashboard/Infografis/BuatInfografis';
+import HistoriInfografisPage from './page/Dashboard/Infografis/HistoriInfografisPage';
 
 //component
 import Shadow from './components/Floating/Shadow';
@@ -84,9 +86,18 @@ export default function App() {
           <Route path='workspace/histori' element={<HistoriWorkspace />} />
           <Route path='bot/sambungkanAkun' element={<SambungkanAkun />} />
           <Route path='bot/botKnowledge' element={<BotKnowledge />} />
+          <Route path='infografis/histori' element={<HistoriInfografisPage />} />
           <Route path='akun/tentangAkun' element={<TentangAkun />} />
           <Route path='akun/langgananDanBilling' element={<Billing />} />
         </Route>
+        <Route 
+          path='/dashboard/infografis/buatInfografis' 
+          element={
+            <ProtectedRoute>
+              <BuatInfografis />
+            </ProtectedRoute>
+          }
+        />
         <Route path='*' element={<Navigate to="/" replace />} />
       </Routes>
     </>

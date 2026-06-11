@@ -1,0 +1,225 @@
+/* KanvaEditor.module.css */
+
+.editorLayout {
+  display: grid;
+  grid-template-rows: 60px 1fr;
+  height: 100vh;
+  width: 100vw;
+  background-color: #0b0f14;
+  color: #d5d5d5;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: rgba(18, 26, 33, 0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 100;
+}
+
+.topLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.backBtn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  font-size: 14px;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 800;
+  color: #34B34A;
+  letter-spacing: 0.5px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toolbarGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.toolBtn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.toolBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.toolBtnActive {
+  background: rgba(52, 179, 74, 0.2) !important;
+  color: #34B34A !important;
+  border: 1px solid rgba(52, 179, 74, 0.3);
+}
+
+.zoomValue {
+  font-size: 13px;
+  font-weight: 500;
+  min-width: 44px;
+  text-align: center;
+}
+
+.penControlsDropdown {
+  position: absolute;
+  top: 50px;
+  right: 120px;
+  background: #18222c;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.penControlRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.penControlRow label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.penInputRange {
+  width: 100px;
+}
+
+.mainArea {
+  display: grid;
+  grid-template-columns: 72px 340px 1fr;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+}
+
+/* Vertical Sider for Nav Icons */
+.navBar {
+  background: rgba(18, 26, 33, 0.9);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  gap: 8px;
+}
+
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 10px;
+  gap: 4px;
+}
+
+.navItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.navItemActive {
+  background: rgba(52, 179, 74, 0.12) !important;
+  color: #34B34A !important;
+}
+
+.navItemIcon {
+  font-size: 20px;
+}
+
+/* Sidebar slide container */
+.sidebarContainer {
+  background: rgba(18, 26, 33, 0.6);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  height: 100%;
+  overflow-y: auto;
+  backdrop-filter: blur(12px);
+  transition: width 0.3s ease;
+}
+
+/* Canvas Viewport */
+.canvasArea {
+  background: #141b22;
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr 64px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.stageViewport {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.footerBar {
+  background: rgba(18, 26, 33, 0.8);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  z-index: 10;
+}

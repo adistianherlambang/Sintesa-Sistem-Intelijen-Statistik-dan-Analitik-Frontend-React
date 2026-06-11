@@ -408,7 +408,7 @@ function StepTwo(props) {
       </Wrapper>
 
       {/* ─── Wrapper Forecasting ─── */}
-      <Wrapper>
+      <Wrapper onClick={() => setForecastingEnabled(prev => !prev)}>
         <div className={styles.forecastingContainer}>
           <div className={styles.forecastingHeader}>
             <div>
@@ -422,6 +422,7 @@ function StepTwo(props) {
                 className={`${styles.sliderTrack} ${forecastingEnabled ? styles.sliderTrackActive : ""}`}
                 role="group"
                 aria-label="Pilih opsi forecasting"
+                onClick={() => setForecastingEnabled(prev => !prev)}
               >
                 {/* sliding pill indicator */}
                 <span
@@ -429,7 +430,7 @@ function StepTwo(props) {
                 />
                 <button
                   type="button"
-                  onClick={() => setForecastingEnabled(true)}
+                  onClick={(e) => { e.stopPropagation(); setForecastingEnabled(true) }}
                   className={`${styles.sliderBtn} ${forecastingEnabled ? styles.sliderBtnActiveYa : ""}`}
                   aria-pressed={forecastingEnabled}
                 >
@@ -437,7 +438,7 @@ function StepTwo(props) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setForecastingEnabled(false)}
+                  onClick={(e) => { e.stopPropagation(); setForecastingEnabled(false) }}
                   className={`${styles.sliderBtn} ${!forecastingEnabled ? styles.sliderBtnActiveTidak : ""}`}
                   aria-pressed={!forecastingEnabled}
                 >

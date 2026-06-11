@@ -284,6 +284,7 @@
   border-radius: 100px;
   padding: 4px;
   gap: 0;
+  cursor: pointer;
 }
 
 .sliderTrackActive {
