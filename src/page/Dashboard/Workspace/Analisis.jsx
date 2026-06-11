@@ -778,7 +778,6 @@ function StepThree(props) {
   const [loadingSummary, setLoadingSummary] = useState(false)
   const [aiSummary, setAiSummary] = useState(null)
   const [generatingBRS, setGeneratingBRS] = useState(false)
-  const [pdfPreviewBase64, setPdfPreviewBase64] = useState(null)
   const [savedHistoryId, setSavedHistoryId] = useState(null)
   const [error, setError] = useState("")
 
@@ -872,11 +871,10 @@ function StepThree(props) {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
-      setPdfPreviewBase64(res.data.pdfData);
       setSavedHistoryId(res.data.historyId);
     } catch (err) {
       console.error("Error generating/saving BRS report:", err.message);
-      setError("Gagal men-generate BRS & PDF: " + (err.response?.data?.message || err.message));
+      setError("Gagal men-generate BRS: " + (err.response?.data?.message || err.message));
     } finally {
       setGeneratingBRS(false);
     }
@@ -901,28 +899,6 @@ function StepThree(props) {
     } catch (err) {
       console.error("Gagal mengunduh IDML:", err.message);
       setError("Gagal mengunduh file IDML.");
-    }
-  };
-
-  const handleDownloadPDF = async () => {
-    if (!savedHistoryId) return;
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `${process.env.REACT_APP_URL_SERVER}/api/users/analysis/${savedHistoryId}/download/pdf`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: 'blob'
-        }
-      );
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = `perkembanganIHK_${uploadedDataset.context.city.replace(/\s+/g, '_')}_${uploadedDataset.context.period.replace(/\s+/g, '_')}.pdf`;
-      link.click();
-    } catch (err) {
-      console.error("Gagal mengunduh PDF:", err.message);
-      setError("Gagal mengunduh file PDF.");
     }
   };
   // Unified AI summary and BRS report generation flow for both sources
@@ -1063,7 +1039,7 @@ function StepThree(props) {
 
             {error && <p style={{ color: '#ef4444', marginTop: 16, fontSize: 14 }}>{error}</p>}
 
-            {!pdfPreviewBase64 && (
+            {!savedHistoryId && (
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
                 <button
                   onClick={handleSaveAndGenerate}
@@ -1109,84 +1085,48 @@ function StepThree(props) {
             )}
           </Wrapper>
 
-          {pdfPreviewBase64 && (
+          {savedHistoryId && (
             <Wrapper style={{ marginTop: '24px' }}>
-              <p className={styles.sectionTitle}>Pratinjau PDF Laporan BRS</p>
-              <div style={{
-                width: '100%',
-                height: '600px',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '8px',
-                overflow: 'hidden',
-                marginTop: '16px',
-                background: '#fff'
-              }}>
-                <iframe
-                  src={`data:application/pdf;base64,${pdfPreviewBase64}`}
-                  width="100%"
-                  height="100%"
-                  title="PDF Preview"
-                  style={{ border: 'none' }}
-                />
-              </div>
-              <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginTop: '24px' }}>
-                <button
-                  onClick={handleDownloadIDML}
-                  style={{
-                    background: 'transparent',
-                    border: '1px solid #34B34A',
-                    color: '#34B34A',
-                    padding: '12px 24px',
-                    borderRadius: '8px',
-                    fontSize: 14,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.background = 'rgba(52, 179, 74, 0.05)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.background = 'transparent';
-                  }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                  Unduh IDML
-                </button>
-                <button
-                  onClick={handleDownloadPDF}
-                  style={{
-                    background: '#34B34A',
-                    color: '#fff',
-                    padding: '12px 24px',
-                    borderRadius: '8px',
-                    fontSize: 14,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    border: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    boxShadow: '0 4px 12px rgba(52, 179, 74, 0.2)',
-                    transition: 'background 0.2s'
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.background = '#2da140'}
-                  onMouseOut={(e) => e.currentTarget.style.background = '#34B34A'}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                  Unduh PDF
-                </button>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '30px 20px', textAlign: 'center', gap: '16px' }}>
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#34B34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+                <p style={{ fontSize: 22, color: '#fff', fontWeight: 600, margin: 0 }}>
+                  Dokumen BRS IDML Berhasil Digenerate!
+                </p>
+                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: 0, maxWidth: '480px' }}>
+                  Laporan Berita Resmi Statistik (BRS) untuk Kota {uploadedDataset?.context?.city} periode {uploadedDataset?.context?.period} telah berhasil diperbarui menggunakan data Anda dan disimpan di riwayat analisis.
+                </p>
+                <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginTop: '12px' }}>
+                  <button
+                    onClick={handleDownloadIDML}
+                    style={{
+                      background: '#34B34A',
+                      border: 'none',
+                      color: '#fff',
+                      padding: '12px 32px',
+                      borderRadius: '8px',
+                      fontSize: 15,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 14px rgba(52, 179, 74, 0.4)',
+                      transition: 'background 0.2s'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.background = '#2da140'}
+                    onMouseOut={(e) => e.currentTarget.style.background = '#34B34A'}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Unduh File IDML
+                  </button>
+                </div>
               </div>
             </Wrapper>
           )}

@@ -51,27 +51,6 @@ export default function HitoriAnalisis({ onLoad }) {
     }
   };
 
-  const handleDownloadPDF = async (id, title) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `${process.env.REACT_APP_URL_SERVER}/api/users/analysis/${id}/download/pdf`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: 'blob'
-        }
-      );
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
-      link.click();
-    } catch (err) {
-      console.error("Gagal mengunduh PDF:", err.message);
-      alert("Gagal mengunduh file PDF.");
-    }
-  };
-
   const formatTanggal = (dateStr) => {
     if (!dateStr) return "-";
     const d = new Date(dateStr);
@@ -102,7 +81,7 @@ export default function HitoriAnalisis({ onLoad }) {
                 <th>Judul</th>
                 <th>Periode</th>
                 <th>Tanggal Dibuat</th>
-                <th style={{ textAlign: "center", width: "180px" }}>Aksi</th>
+                <th style={{ textAlign: "center", width: "100px" }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -124,31 +103,12 @@ export default function HitoriAnalisis({ onLoad }) {
                         fontSize: '12px',
                         fontWeight: 600,
                         cursor: 'pointer',
-                        marginRight: '8px',
                         transition: 'background 0.2s'
                       }}
                       onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(52,179,74,0.1)'; }}
                       onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; }}
                     >
                       IDML
-                    </button>
-                    <button
-                      onClick={() => handleDownloadPDF(item._id, item.title)}
-                      style={{
-                        background: '#34B34A',
-                        border: 'none',
-                        color: '#fff',
-                        padding: '6px 12px',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        transition: 'background 0.2s'
-                      }}
-                      onMouseOver={(e) => { e.currentTarget.style.background = '#2da140'; }}
-                      onMouseOut={(e) => { e.currentTarget.style.background = '#34B34A'; }}
-                    >
-                      PDF
                     </button>
                   </td>
                 </tr>
