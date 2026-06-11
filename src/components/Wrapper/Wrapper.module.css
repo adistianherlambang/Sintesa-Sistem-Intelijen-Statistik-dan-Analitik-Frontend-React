@@ -12,7 +12,11 @@
   cursor: pointer;
 }
 
-.container:hover {
+.container:hover:not(.noHover) {
   background-color: rgba(255, 255, 255, 0.05);
   border: solid rgba(255, 255, 255, 0.5) 1px;
+}
+
+.noHover {
+  cursor: default;
 }

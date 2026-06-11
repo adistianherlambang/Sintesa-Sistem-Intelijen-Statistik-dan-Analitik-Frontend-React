@@ -87,17 +87,10 @@ export default function App() {
           <Route path='bot/sambungkanAkun' element={<SambungkanAkun />} />
           <Route path='bot/botKnowledge' element={<BotKnowledge />} />
           <Route path='infografis/histori' element={<HistoriInfografisPage />} />
+          <Route path='infografis/buatInfografis' element={<BuatInfografis />} />
           <Route path='akun/tentangAkun' element={<TentangAkun />} />
           <Route path='akun/langgananDanBilling' element={<Billing />} />
         </Route>
-        <Route 
-          path='/dashboard/infografis/buatInfografis' 
-          element={
-            <ProtectedRoute>
-              <BuatInfografis />
-            </ProtectedRoute>
-          }
-        />
         <Route path='*' element={<Navigate to="/" replace />} />
       </Routes>
     </>

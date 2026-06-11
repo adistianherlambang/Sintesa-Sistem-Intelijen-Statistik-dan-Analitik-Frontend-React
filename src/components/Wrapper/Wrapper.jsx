@@ -1,10 +1,25 @@
 import React from 'react'
 import styles from "./Wrapper.module.css"
 
-export default function Wrapper({ width, height, padding, children, onClick }) {
+export default function Wrapper({ width, height, padding, children, onClick, style, hoverable }) {
+  const isClickable = typeof onClick === 'function';
+  const shouldHover = hoverable !== undefined ? hoverable : isClickable;
+
   return (
-    <div style={{ width: width, height: height, padding: padding ? padding : "16px" }} onClick={onClick} className={styles.container}>{children}</div>
-  )
+    <div
+      style={{
+        width: width,
+        height: height,
+        padding: padding ? padding : "16px",
+        cursor: isClickable ? 'pointer' : 'default',
+        ...style
+      }}
+      onClick={onClick}
+      className={`${styles.container} ${shouldHover ? '' : styles.noHover}`}
+    >
+      {children}
+    </div>
+  );
 }
 
 //width & height isi fill atau angka spesifik misal width={12rem} atau width={fill}

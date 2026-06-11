@@ -13,7 +13,7 @@ import {
     setPath
 } from './store/editorReducer';
 
-import { IoDuplicateOutline, IoSaveOutline, IoArrowBack } from "react-icons/io5";
+import { IoDuplicateOutline, IoSaveOutline } from "react-icons/io5";
 import { HiOutlinePencil } from "react-icons/hi2";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { SlReload } from "react-icons/sl";
@@ -33,6 +33,7 @@ import Share from './components/Share';
 import UndoRedo from './components/UndoRedo';
 import AddPage from './components/AddPage';
 import EditorColorPicker from './components/EditorColorPicker';
+import Wrapper from '../components/Wrapper/Wrapper';
 
 import styles from './KanvaEditor.module.css';
 
@@ -239,264 +240,266 @@ export default function KanvaEditor() {
     ];
 
     return (
-        <div className={styles.editorLayout}>
-            {/* Top Toolbar */}
-            <div className={styles.topBar}>
-                <div className={styles.topLeft}>
-                    <button
-                        className={styles.backBtn}
-                        onClick={() => navigate('/dashboard/infografis/histori')}
-                    >
-                        <IoArrowBack size={18} />
-                        <span>Kembali</span>
-                    </button>
-                    <span className={styles.logo}>KANVA</span>
-                </div>
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
+            {/* Top Toolbar - wrapped in Wrapper */}
+            <div>
+                <Wrapper width="100%" height="auto" padding="8px 20px" hoverable={false}>
+                    <div className={styles.toolbar} style={{ width: '100%', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <div className={styles.toolbarGroup}>
+                                <UndoRedo pushHistory={pushHistory} />
+                            </div>
 
-                <div className={styles.toolbar}>
-                    <div className={styles.toolbarGroup}>
-                        <UndoRedo pushHistory={pushHistory} />
-                    </div>
+                            <div className={styles.toolbarGroup}>
+                                <EditorColorPicker setPagesWithHistory={setPagesWithHistory} />
+                            </div>
 
-                    <div className={styles.toolbarGroup}>
-                        <EditorColorPicker setPagesWithHistory={setPagesWithHistory} />
-                    </div>
-
-                    <div className={styles.toolbarGroup}>
-                        {/* Duplicate */}
-                        <button
-                            className={styles.toolBtn}
-                            onClick={duplicateSelected}
-                            disabled={!selectedUniqueId}
-                            title="Duplikat Elemen"
-                        >
-                            <IoDuplicateOutline size={18} />
-                        </button>
-
-                        {/* Delete */}
-                        <button
-                            className={styles.toolBtn}
-                            onClick={deleteSelected}
-                            disabled={!selectedUniqueId}
-                            style={{ color: selectedUniqueId ? '#ef4444' : 'rgba(255, 255, 255, 0.3)' }}
-                            title="Hapus Elemen"
-                        >
-                            <RiDeleteBin5Line size={18} />
-                        </button>
-                    </div>
-
-                    {/* Zoom controls */}
-                    <div className={styles.toolbarGroup}>
-                        <button
-                            className={styles.toolBtn}
-                            onClick={() => dispatch(setZoom(Math.max(0.2, zoom - 0.1)))}
-                            title="Perkecil"
-                        >
-                            <GoZoomOut size={16} />
-                        </button>
-                        <span className={styles.zoomValue}>{Math.round(zoom * 100)}%</span>
-                        <button
-                            className={styles.toolBtn}
-                            onClick={() => dispatch(setZoom(Math.min(3, zoom + 0.1)))}
-                            title="Perbesar"
-                        >
-                            <GoZoomIn size={16} />
-                        </button>
-                        <button
-                            className={styles.toolBtn}
-                            onClick={() => dispatch(setZoom(1))}
-                            title="Reset Zoom"
-                        >
-                            <SlReload size={16} />
-                        </button>
-                    </div>
-
-                    {/* Annotation / Pen Tool */}
-                    <div className={styles.toolbarGroup} style={{ position: 'relative' }}>
-                        <button
-                            className={`${styles.toolBtn} ${isPenTool ? styles.toolBtnActive : ''}`}
-                            onClick={() => {
-                                setIsPenTool(!isPenTool);
-                                if (!isPenTool) setShowPenDropdown(true);
-                                else setShowPenDropdown(false);
-                            }}
-                            title="Alat Gambar (Pen)"
-                        >
-                            <HiOutlinePencil size={18} />
-                        </button>
-
-                        {isPenTool && showPenDropdown && (
-                            <div className={styles.penControlsDropdown}>
-                                <div className={styles.penControlRow}>
-                                    <label>Warna</label>
-                                    <input
-                                        type="color"
-                                        value={penColor}
-                                        onChange={(e) => setPenColor(e.target.value)}
-                                    />
-                                </div>
-                                <div className={styles.penControlRow}>
-                                    <label>Ukuran ({penSize}px)</label>
-                                    <input
-                                        type="range"
-                                        min="1"
-                                        max="20"
-                                        value={penSize}
-                                        onChange={(e) => setPenSize(Number(e.target.value))}
-                                        className={styles.penInputRange}
-                                    />
-                                </div>
-                                <div className={styles.penControlRow}>
-                                    <label>Opasitas ({Math.round(penOpacity * 100)}%)</label>
-                                    <input
-                                        type="range"
-                                        min="0.1"
-                                        max="1"
-                                        step="0.1"
-                                        value={penOpacity}
-                                        onChange={(e) => setPenOpacity(Number(e.target.value))}
-                                        className={styles.penInputRange}
-                                    />
-                                </div>
-                                <div className={styles.penControlRow} style={{ gap: 4, marginTop: 4 }}>
-                                    <button
-                                        className={`${styles.backBtn} ${lineCap === 'round' ? styles.toolBtnActive : ''}`}
-                                        style={{ padding: '2px 8px', fontSize: 11 }}
-                                        onClick={() => setLineCap("round")}
-                                    >
-                                        Bulat
-                                    </button>
-                                    <button
-                                        className={`${styles.backBtn} ${lineCap === 'square' ? styles.toolBtnActive : ''}`}
-                                        style={{ padding: '2px 8px', fontSize: 11 }}
-                                        onClick={() => setLineCap("square")}
-                                    >
-                                        Kotak
-                                    </button>
-                                </div>
+                            <div className={styles.toolbarGroup}>
+                                {/* Duplicate */}
                                 <button
-                                    className={styles.backBtn}
-                                    style={{ width: '100%', padding: '4px', fontSize: 12, color: '#ef4444', borderColor: '#ef4444' }}
-                                    onClick={clearAnnotations}
+                                    className={styles.toolBtn}
+                                    onClick={duplicateSelected}
+                                    disabled={!selectedUniqueId}
+                                    title="Duplikat Elemen"
                                 >
-                                    Hapus Coretan
+                                    <IoDuplicateOutline size={18} />
+                                </button>
+
+                                {/* Delete */}
+                                <button
+                                    className={styles.toolBtn}
+                                    onClick={deleteSelected}
+                                    disabled={!selectedUniqueId}
+                                    style={{ color: selectedUniqueId ? '#ef4444' : 'rgba(255, 255, 255, 0.3)' }}
+                                    title="Hapus Elemen"
+                                >
+                                    <RiDeleteBin5Line size={18} />
                                 </button>
                             </div>
-                        )}
-                    </div>
+                        </div>
 
-                    <div className={styles.toolbarGroup}>
-                        <Share stageRef={stageRef} />
-                    </div>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            {/* Zoom controls */}
+                            <div className={styles.toolbarGroup}>
+                                <button
+                                    className={styles.toolBtn}
+                                    onClick={() => dispatch(setZoom(Math.max(0.2, zoom - 0.1)))}
+                                    title="Perkecil"
+                                >
+                                    <GoZoomOut size={16} />
+                                </button>
+                                <span className={styles.zoomValue}>{Math.round(zoom * 100)}%</span>
+                                <button
+                                    className={styles.toolBtn}
+                                    onClick={() => dispatch(setZoom(Math.min(3, zoom + 0.1)))}
+                                    title="Perbesar"
+                                >
+                                    <GoZoomIn size={16} />
+                                </button>
+                                <button
+                                    className={styles.toolBtn}
+                                    onClick={() => dispatch(setZoom(1))}
+                                    title="Reset Zoom"
+                                >
+                                    <SlReload size={16} />
+                                </button>
+                            </div>
 
-                    <button
-                        className={styles.backBtn}
-                        style={{ background: '#34B34A', borderColor: '#2da140', color: '#fff', fontWeight: 600 }}
-                        onClick={saveTemplate}
-                    >
-                        <IoSaveOutline size={16} />
-                        <span>Simpan</span>
-                    </button>
-                </div>
+                            {/* Annotation / Pen Tool */}
+                            <div className={styles.toolbarGroup} style={{ position: 'relative' }}>
+                                <button
+                                    className={`${styles.toolBtn} ${isPenTool ? styles.toolBtnActive : ''}`}
+                                    onClick={() => {
+                                        setIsPenTool(!isPenTool);
+                                        if (!isPenTool) setShowPenDropdown(true);
+                                        else setShowPenDropdown(false);
+                                    }}
+                                    title="Alat Gambar (Pen)"
+                                >
+                                    <HiOutlinePencil size={18} />
+                                </button>
+
+                                {isPenTool && showPenDropdown && (
+                                    <div className={styles.penControlsDropdown}>
+                                        <div className={styles.penControlRow}>
+                                            <label>Warna</label>
+                                            <input
+                                                type="color"
+                                                value={penColor}
+                                                onChange={(e) => setPenColor(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className={styles.penControlRow}>
+                                            <label>Ukuran ({penSize}px)</label>
+                                            <input
+                                                type="range"
+                                                min="1"
+                                                max="20"
+                                                value={penSize}
+                                                onChange={(e) => setPenSize(Number(e.target.value))}
+                                                className={styles.penInputRange}
+                                            />
+                                        </div>
+                                        <div className={styles.penControlRow}>
+                                            <label>Opasitas ({Math.round(penOpacity * 100)}%)</label>
+                                            <input
+                                                type="range"
+                                                min="0.1"
+                                                max="1"
+                                                step="0.1"
+                                                value={penOpacity}
+                                                onChange={(e) => setPenOpacity(Number(e.target.value))}
+                                                className={styles.penInputRange}
+                                            />
+                                        </div>
+                                        <div className={styles.penControlRow} style={{ gap: 4, marginTop: 4 }}>
+                                            <button
+                                                className={`${styles.backBtn} ${lineCap === 'round' ? styles.toolBtnActive : ''}`}
+                                                style={{ padding: '2px 8px', fontSize: 11 }}
+                                                onClick={() => setLineCap("round")}
+                                            >
+                                                Bulat
+                                            </button>
+                                            <button
+                                                className={`${styles.backBtn} ${lineCap === 'square' ? styles.toolBtnActive : ''}`}
+                                                style={{ padding: '2px 8px', fontSize: 11 }}
+                                                onClick={() => setLineCap("square")}
+                                            >
+                                                Kotak
+                                            </button>
+                                        </div>
+                                        <button
+                                            className={styles.backBtn}
+                                            style={{ width: '100%', padding: '4px', fontSize: 12, color: '#ef4444', borderColor: '#ef4444' }}
+                                            onClick={clearAnnotations}
+                                        >
+                                            Hapus Coretan
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className={styles.toolbarGroup}>
+                                <Share stageRef={stageRef} />
+                            </div>
+
+                            <button
+                                className={styles.backBtn}
+                                style={{ background: '#34B34A', borderColor: '#2da140', color: '#fff', fontWeight: 600 }}
+                                onClick={saveTemplate}
+                            >
+                                <IoSaveOutline size={16} />
+                                <span>Simpan</span>
+                            </button>
+                        </div>
+                    </div>
+                </Wrapper>
             </div>
 
-            {/* Main Editor Grid */}
-            <div className={styles.mainArea}>
-                {/* Left Side Icons Panel */}
-                <div className={styles.navBar}>
-                    {sidebarTabs.map((tab) => {
-                        const isActive = path === tab.name;
-                        return (
-                            <div
-                                key={tab.name}
-                                className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}
-                                onClick={() => handleNavClick(tab.name)}
-                            >
-                                <span className={styles.navItemIcon}>{tab.icon}</span>
-                                <span>{tab.label}</span>
-                            </div>
-                        );
-                    })}
-                </div>
+            {/* Left Nav Menu and Canvas split */}
+            <div style={{ display: 'flex', gap: '16px', marginTop: '16px', height: 'calc(100vh - 200px)' }}>
+                {/* Left side Nav Menu Panel - wrapped in Wrapper */}
+                <Wrapper width="auto" height="100%" padding="0" hoverable={false}>
+                    <div style={{ display: 'flex', height: '100%' }}>
+                        {/* Left Side Icons Panel */}
+                        <div className={styles.navBar}>
+                            {sidebarTabs.map((tab) => {
+                                const isActive = path === tab.name;
+                                return (
+                                    <div
+                                        key={tab.name}
+                                        className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}
+                                        onClick={() => handleNavClick(tab.name)}
+                                    >
+                                        <span className={styles.navItemIcon}>{tab.icon}</span>
+                                        <span>{tab.label}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
 
-                {/* Sub Panel Content Sidebar */}
-                <div className={styles.sidebarContainer}>
-                    <Sidebar
-                        selectedEl={selectedEl}
-                        setElement={setElement}
-                        activePage={activePage}
-                        setPagesWithHistory={setPagesWithHistory}
-                        openMiniFor={openMiniFor}
-                        stageRef={stageRef}
-                    />
-                </div>
+                        {/* Sub Panel Content Sidebar */}
+                        <div className={styles.sidebarContainer}>
+                            <Sidebar
+                                selectedEl={selectedEl}
+                                setElement={setElement}
+                                activePage={activePage}
+                                setPagesWithHistory={setPagesWithHistory}
+                                openMiniFor={openMiniFor}
+                                stageRef={stageRef}
+                            />
+                        </div>
+                    </div>
+                </Wrapper>
 
-                {/* Canvas Area */}
-                <div className={styles.canvasArea}>
-                    <div ref={containerRef} className={styles.stageViewport}>
-                        <Stage
-                            ref={stageRef}
-                            key={`${canvasSize?.w}x${canvasSize?.h}`}
-                            width={canvasSize?.w}
-                            height={canvasSize?.h}
-                            scale={{ x: zoom, y: zoom }}
-                            x={(containerSize?.w - canvasSize?.w * zoom) / 2}
-                            y={(containerSize?.h - canvasSize?.h * zoom) / 2}
-                            style={{
-                                background: activePage?.background || "#ffffff",
-                                boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-                            }}
-                            onMouseDown={(e) => {
-                                if (e.target === e.target.getStage()) {
-                                    dispatch(setSelectedUniqueId(null));
-                                    dispatch(setPopUp(false));
-                                }
-                                handleMouseDown(e);
-                            }}
-                            onMouseMove={handleMouseMove}
-                            onMouseUp={handleMouseUp}
-                        >
-                            <Layer>
-                                {(activePage?.children || []).map((el) => {
-                                    if (!el) return null;
-                                    let element = { ...el };
-
-                                    if (isPenTool) {
-                                        element['locked'] = true;
-                                    } else {
-                                        element['locked'] = el?.locked || false;
+                {/* Canvas Area Panel - wrapped in Wrapper */}
+                <Wrapper width="100%" height="100%" padding="0" hoverable={false}>
+                    <div className={styles.canvasArea} style={{ height: '100%' }}>
+                        <div ref={containerRef} className={styles.stageViewport}>
+                            <Stage
+                                ref={stageRef}
+                                key={`${canvasSize?.w}x${canvasSize?.h}`}
+                                width={canvasSize?.w}
+                                height={canvasSize?.h}
+                                scale={{ x: zoom, y: zoom }}
+                                x={(containerSize?.w - canvasSize?.w * zoom) / 2}
+                                y={(containerSize?.h - canvasSize?.h * zoom) / 2}
+                                style={{
+                                    background: activePage?.background || "#ffffff",
+                                    boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+                                }}
+                                onMouseDown={(e) => {
+                                    if (e.target === e.target.getStage()) {
+                                        dispatch(setSelectedUniqueId(null));
+                                        dispatch(setPopUp(false));
                                     }
+                                    handleMouseDown(e);
+                                }}
+                                onMouseMove={handleMouseMove}
+                                onMouseUp={handleMouseUp}
+                            >
+                                <Layer>
+                                    {(activePage?.children || []).map((el) => {
+                                        if (!el) return null;
+                                        let element = { ...el };
 
-                                    return (
-                                        <EditorLayer
-                                            key={element.id}
-                                            el={element}
-                                            setElement={setElement}
-                                            stageRef={stageRef}
+                                        if (isPenTool) {
+                                            element['locked'] = true;
+                                        } else {
+                                            element['locked'] = el?.locked || false;
+                                        }
+
+                                        return (
+                                            <EditorLayer
+                                                key={element.id}
+                                                el={element}
+                                                setElement={setElement}
+                                                stageRef={stageRef}
+                                            />
+                                        );
+                                    })}
+                                    {lines?.map((line, i) => (
+                                        <Line
+                                            key={i}
+                                            points={line?.points}
+                                            stroke={line?.color}
+                                            strokeWidth={line?.size}
+                                            opacity={line?.opacity}
+                                            tension={0.5}
+                                            lineCap={line?.cap}
+                                            lineJoin="round"
                                         />
-                                    );
-                                })}
-                                {lines?.map((line, i) => (
-                                    <Line
-                                        key={i}
-                                        points={line?.points}
-                                        stroke={line?.color}
-                                        strokeWidth={line?.size}
-                                        opacity={line?.opacity}
-                                        tension={0.5}
-                                        lineCap={line?.cap}
-                                        lineJoin="round"
-                                    />
-                                ))}
-                            </Layer>
-                        </Stage>
-                    </div>
+                                    ))}
+                                </Layer>
+                            </Stage>
+                        </div>
 
-                    {/* Bottom Page Bar */}
-                    <div className={styles.footerBar}>
-                        <AddPage setPagesWithHistory={setPagesWithHistory} />
+                        {/* Bottom Page Bar */}
+                        <div className={styles.footerBar}>
+                            <AddPage setPagesWithHistory={setPagesWithHistory} />
+                        </div>
                     </div>
-                </div>
+                </Wrapper>
             </div>
         </div>
     );
