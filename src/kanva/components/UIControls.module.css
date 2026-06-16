@@ -57,19 +57,18 @@
   appearance: none;
   width: 34px;
   height: 34px;
-  background-color: transparent;
-  border: none;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: solid rgba(255, 255, 255, 0.2) 1px;
   cursor: pointer;
   padding: 0;
+  border-radius: 4px;
 }
 
 .colorInput::-webkit-color-swatch {
-  border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .colorInput::-moz-color-swatch {
-  border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -111,11 +110,11 @@
   border-radius: 50%;
 }
 
-.switch input:checked + .sliderRound {
+.switch input:checked+.sliderRound {
   background-color: #34B34A;
 }
 
-.switch input:checked + .sliderRound:before {
+.switch input:checked+.sliderRound:before {
   transform: translateX(16px);
 }
 
@@ -249,10 +248,14 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.skeletonInput, .skeletonButton, .skeletonAvatar {
+.skeletonInput,
+.skeletonButton,
+.skeletonAvatar {
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 37%, rgba(255, 255, 255, 0.05) 63%);
   background-size: 400% 100%;
   animation: skeleton-loading 1.4s ease infinite;
@@ -276,8 +279,13 @@
 }
 
 @keyframes skeleton-loading {
-  0% { background-position: 100% 50%; }
-  100% { background-position: 0 50%; }
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0 50%;
+  }
 }
 
 .empty {
