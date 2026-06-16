@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import jsPDF from "jspdf";
 import { BsDownload } from "react-icons/bs";
 import { FaRegFilePdf } from "react-icons/fa6";
@@ -9,6 +9,8 @@ import styles from './Share.module.css';
 export default function Share({ stageRef }) {
     const { editorPages, activeIndex } = useSelector((state) => state?.editor ?? {});
     const [open, setOpen] = useState(false);
+    const [dropPos, setDropPos] = useState({ top: 0, right: 0 });
+    const btnRef = useRef(null);
 
     const getFileName = (ext) =>
         `page-${(editorPages[activeIndex] || {})?.id || activeIndex}.${ext}`;
@@ -42,15 +44,46 @@ export default function Share({ stageRef }) {
         setOpen(false);
     };
 
+    const handleToggle = () => {
+        if (!open && btnRef.current) {
+            const rect = btnRef.current.getBoundingClientRect();
+            setDropPos({
+                top: rect.bottom + 6,
+                right: window.innerWidth - rect.right,
+            });
+        }
+        setOpen(o => !o);
+    };
+
+    // Close on scroll or resize
+    useEffect(() => {
+        if (!open) return;
+        const close = () => setOpen(false);
+        window.addEventListener("scroll", close, true);
+        window.addEventListener("resize", close);
+        return () => {
+            window.removeEventListener("scroll", close, true);
+            window.removeEventListener("resize", close);
+        };
+    }, [open]);
+
     return (
         <div className={styles.wrapper}>
-            <button className={styles.triggerBtn} onClick={() => setOpen(o => !o)} title="Download">
+            <button ref={btnRef} className={styles.triggerBtn} onClick={handleToggle} title="Download">
                 <BsDownload size={16} />
             </button>
             {open && (
                 <>
                     <div className={styles.backdrop} onClick={() => setOpen(false)} />
-                    <div className={styles.dropdown}>
+                    <div
+                        className={styles.dropdown}
+                        style={{
+                            position: 'fixed',
+                            top: dropPos.top,
+                            right: dropPos.right,
+                            zIndex: 99999,
+                        }}
+                    >
                         <p className={styles.dropTitle}>Export Options</p>
                         <button className={styles.dropItem} onClick={exportPNG}>
                             <TbPhotoDown size={16} /> Download PNG
