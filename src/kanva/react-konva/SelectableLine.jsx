@@ -81,10 +81,10 @@ function SelectableLineComponent({ shape, selected, onSelect, onChange }) {
                 draggable={!shape?.locked}
                 visible={shape?.visible !== false}
                 onMouseDown={(e) => {
-                    if (onSelect) onSelect();
+                    if (onSelect) onSelect(e);
                 }}
                 onTap={(e) => {
-                    if (onSelect) onSelect();
+                    if (onSelect) onSelect(e);
                 }}
                 onDragMove={(e) => {
                     if (shape?.locked) return;

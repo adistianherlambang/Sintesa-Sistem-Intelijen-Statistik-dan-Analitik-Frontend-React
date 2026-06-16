@@ -18,7 +18,6 @@ const EditorLayer = ({ el, setElement, stageRef, isSpacePressed }) => {
     const dispatch = useDispatch();
     const { selectedUniqueId } = useSelector((state) => state?.editor ?? {});
 
-
     const { handleDragging, handleDragEnd } = useKonvaSnapping({
         snapRange: 5,
         guidelineColor: "blue",
@@ -31,39 +30,48 @@ const EditorLayer = ({ el, setElement, stageRef, isSpacePressed }) => {
 
     if (!el) return null;
 
-    function handleOnes(id) {
+    const isSelected = Array.isArray(selectedUniqueId)
+        ? selectedUniqueId.includes(el?.id)
+        : selectedUniqueId === el?.id;
+
+    function handleOnes(id, e) {
         if (isSpacePressed) return;
-        dispatch(setSelectedUniqueId(id));
+        const isShift = e?.evt?.shiftKey || false;
+
+        if (isShift) {
+            const currentSelection = selectedUniqueId;
+            let nextSelection;
+            if (!currentSelection) {
+                nextSelection = [id];
+            } else if (Array.isArray(currentSelection)) {
+                if (currentSelection.includes(id)) {
+                    nextSelection = currentSelection.filter((x) => x !== id);
+                } else {
+                    nextSelection = [...currentSelection, id];
+                }
+            } else {
+                if (currentSelection === id) {
+                    nextSelection = null;
+                } else {
+                    nextSelection = [currentSelection, id];
+                }
+            }
+            if (Array.isArray(nextSelection) && nextSelection.length === 0) {
+                nextSelection = null;
+            }
+            dispatch(setSelectedUniqueId(nextSelection));
+        } else {
+            dispatch(setSelectedUniqueId(id));
+        }
         dispatch(setPopUp(false));
     };
 
     if (el?.type === "text") {
-        return <SelectableText key={el?.id} shape={el} selected={selectedUniqueId === el?.id} stageRef={stageRef}
-            onSelect={() => handleOnes(el?.id)}
+        return <SelectableText key={el?.id} shape={el} selected={isSelected} stageRef={stageRef}
+            onSelect={(e) => handleOnes(el?.id, e)}
             onChange={(next) => setElement(el?.id, () => next)}
         />;
     }
-
-
-
-    // if (el.type === "stroke") {
-    //     const pts = flattenPoints(el.points);
-    //     return (
-    //         <Line
-    //             key={el.id}
-    //             points={pts}
-    //             stroke={el.strokeColor || "#000"}
-    //             strokeWidth={el.strokeWidth || el.strokeWidth === 0 ? el.strokeWidth : el.strokeWidth || 2}
-    //             lineCap={el.line || "round"}
-    //             lineJoin="round"
-    //             tension={0.2}
-    //             opacity={el.opacity || 1}
-    //             onMouseDown={() => handleOnes(el.id)}
-    //             onTap={() => handleOnes(el.id)}
-    //             draggable={false}
-    //         />
-    //     );
-    // }
 
     if (el?.type === "banner") {
         return (
@@ -72,8 +80,8 @@ const EditorLayer = ({ el, setElement, stageRef, isSpacePressed }) => {
                 x={el?.x || 0}
                 y={el?.y || 0}
                 draggable={!isSpacePressed}
-                onClick={() => handleOnes(el?.id)}
-                onTap={() => handleOnes(el?.id)}
+                onClick={(e) => handleOnes(el?.id, e)}
+                onTap={(e) => handleOnes(el?.id, e)}
                 onDragMove={(e) => {
                     if (isSpacePressed) return;
                     handleDragging(e);
@@ -108,8 +116,8 @@ const EditorLayer = ({ el, setElement, stageRef, isSpacePressed }) => {
             <SelectableIcon
                 key={el?.id}
                 shape={el}
-                selected={selectedUniqueId === el?.id}
-                onSelect={() => handleOnes(el?.id)}
+                selected={isSelected}
+                onSelect={(e) => handleOnes(el?.id, e)}
                 onChange={(next) => setElement(el?.id, () => next)}
             />
         );
@@ -118,36 +126,36 @@ const EditorLayer = ({ el, setElement, stageRef, isSpacePressed }) => {
         return <SelectableImage
             key={el?.id}
             shape={el}
-            selected={selectedUniqueId === el?.id}
-            onSelect={() => handleOnes(el?.id)}
+            selected={isSelected}
+            onSelect={(e) => handleOnes(el?.id, e)}
             onChange={(next) => setElement(el?.id, () => next)}
         />;
     }
 
     if (el?.type === "rect") {
-        return <SelectableRect key={el?.id} shape={el} selected={selectedUniqueId === el?.id}
-            onSelect={() => handleOnes(el?.id)}
+        return <SelectableRect key={el?.id} shape={el} selected={isSelected}
+            onSelect={(e) => handleOnes(el?.id, e)}
             onChange={(next) => setElement(el?.id, () => next)}
         />;
     }
 
     if (el?.type === "circle") {
-        return <SelectableCircul key={el?.id} shape={el} selected={selectedUniqueId === el?.id}
-            onSelect={() => handleOnes(el?.id)}
+        return <SelectableCircul key={el?.id} shape={el} selected={isSelected}
+            onSelect={(e) => handleOnes(el?.id, e)}
             onChange={(next) => setElement(el?.id, () => next)}
         />;
     }
 
     if (el?.type === "triangle") {
-        return <SelectableTriangle key={el?.id} shape={el} selected={selectedUniqueId === el?.id}
-            onSelect={() => handleOnes(el?.id)}
+        return <SelectableTriangle key={el?.id} shape={el} selected={isSelected}
+            onSelect={(e) => handleOnes(el?.id, e)}
             onChange={(next) => setElement(el?.id, () => next)}
         />;
     }
 
     if (el?.type === "star") {
-        return <SelectableStar key={el?.id} shape={el} selected={selectedUniqueId === el?.id}
-            onSelect={() => handleOnes(el?.id)}
+        return <SelectableStar key={el?.id} shape={el} selected={isSelected}
+            onSelect={(e) => handleOnes(el?.id, e)}
             onChange={(next) => setElement(el?.id, () => next)}
         />;
     }
@@ -158,8 +166,8 @@ const EditorLayer = ({ el, setElement, stageRef, isSpacePressed }) => {
             <SelectableArrow
                 key={el?.id}
                 shape={el}
-                selected={selectedUniqueId === el?.id}
-                onSelect={() => handleOnes(el?.id)}
+                selected={isSelected}
+                onSelect={(e) => handleOnes(el?.id, e)}
                 onChange={(next) => setElement(el?.id, () => next)}
             />
         );
@@ -170,8 +178,8 @@ const EditorLayer = ({ el, setElement, stageRef, isSpacePressed }) => {
             <SelectableLine
                 key={el?.id}
                 shape={el}
-                selected={selectedUniqueId === el?.id}
-                onSelect={() => handleOnes(el?.id)}
+                selected={isSelected}
+                onSelect={(e) => handleOnes(el?.id, e)}
                 onChange={(next) => setElement(el?.id, () => next)}
             />
         );
@@ -182,14 +190,12 @@ const EditorLayer = ({ el, setElement, stageRef, isSpacePressed }) => {
             <SelectablePolygon
                 key={el?.id}
                 shape={el}
-                selected={selectedUniqueId === el?.id}
-                onSelect={() => handleOnes(el?.id)}
+                selected={isSelected}
+                onSelect={(e) => handleOnes(el?.id, e)}
                 onChange={(next) => setElement(el?.id, () => next)}
             />
         );
     }
-
-
 
     return null;
 }

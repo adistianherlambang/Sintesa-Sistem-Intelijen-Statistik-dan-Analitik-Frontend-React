@@ -56,13 +56,39 @@ export default function Layer({ elements = [], onToggleLock, onToggleVisibility,
             {reversedIndices.map((origIndex) => {
                 const el = elements[origIndex];
                 if (!el) return null;
-                const isSelected = selectedUniqueId === el.id;
+                const isSelected = Array.isArray(selectedUniqueId) ? selectedUniqueId.includes(el.id) : selectedUniqueId === el.id;
 
                 return (
                     <div
                         key={el.id}
                         className={`${styles.layerItem} ${isSelected ? styles.selected : ""}`}
-                        onClick={() => dispatch(setSelectedUniqueId(el.id))}
+                        onClick={(e) => {
+                            if (e.shiftKey) {
+                                const currentSelection = selectedUniqueId;
+                                let nextSelection;
+                                if (!currentSelection) {
+                                    nextSelection = [el.id];
+                                } else if (Array.isArray(currentSelection)) {
+                                    if (currentSelection.includes(el.id)) {
+                                        nextSelection = currentSelection.filter((x) => x !== el.id);
+                                    } else {
+                                        nextSelection = [...currentSelection, el.id];
+                                    }
+                                } else {
+                                    if (currentSelection === el.id) {
+                                        nextSelection = null;
+                                    } else {
+                                        nextSelection = [currentSelection, el.id];
+                                    }
+                                }
+                                if (Array.isArray(nextSelection) && nextSelection.length === 0) {
+                                    nextSelection = null;
+                                }
+                                dispatch(setSelectedUniqueId(nextSelection));
+                            } else {
+                                dispatch(setSelectedUniqueId(el.id));
+                            }
+                        }}
                     >
                         <div className={styles.leftInfo}>
                             {getIcon(el.type)}

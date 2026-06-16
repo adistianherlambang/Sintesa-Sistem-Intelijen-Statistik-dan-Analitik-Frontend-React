@@ -61,7 +61,11 @@ export default function KanvaEditor() {
     const [containerSize, setContainerSize] = useState({ w: 0, h: 0 });
 
     const activePage = editorPages[activeIndex] || { children: [], background: "#ffffff" };
-    const selectedEl = (activePage?.children || [])?.find((e) => e?.id === selectedUniqueId);
+    const selectedEl = (activePage?.children || [])?.find((e) => {
+        const selectedIds = Array.isArray(selectedUniqueId) ? selectedUniqueId : [selectedUniqueId].filter(Boolean);
+        const primaryId = selectedIds[selectedIds.length - 1];
+        return e?.id === primaryId;
+    });
 
     // pen/draw tool state
     const [isPenTool, setIsPenTool] = useState(false);
@@ -92,53 +96,68 @@ export default function KanvaEditor() {
     // Clipboard state for copy/paste
     const [clipboard, setClipboard] = useState(null);
 
+    // Ref to store original positions of selected items during a drag session
+    const dragStartPositionsRef = useRef(null);
+
     const copySelected = () => {
         if (!selectedUniqueId) return;
-        const el = (activePage?.children || [])?.find((e) => e?.id === selectedUniqueId);
-        if (el) {
-            setClipboard(el);
+        const selectedIds = Array.isArray(selectedUniqueId) ? selectedUniqueId : [selectedUniqueId];
+        const elements = (activePage?.children || [])?.filter((e) => selectedIds.includes(e?.id));
+        if (elements.length > 0) {
+            setClipboard(elements);
         }
     };
 
     const pasteSelected = () => {
         if (!clipboard) return;
         
-        const copiedEl = JSON.parse(JSON.stringify(clipboard));
-        const newId = `${copiedEl.id}-copy-${Date.now()}`;
-        copiedEl.id = newId;
-        copiedEl.x = (copiedEl.x || 0) + 20;
-        copiedEl.y = (copiedEl.y || 0) + 20;
+        const clipboardArr = Array.isArray(clipboard) ? clipboard : [clipboard];
+        const newIds = [];
+        const elementsToPaste = [];
 
         const assignNewIds = (element) => {
-            if (element.children && Array.isArray(element.children)) {
-                element.children = element.children.map(child => {
+            const newEl = JSON.parse(JSON.stringify(element));
+            newEl.id = `${newEl.id}-copy-${Date.now()}`;
+            newEl.x = (newEl.x || 0) + 20;
+            newEl.y = (newEl.y || 0) + 20;
+            if (newEl.children && Array.isArray(newEl.children)) {
+                newEl.children = newEl.children.map(child => {
                     const newChild = { ...child, id: `${child.id}-copy-${Date.now()}` };
                     return assignNewIds(newChild);
                 });
             }
-            return element;
+            return newEl;
         };
-        const elementToPaste = assignNewIds(copiedEl);
+
+        clipboardArr.forEach(el => {
+            const pasted = assignNewIds(el);
+            elementsToPaste.push(pasted);
+            newIds.push(pasted.id);
+        });
 
         setPagesWithHistory((prev) => {
             const cp = JSON.parse(JSON.stringify(prev));
             const page = cp[activeIndex] || { children: [] };
             page.children = page.children || [];
-            page.children.push(elementToPaste);
+            page.children.push(...elementsToPaste);
             cp[activeIndex] = page;
             return cp;
         });
 
-        setClipboard(elementToPaste);
-        openMiniFor(newId);
+        setClipboard(clipboardArr);
+        if (newIds.length === 1) {
+            openMiniFor(newIds[0]);
+        } else {
+            dispatch(setSelectedUniqueId(newIds));
+        }
     };
 
     const selectAll = () => {
-        const bannerEl = (activePage?.children || [])?.find(e => e?.type === 'banner');
-        if (bannerEl) {
-            openMiniFor(bannerEl.id);
-        } else if (activePage?.children?.length > 0) {
-            openMiniFor(activePage.children[0].id);
+        const childrenIds = (activePage?.children || [])
+            ?.filter(e => e && e.type !== 'banner')
+            ?.map(e => e.id) || [];
+        if (childrenIds.length > 0) {
+            dispatch(setSelectedUniqueId(childrenIds));
         }
     };
 
@@ -391,6 +410,68 @@ export default function KanvaEditor() {
         }
     }, []);
 
+    const handleStageDragStart = useCallback((e) => {
+        const target = e.target;
+        if (target === target.getStage() || target.name() === 'page-background') return;
+
+        const targetId = target.id();
+        const selectedIds = Array.isArray(selectedUniqueId) ? selectedUniqueId : [selectedUniqueId].filter(Boolean);
+
+        if (selectedIds.includes(targetId)) {
+            const startPositions = {};
+            selectedIds.forEach((id) => {
+                const node = target.getStage().findOne('#' + id);
+                if (node) {
+                    startPositions[id] = { x: node.x(), y: node.y() };
+                }
+            });
+            dragStartPositionsRef.current = startPositions;
+        }
+    }, [selectedUniqueId]);
+
+    const handleStageDragMove = useCallback((e) => {
+        if (e.target === e.target.getStage()) {
+            handleStageDrag(e);
+            return;
+        }
+
+        if (!dragStartPositionsRef.current) return;
+
+        const target = e.target;
+        const targetId = target.id();
+        const startPositions = dragStartPositionsRef.current;
+        const startTargetPos = startPositions[targetId];
+        if (!startTargetPos) return;
+
+        const dx = target.x() - startTargetPos.x;
+        const dy = target.y() - startTargetPos.y;
+
+        const selectedIds = Array.isArray(selectedUniqueId) ? selectedUniqueId : [selectedUniqueId].filter(Boolean);
+
+        selectedIds.forEach((id) => {
+            if (id !== targetId) {
+                const node = target.getStage().findOne('#' + id);
+                if (node) {
+                    const start = startPositions[id];
+                    if (start) {
+                        node.position({
+                            x: start.x + dx,
+                            y: start.y + dy
+                        });
+                    }
+                }
+            }
+        });
+    }, [selectedUniqueId, handleStageDrag]);
+
+    const handleStageDragEnd = useCallback((e) => {
+        if (e.target === e.target.getStage()) {
+            handleStageDrag(e);
+            return;
+        }
+        dragStartPositionsRef.current = null;
+    }, [handleStageDrag]);
+
     // Pen drawings logic
     const handleMouseDown = useCallback((e) => {
         if (!isPenTool) return;
@@ -438,7 +519,47 @@ export default function KanvaEditor() {
     const setElement = (id, updater) => {
         setPagesWithHistory((prev) => {
             const cp = JSON.parse(JSON.stringify(prev));
-            const els = (cp[activeIndex]?.children || [])?.map((el) => (el && el?.id === id ? updater(el) : el));
+            const activeChildren = cp[activeIndex]?.children || [];
+            
+            const originalEl = activeChildren.find((el) => el?.id === id);
+            if (!originalEl) return prev;
+            
+            const updatedEl = updater(originalEl);
+            
+            const dx = (updatedEl.x ?? originalEl.x) - (originalEl.x ?? 0);
+            const dy = (updatedEl.y ?? originalEl.y) - (originalEl.y ?? 0);
+            
+            const selectedIds = Array.isArray(selectedUniqueId) ? selectedUniqueId : [selectedUniqueId].filter(Boolean);
+            const isDragging = dragStartPositionsRef.current !== null;
+            
+            const els = activeChildren.map((el) => {
+                if (!el) return el;
+                if (el.id === id) {
+                    return updatedEl;
+                }
+                
+                if (selectedIds.includes(el.id) && selectedIds.includes(id)) {
+                    if (isDragging) {
+                        const nextEl = { ...el };
+                        if (dx !== 0 || dy !== 0) {
+                            nextEl.x = (el.x || 0) + dx;
+                            nextEl.y = (el.y || 0) + dy;
+                        }
+                        return nextEl;
+                    }
+                    
+                    const nextEl = { ...el };
+                    for (const key in updatedEl) {
+                        if (updatedEl[key] !== originalEl[key]) {
+                            if (['id', 'x', 'y', 'width', 'height', 'rotation', 'points'].includes(key)) continue;
+                            nextEl[key] = updatedEl[key];
+                        }
+                    }
+                    return nextEl;
+                }
+                return el;
+            });
+            
             cp[activeIndex] = { ...cp[activeIndex], children: els };
             return cp;
         });
@@ -453,10 +574,11 @@ export default function KanvaEditor() {
 
     const deleteSelected = () => {
         if (!selectedUniqueId) return;
+        const selectedIds = Array.isArray(selectedUniqueId) ? selectedUniqueId : [selectedUniqueId];
         setPagesWithHistory((prev) => {
             const cp = JSON.parse(JSON.stringify(prev));
             const page = cp[activeIndex] || { children: [] };
-            page.children = (page?.children || [])?.filter((el) => el?.id !== selectedUniqueId);
+            page.children = (page?.children || [])?.filter((el) => !selectedIds.includes(el?.id));
             cp[activeIndex] = page;
             return cp;
         });
@@ -467,19 +589,47 @@ export default function KanvaEditor() {
 
     const duplicateSelected = () => {
         if (!selectedUniqueId) return;
-        const el = (activePage?.children || [])?.find((e) => e?.id === selectedUniqueId);
-        if (!el) return;
-        const id = `${el?.id}-copy-${Date.now()}`;
-        const copy = { ...el, id, x: (el?.x || 0) + 20, y: (el?.y || 0) + 20 };
+        const selectedIds = Array.isArray(selectedUniqueId) ? selectedUniqueId : [selectedUniqueId];
+        const elements = (activePage?.children || [])?.filter((e) => selectedIds.includes(e?.id));
+        if (elements.length === 0) return;
+
+        const elementsToDuplicate = [];
+        const newIds = [];
+
+        const assignNewIds = (element) => {
+            const newEl = JSON.parse(JSON.stringify(element));
+            newEl.id = `${newEl.id}-copy-${Date.now()}`;
+            newEl.x = (newEl.x || 0) + 20;
+            newEl.y = (newEl.y || 0) + 20;
+            if (newEl.children && Array.isArray(newEl.children)) {
+                newEl.children = newEl.children.map(child => {
+                    const newChild = { ...child, id: `${child.id}-copy-${Date.now()}` };
+                    return assignNewIds(newChild);
+                });
+            }
+            return newEl;
+        };
+
+        elements.forEach(el => {
+            const duplicated = assignNewIds(el);
+            elementsToDuplicate.push(duplicated);
+            newIds.push(duplicated.id);
+        });
+
         setPagesWithHistory((prev) => {
             const cp = JSON.parse(JSON.stringify(prev));
             const page = cp[activeIndex] || { children: [] };
             page.children = page?.children || [];
-            page?.children?.push(copy);
+            page?.children?.push(...elementsToDuplicate);
             cp[activeIndex] = page;
             return cp;
         });
-        openMiniFor(id);
+
+        if (newIds.length === 1) {
+            openMiniFor(newIds[0]);
+        } else {
+            dispatch(setSelectedUniqueId(newIds));
+        }
     };
     duplicateSelectedRef.current = duplicateSelected;
 
@@ -743,8 +893,9 @@ export default function KanvaEditor() {
                                 x={stagePos.x}
                                 y={stagePos.y}
                                 draggable={isSpacePressed}
-                                onDragMove={handleStageDrag}
-                                onDragEnd={handleStageDrag}
+                                onDragStart={handleStageDragStart}
+                                onDragMove={handleStageDragMove}
+                                onDragEnd={handleStageDragEnd}
                                 style={{
                                     cursor: getCursorStyle(),
                                 }}

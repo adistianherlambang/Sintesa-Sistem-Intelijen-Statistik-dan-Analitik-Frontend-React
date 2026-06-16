@@ -15,8 +15,9 @@ export default function EditorColorPicker({ setPagesWithHistory }) {
             const cp = JSON.parse(JSON.stringify(prev));
 
             if (selectedUniqueId) {
+                const selectedIds = Array.isArray(selectedUniqueId) ? selectedUniqueId : [selectedUniqueId];
                 cp[activeIndex].children = cp[activeIndex]?.children?.map((c) => {
-                    if (c?.id === selectedUniqueId) {
+                    if (selectedIds.includes(c?.id)) {
                         if (c?.type === "text") return { ...c, fill: newColor };
                         if (c?.type === "icon") return { ...c, fill: newColor };
                         if (c?.type === "line") return { ...c, stroke: newColor };
@@ -39,7 +40,9 @@ export default function EditorColorPicker({ setPagesWithHistory }) {
         setPagesWithHistory((prev) => {
             if (!prev[activeIndex]) return prev;
             if (selectedUniqueId) {
-                const obj = prev[activeIndex]?.children?.find(c => c?.id === selectedUniqueId);
+                const selectedIds = Array.isArray(selectedUniqueId) ? selectedUniqueId : [selectedUniqueId];
+                const primaryId = selectedIds[selectedIds.length - 1];
+                const obj = prev[activeIndex]?.children?.find(c => c?.id === primaryId);
                 if (obj) {
                     if (obj?.type === "line") setColor(obj?.stroke || "#000000");
                     else setColor(obj?.fill || "#000000");
