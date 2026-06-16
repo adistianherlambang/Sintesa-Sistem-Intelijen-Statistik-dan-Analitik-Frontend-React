@@ -18,38 +18,38 @@ export default function Analisis() {
   const [brsPreview, setBrsPreview] = useState(null)
 
   const item = [
-    { 
-      label: "StepOne", 
+    {
+      label: "StepOne",
       content: (props) => (
-        <StepOne 
-          {...props} 
-          datasetSource={datasetSource} 
-          setDatasetSource={setDatasetSource} 
+        <StepOne
+          {...props}
+          datasetSource={datasetSource}
+          setDatasetSource={setDatasetSource}
         />
-      ) 
+      )
     },
-    { 
-      label: "StepTwo", 
+    {
+      label: "StepTwo",
       content: (props) => (
-        <StepTwo 
-          {...props} 
-          datasetSource={datasetSource} 
-          uploadedDataset={uploadedDataset} 
-          setUploadedDataset={setUploadedDataset} 
+        <StepTwo
+          {...props}
+          datasetSource={datasetSource}
+          uploadedDataset={uploadedDataset}
+          setUploadedDataset={setUploadedDataset}
         />
-      ) 
+      )
     },
-    { 
-      label: "StepThree", 
+    {
+      label: "StepThree",
       content: (props) => (
-        <StepThree 
-          {...props} 
-          datasetSource={datasetSource} 
-          uploadedDataset={uploadedDataset} 
-          brsPreview={brsPreview} 
-          setBrsPreview={setBrsPreview} 
+        <StepThree
+          {...props}
+          datasetSource={datasetSource}
+          uploadedDataset={uploadedDataset}
+          brsPreview={brsPreview}
+          setBrsPreview={setBrsPreview}
         />
-      ) 
+      )
     },
   ]
 
@@ -183,7 +183,7 @@ function StepTwoManual(props) {
     <div className={styles.container}>
       <Wrapper>
         <p className={styles.sectionTitle}>Unggah Dataset Secara Manual</p>
-        <div 
+        <div
           onDragEnter={handleDrag}
           onDragOver={handleDrag}
           onDragLeave={handleDrag}
@@ -223,9 +223,9 @@ function StepTwoManual(props) {
             display: 'inline-block'
           }}>
             Pilih File
-            <input 
-              type="file" 
-              accept=".xlsx" 
+            <input
+              type="file"
+              accept=".xlsx"
               style={{ display: 'none' }}
               onChange={(e) => e.target.files && handleFile(e.target.files[0])}
             />
@@ -332,17 +332,17 @@ function StepTwoAvailable(props) {
         break;
       }
     }
-    
+
     const userCity = inflasi?.kota || user?.location?.name || "KOTA METRO";
     const currentYear = new Date().getFullYear();
     const periodText = `${monthNames[monthIndex]} ${currentYear}`;
-    
+
     const infValue = inflasi?.data?.[monthIndex]?.value || "0.00";
     const yValue = inflasi?.yoy?.[monthIndex]?.value || "0.00";
     const iValue = ihk?.data?.[monthIndex]?.value || "100.00";
 
     const commodityList = komoditas?.hierarki || [];
-    
+
     // Construct divisionData from komoditas.hierarki
     const divisions = commodityList.map(c => {
       const dataKeys = Object.keys(c.data || {});
@@ -783,10 +783,10 @@ function StepThree(props) {
 
   // Parameters extracted from manual dataset
   const dataRows = uploadedDataset?.parsedData || []
-  
+
   // Look for UMUM row
   const umumRow = dataRows.find(row => String(row[4]) === "0")
-  
+
   const ihkValue = (umumRow && umumRow[8] !== undefined && umumRow[8] !== null && umumRow[8] !== "") ? String(umumRow[8]) : "115.42"
   const inflasiValue = (umumRow && umumRow[9] !== undefined && umumRow[9] !== null && umumRow[9] !== "") ? String(umumRow[9]) : "0.24"
   const yoyValue = (umumRow && umumRow[11] !== undefined && umumRow[11] !== null && umumRow[11] !== "") ? String(umumRow[11]) : "1.85"
@@ -811,12 +811,12 @@ function StepThree(props) {
     return code.length === 2 && code !== "0";
   }).map(row => ({
     name: String(row[5]).replace(/MAKANAN, MINUMAN DAN TEMBAKAU/i, "Makanan & Rokok")
-                  .replace(/PERUMAHAN, AIR, LISTRIK, DAN BAHAN BAKAR RUMAH TANGGA/i, "Perumahan & Energi")
-                  .replace(/PERLENGKAPAN, PERALATAN DAN PEMELIHARAAN RUTIN RUMAH TANGGA/i, "Perlengkapan RT")
-                  .replace(/INFORMASI, KOMUNIKASI, DAN JASA KEUANGAN/i, "Infokom & Finansial")
-                  .replace(/REKREASI, OLAHRAGA, DAN BUDAYA/i, "Rekreasi & Budaya")
-                  .replace(/JASA PELAYANAN MAKANAN DAN MINUMAN/i, "Restoran/Kuliner")
-                  .substring(0, 18),
+      .replace(/PERUMAHAN, AIR, LISTRIK, DAN BAHAN BAKAR RUMAH TANGGA/i, "Perumahan & Energi")
+      .replace(/PERLENGKAPAN, PERALATAN DAN PEMELIHARAAN RUTIN RUMAH TANGGA/i, "Perlengkapan RT")
+      .replace(/INFORMASI, KOMUNIKASI, DAN JASA KEUANGAN/i, "Infokom & Finansial")
+      .replace(/REKREASI, OLAHRAGA, DAN BUDAYA/i, "Rekreasi & Budaya")
+      .replace(/JASA PELAYANAN MAKANAN DAN MINUMAN/i, "Restoran/Kuliner")
+      .substring(0, 18),
     inflasi: parseFloat(row[9]) || 0
   }));
 
@@ -920,8 +920,8 @@ function StepThree(props) {
             <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: 0, maxWidth: '440px' }}>
               Dataset yang Anda unggah tidak dikenali oleh AI kami sebagai file data IHK atau inflasi BPS daerah yang sah. Silakan kembali dan unggah file yang terstruktur dengan kolom yang sesuai.
             </p>
-            <button 
-              onClick={() => setStep(1)} 
+            <button
+              onClick={() => setStep(1)}
               style={{
                 background: 'rgba(255,255,255,0.06)',
                 border: '1px solid rgba(255,255,255,0.15)',
@@ -971,10 +971,7 @@ function StepThree(props) {
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {aiSummary.sections?.map((section, idx) => (
-                  <Wrapper key={idx} style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', padding: '16px' }}>
-                    <h4 style={{ color: '#34B34A', margin: '0 0 8px 0', fontSize: '15px', fontWeight: 600 }}>
-                      {section.title}
-                    </h4>
+                  <Wrapper key={idx}>
                     <p style={{ color: 'rgba(255, 255, 255, 0.8)', margin: 0, fontSize: '14px', lineHeight: 1.5 }}>
                       {section.content}
                     </p>
@@ -984,7 +981,7 @@ function StepThree(props) {
             </Wrapper>
           )}
 
-          {divisionData.length > 0 && (
+          {/* {divisionData.length > 0 && (
             <Wrapper>
               <p className={styles.sectionTitle}>Visualisasi Inflasi per Kelompok Pengeluaran (%)</p>
               <div style={{ width: '100%', height: 320, marginTop: '20px' }}>
@@ -1014,7 +1011,7 @@ function StepThree(props) {
                 </ResponsiveContainer>
               </div>
             </Wrapper>
-          )}
+          )} */}
 
           <Wrapper>
             <p className={styles.sectionTitle}>Ringkasan Parameter Data Utama</p>
@@ -1057,7 +1054,11 @@ function StepThree(props) {
                     transition: 'transform 0.2s, background 0.2s',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px'
+                    gap: '8px',
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center"
                   }}
                 >
                   {generatingBRS ? (
@@ -1114,7 +1115,11 @@ function StepThree(props) {
                       alignItems: 'center',
                       gap: '8px',
                       boxShadow: '0 4px 14px rgba(52, 179, 74, 0.4)',
-                      transition: 'background 0.2s'
+                      transition: 'background 0.2s',
+                      width: "100%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center"
                     }}
                     onMouseOver={(e) => e.currentTarget.style.background = '#2da140'}
                     onMouseOut={(e) => e.currentTarget.style.background = '#34B34A'}
