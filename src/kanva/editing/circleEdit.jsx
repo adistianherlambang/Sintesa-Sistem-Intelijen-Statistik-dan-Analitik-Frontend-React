@@ -5,6 +5,7 @@ import {
     Typography,
     Flex,
 } from "../components/UIControls";
+import styles from "./editing.module.css";
 
 const CircleEdit = ({ selectedEl, setElement }) => {
     if (!selectedEl) return null;
@@ -14,76 +15,75 @@ const CircleEdit = ({ selectedEl, setElement }) => {
     };
 
     return (
-        <>
+        <div className={styles.container}>
             {/* Position */}
-            <Flex align="center" justify="space-between">
-                <Typography>Position X</Typography>
+            <p className={styles.sectionTitle}>Position</p>
+            <div className={styles.row}>
+                <span className={styles.label}>Position X</span>
                 <InputNumber value={selectedEl?.x} onChange={(v) => update("x", v)} />
-            </Flex>
-
-            <Flex align="center" justify="space-between">
-                <Typography>Position Y</Typography>
+            </div>
+            <div className={styles.row}>
+                <span className={styles.label}>Position Y</span>
                 <InputNumber value={selectedEl?.y} onChange={(v) => update("y", v)} />
-            </Flex>
+            </div>
 
             {/* Circle size */}
-            <Flex align="center" justify="space-between">
-                <Typography>Radius</Typography>
+            <p className={styles.sectionTitle}>Size</p>
+            <div className={styles.row}>
+                <span className={styles.label}>Radius</span>
                 <InputNumber
                     value={selectedEl?.radius || 50}
                     onChange={(v) => update("radius", v)}
                 />
-            </Flex>
+            </div>
 
             {/* Fill & Stroke */}
-            <Flex align="center" justify="space-between">
-                <Typography>Fill</Typography>
+            <p className={styles.sectionTitle}>Fill &amp; Stroke</p>
+            <div className={styles.colorRow}>
+                <span className={styles.label}>Fill</span>
                 <ColorPicker
                     value={selectedEl?.fill || "#fff"}
                     onChange={(c) => update("fill", c?.toHexString())}
                 />
-            </Flex>
-
-            <Flex align="center" justify="space-between">
-                <Typography>Stroke</Typography>
+            </div>
+            <div className={styles.colorRow}>
+                <span className={styles.label}>Stroke</span>
                 <ColorPicker
                     value={selectedEl?.stroke || "#000"}
                     onChange={(c) => update("stroke", c?.toHexString())}
                 />
-            </Flex>
-
-            <Flex align="center" justify="space-between">
-                <Typography>Stroke Width</Typography>
+            </div>
+            <div className={styles.row}>
+                <span className={styles.label}>Stroke Width</span>
                 <InputNumber
                     value={selectedEl?.strokeWidth || 1}
                     onChange={(v) => update("strokeWidth", v)}
                 />
-            </Flex>
+            </div>
 
             {/* Dash Style */}
-            <Typography>Dash Style</Typography>
-            <Flex align="center" justify="space-between">
-                <Typography>Dash length</Typography>
+            <p className={styles.sectionTitle}>Dash Style</p>
+            <div className={styles.row}>
+                <span className={styles.label}>Dash length</span>
                 <InputNumber
                     value={selectedEl?.dash?.[0] || 0}
                     onChange={(v) =>
                         update("dash", [v, selectedEl?.dash?.[1] || 0])
                     }
                 />
-            </Flex>
-
-            <Flex align="center" justify="space-between">
-                <Typography>Dash gap</Typography>
+            </div>
+            <div className={styles.row}>
+                <span className={styles.label}>Dash gap</span>
                 <InputNumber
                     value={selectedEl?.dash?.[1] || 0}
                     onChange={(v) =>
                         update("dash", [selectedEl?.dash?.[0] || 0, v])
                     }
                 />
-            </Flex>
+            </div>
 
             {/* Opacity */}
-            <Typography>Opacity</Typography>
+            <p className={styles.sectionTitle}>Opacity</p>
             <Slider
                 min={0}
                 max={1}
@@ -93,40 +93,36 @@ const CircleEdit = ({ selectedEl, setElement }) => {
             />
 
             {/* Shadow */}
-            <Typography>Shadow</Typography>
-            <Flex align="center" justify="space-between">
-                <Typography>Shadow Color</Typography>
+            <p className={styles.sectionTitle}>Shadow</p>
+            <div className={styles.colorRow}>
+                <span className={styles.label}>Shadow Color</span>
                 <ColorPicker
                     value={selectedEl?.shadowColor || "#000"}
                     onChange={(c) => update("shadowColor", c?.toHexString())}
                 />
-            </Flex>
-
-            <Flex align="center" justify="space-between">
-                <Typography>Shadow Blur</Typography>
+            </div>
+            <div className={styles.row}>
+                <span className={styles.label}>Shadow Blur</span>
                 <InputNumber
                     value={selectedEl?.shadowBlur || 0}
                     onChange={(v) => update("shadowBlur", v)}
                 />
-            </Flex>
-
-            <Flex align="center" justify="space-between">
-                <Typography>Shadow Offset X</Typography>
+            </div>
+            <div className={styles.row}>
+                <span className={styles.label}>Shadow Offset X</span>
                 <InputNumber
                     value={selectedEl?.shadowOffsetX || 0}
                     onChange={(v) => update("shadowOffsetX", v)}
                 />
-            </Flex>
-
-            <Flex align="center" justify="space-between">
-                <Typography>Shadow Offset Y</Typography>
+            </div>
+            <div className={styles.row}>
+                <span className={styles.label}>Shadow Offset Y</span>
                 <InputNumber
                     value={selectedEl?.shadowOffsetY || 0}
                     onChange={(v) => update("shadowOffsetY", v)}
                 />
-            </Flex>
-
-            <Typography>Shadow Opacity</Typography>
+            </div>
+            <p className={styles.label}>Shadow Opacity</p>
             <Slider
                 min={0}
                 max={1}
@@ -134,7 +130,7 @@ const CircleEdit = ({ selectedEl, setElement }) => {
                 value={selectedEl?.shadowOpacity ?? 1}
                 onChange={(v) => update("shadowOpacity", v)}
             />
-        </>
+        </div>
     );
 };
 

@@ -1,0 +1,181 @@
+/* editing.module.css - Shared styles for all kanva editing panels */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+.label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 400;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.sectionTitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-top: 10px;
+  margin-bottom: 2px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.07);
+  margin: 6px 0;
+}
+
+/* Number input */
+.input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 8px;
+  width: 90px;
+  text-align: right;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: rgba(52, 179, 74, 0.5);
+}
+
+/* Slider track */
+.slider {
+  width: 100%;
+  accent-color: #34B34A;
+  cursor: pointer;
+}
+
+/* Toggle switch */
+.switchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 0;
+}
+
+/* Color swatch row */
+.colorRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+/* Select dropdown */
+.select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 8px;
+  outline: none;
+  cursor: pointer;
+  min-width: 100px;
+  transition: border-color 0.15s;
+}
+
+.select:focus {
+  border-color: rgba(52, 179, 74, 0.5);
+}
+
+/* Button group (e.g. align buttons) */
+.btnGroup {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  padding: 5px 8px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.btnActive {
+  background: rgba(52, 179, 74, 0.2) !important;
+  border-color: rgba(52, 179, 74, 0.4) !important;
+  color: #34B34A !important;
+}
+
+/* Font size input addon row */
+.addonRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.addonIcon {
+  color: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+}
+
+.inputFull {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 8px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.inputFull:focus {
+  border-color: rgba(52, 179, 74, 0.5);
+}
+
+/* Corner radius inputs (labeled) */
+.cornerGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.cornerCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cornerLabel {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+}

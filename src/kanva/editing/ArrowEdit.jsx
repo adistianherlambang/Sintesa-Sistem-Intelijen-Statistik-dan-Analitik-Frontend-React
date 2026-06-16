@@ -7,6 +7,7 @@ import {
   Select,
   Switch,
 } from "../components/UIControls";
+import styles from "./editing.module.css";
 
 const ArrowEdit = ({ selectedEl, setElement }) => {
   if (!selectedEl) return null;
@@ -16,104 +17,108 @@ const ArrowEdit = ({ selectedEl, setElement }) => {
   const p = selectedEl?.points || [0, 0, 150, 0];
 
   return (
-    <>
+    <div className={styles.container}>
       {/* Position & Rotation */}
-      <Flex align="center" justify="space-between">
-        <Typography>X</Typography>
+      <p className={styles.sectionTitle}>Position &amp; Rotation</p>
+      <div className={styles.row}>
+        <span className={styles.label}>X</span>
         <InputNumber value={selectedEl?.x || 0} onChange={(v) => update("x", v)} />
-      </Flex>
-      <Flex align="center" justify="space-between">
-        <Typography>Y</Typography>
+      </div>
+      <div className={styles.row}>
+        <span className={styles.label}>Y</span>
         <InputNumber value={selectedEl?.y || 0} onChange={(v) => update("y", v)} />
-      </Flex>
-      <Flex align="center" justify="space-between">
-        <Typography>Rotation</Typography>
+      </div>
+      <div className={styles.row}>
+        <span className={styles.label}>Rotation</span>
         <InputNumber
           value={selectedEl?.rotation || 0}
           onChange={(v) => update("rotation", v)}
         />
-      </Flex>
+      </div>
 
       {/* Start / End points (local to the arrow group) */}
-      <Typography style={{ marginTop: 8 }}>Points (local)</Typography>
-      <Flex align="center" justify="space-between">
-        <Typography>Start X</Typography>
+      <p className={styles.sectionTitle}>Points (local)</p>
+      <div className={styles.row}>
+        <span className={styles.label}>Start X</span>
         <InputNumber
           value={p[0]}
           onChange={(v) => update("points", [v, p[1], p[2], p[3]])}
         />
-      </Flex>
-      <Flex align="center" justify="space-between">
-        <Typography>Start Y</Typography>
+      </div>
+      <div className={styles.row}>
+        <span className={styles.label}>Start Y</span>
         <InputNumber
           value={p[1]}
           onChange={(v) => update("points", [p[0], v, p[2], p[3]])}
         />
-      </Flex>
-      <Flex align="center" justify="space-between">
-        <Typography>End X</Typography>
+      </div>
+      <div className={styles.row}>
+        <span className={styles.label}>End X</span>
         <InputNumber
           value={p[2]}
           onChange={(v) => update("points", [p[0], p[1], v, p[3]])}
         />
-      </Flex>
-      <Flex align="center" justify="space-between">
-        <Typography>End Y</Typography>
+      </div>
+      <div className={styles.row}>
+        <span className={styles.label}>End Y</span>
         <InputNumber
           value={p[3]}
           onChange={(v) => update("points", [p[0], p[1], p[2], v])}
         />
-      </Flex>
+      </div>
 
       {/* Arrow head */}
-      <Flex align="center" justify="space-between">
-        <Typography>Pointer Length</Typography>
+      <p className={styles.sectionTitle}>Arrow Head</p>
+      <div className={styles.row}>
+        <span className={styles.label}>Pointer Length</span>
         <InputNumber
           value={selectedEl?.pointerLength || 15}
           onChange={(v) => update("pointerLength", v)}
         />
-      </Flex>
-      <Flex align="center" justify="space-between">
-        <Typography>Pointer Width</Typography>
+      </div>
+      <div className={styles.row}>
+        <span className={styles.label}>Pointer Width</span>
         <InputNumber
           value={selectedEl?.pointerWidth || 15}
           onChange={(v) => update("pointerWidth", v)}
         />
-      </Flex>
-      <Flex align="center" justify="space-between">
-        <Typography>Arrow at Start</Typography>
+      </div>
+      <div className={styles.row}>
+        <span className={styles.label}>Arrow at Start</span>
         <Switch
           checked={!!selectedEl?.pointerAtBeginning}
           onChange={(v) => update("pointerAtBeginning", v)}
         />
-      </Flex>
+      </div>
 
       {/* Stroke + Fill */}
-      <Flex align="center" justify="space-between">
-        <Typography>Fill</Typography>
+      <p className={styles.sectionTitle}>Stroke &amp; Fill</p>
+      <div className={styles.colorRow}>
+        <span className={styles.label}>Fill</span>
         <ColorPicker
           value={selectedEl?.fill ?? selectedEl?.stroke ?? "#000"}
           onChange={(c) => update("fill", c?.toHexString())}
         />
-      </Flex>
-      <Flex align="center" justify="space-between">
-        <Typography>Stroke</Typography>
+      </div>
+      <div className={styles.colorRow}>
+        <span className={styles.label}>Stroke</span>
         <ColorPicker
           value={selectedEl?.stroke || "#000"}
           onChange={(c) => update("stroke", c?.toHexString())}
         />
-      </Flex>
-      <Flex align="center" justify="space-between">
-        <Typography>Stroke Width</Typography>
+      </div>
+      <div className={styles.row}>
+        <span className={styles.label}>Stroke Width</span>
         <InputNumber
           value={selectedEl?.strokeWidth || 2}
           onChange={(v) => update("strokeWidth", v)}
         />
-      </Flex>
+      </div>
 
       {/* Caps / Joins */}
-      <Flex align="center" justify="space-between">
-        <Typography>Line Cap</Typography>
+      <p className={styles.sectionTitle}>Caps &amp; Joins</p>
+      <div className={styles.row}>
+        <span className={styles.label}>Line Cap</span>
         <Select
           value={selectedEl?.lineCap || "round"}
           onChange={(v) => update("lineCap", v)}
@@ -124,9 +129,9 @@ const ArrowEdit = ({ selectedEl, setElement }) => {
           ]}
           style={{ width: 120 }}
         />
-      </Flex>
-      <Flex align="center" justify="space-between">
-        <Typography>Line Join</Typography>
+      </div>
+      <div className={styles.row}>
+        <span className={styles.label}>Line Join</span>
         <Select
           value={selectedEl?.lineJoin || "round"}
           onChange={(v) => update("lineJoin", v)}
@@ -137,27 +142,27 @@ const ArrowEdit = ({ selectedEl, setElement }) => {
           ]}
           style={{ width: 120 }}
         />
-      </Flex>
+      </div>
 
       {/* Dash */}
-      <Typography>Dash</Typography>
-      <Flex align="center" justify="space-between">
-        <Typography>Dash Length</Typography>
+      <p className={styles.sectionTitle}>Dash</p>
+      <div className={styles.row}>
+        <span className={styles.label}>Dash Length</span>
         <InputNumber
           value={selectedEl?.dash?.[0] || 0}
           onChange={(v) => update("dash", [v, selectedEl?.dash?.[1] || 0])}
         />
-      </Flex>
-      <Flex align="center" justify="space-between">
-        <Typography>Dash Gap</Typography>
+      </div>
+      <div className={styles.row}>
+        <span className={styles.label}>Dash Gap</span>
         <InputNumber
           value={selectedEl?.dash?.[1] || 0}
           onChange={(v) => update("dash", [selectedEl?.dash?.[0] || 0, v])}
         />
-      </Flex>
+      </div>
 
       {/* Opacity */}
-      <Typography>Opacity</Typography>
+      <p className={styles.sectionTitle}>Opacity</p>
       <Slider
         min={0}
         max={1}
@@ -167,45 +172,45 @@ const ArrowEdit = ({ selectedEl, setElement }) => {
       />
 
       {/* Blur */}
-      <Flex align="center" justify="space-between">
-        <Typography>Blur</Typography>
+      <div className={styles.row}>
+        <span className={styles.label}>Blur</span>
         <InputNumber
           value={selectedEl?.blurRadius || 0}
           onChange={(v) => update("blurRadius", v)}
         />
-      </Flex>
+      </div>
 
       {/* Shadow */}
-      <Typography>Shadow</Typography>
-      <Flex align="center" justify="space-between">
-        <Typography>Color</Typography>
+      <p className={styles.sectionTitle}>Shadow</p>
+      <div className={styles.colorRow}>
+        <span className={styles.label}>Color</span>
         <ColorPicker
           value={selectedEl?.shadowColor || "#000"}
           onChange={(c) => update("shadowColor", c?.toHexString())}
         />
-      </Flex>
-      <Flex align="center" justify="space-between">
-        <Typography>Blur</Typography>
+      </div>
+      <div className={styles.row}>
+        <span className={styles.label}>Blur</span>
         <InputNumber
           value={selectedEl?.shadowBlur || 0}
           onChange={(v) => update("shadowBlur", v)}
         />
-      </Flex>
-      <Flex align="center" justify="space-between">
-        <Typography>Offset X</Typography>
+      </div>
+      <div className={styles.row}>
+        <span className={styles.label}>Offset X</span>
         <InputNumber
           value={selectedEl?.shadowOffsetX || 0}
           onChange={(v) => update("shadowOffsetX", v)}
         />
-      </Flex>
-      <Flex align="center" justify="space-between">
-        <Typography>Offset Y</Typography>
+      </div>
+      <div className={styles.row}>
+        <span className={styles.label}>Offset Y</span>
         <InputNumber
           value={selectedEl?.shadowOffsetY || 0}
           onChange={(v) => update("shadowOffsetY", v)}
         />
-      </Flex>
-      <Typography>Shadow Opacity</Typography>
+      </div>
+      <p className={styles.label}>Shadow Opacity</p>
       <Slider
         min={0}
         max={1}
@@ -215,28 +220,29 @@ const ArrowEdit = ({ selectedEl, setElement }) => {
       />
 
       {/* Toggles */}
-      <Flex align="center" justify="space-between" style={{ marginTop: 8 }}>
-        <Typography>Stroke Scales on Resize</Typography>
+      <p className={styles.sectionTitle}>Options</p>
+      <div className={styles.row}>
+        <span className={styles.label}>Stroke Scales on Resize</span>
         <Switch
           checked={!!selectedEl?.strokeScaleEnabled}
           onChange={(v) => update("strokeScaleEnabled", v)}
         />
-      </Flex>
-      <Flex align="center" justify="space-between">
-        <Typography>Locked</Typography>
+      </div>
+      <div className={styles.row}>
+        <span className={styles.label}>Locked</span>
         <Switch
           checked={!!selectedEl?.locked}
           onChange={(v) => update("locked", v)}
         />
-      </Flex>
-      <Flex align="center" justify="space-between">
-        <Typography>Visible</Typography>
+      </div>
+      <div className={styles.row}>
+        <span className={styles.label}>Visible</span>
         <Switch
           checked={selectedEl?.visible !== false}
           onChange={(v) => update("visible", v)}
         />
-      </Flex>
-    </>
+      </div>
+    </div>
   );
 };
 

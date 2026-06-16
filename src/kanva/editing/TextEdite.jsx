@@ -1,69 +1,99 @@
-import { Button, ColorPicker, Flex, InputNumber, Select, Typography, Slider } from "../components/UIControls";
-
+import { ColorPicker, InputNumber, Select, Slider, Switch } from "../components/UIControls";
 import { CiTextAlignLeft, CiTextAlignCenter, CiTextAlignRight } from "react-icons/ci";
 import { FaBold, FaItalic, FaUnderline, FaStrikethrough } from "react-icons/fa6";
 import { ImTextHeight } from "react-icons/im";
+import styles from "./editing.module.css";
 
 const TextEdite = ({ selectedEl, setElement, toggle }) => {
     return (
-        <>
-            <Typography style={{ padding: 5 }}>Font Size</Typography>
-            <InputNumber style={{ padding: 5 }} min={6} value={selectedEl?.fontSize || 16} addonBefore={<ImTextHeight size={16} />}
-                onChange={(value) =>
-                    setElement(selectedEl?.id, (el) => ({
-                        ...el,
-                        fontSize: value || 16,
-                    }))
-                }
-            />
-
-            <Typography style={{ padding: 5 }}>Font Align</Typography>
-            <Flex style={{ padding: 5 }} gap={10} wrap align='center' justify='start'>
-                <Button type={selectedEl?.align === "left" ? "primary" : "default"} icon={<CiTextAlignLeft size={22} color='gray' />}
-                    onClick={() => setElement(selectedEl?.id, (el) => ({ ...el, align: "left" }))}
-                />
-                <Button type={selectedEl?.align === "center" ? "primary" : "default"} icon={<CiTextAlignCenter size={22} color='gray' />}
-                    onClick={() =>
+        <div className={styles.container}>
+            {/* Font Size */}
+            <p className={styles.sectionTitle}>Font Size</p>
+            <div className={styles.addonRow}>
+                <span className={styles.addonIcon}><ImTextHeight size={16} /></span>
+                <InputNumber
+                    className={styles.inputFull}
+                    min={6}
+                    value={selectedEl?.fontSize || 16}
+                    onChange={(value) =>
                         setElement(selectedEl?.id, (el) => ({
                             ...el,
-                            align: "center",
+                            fontSize: value || 16,
                         }))
                     }
                 />
-                <Button type={selectedEl?.align === "right" ? "primary" : "default"} icon={<CiTextAlignRight size={22} color='gray' />}
-                    onClick={() =>
-                        setElement(selectedEl?.id, (el) => ({ ...el, align: "right" }))
-                    }
-                />
-            </Flex>
+            </div>
 
-            <Typography style={{ padding: 5 }}>Font Style</Typography>
-            <Flex style={{ padding: 5 }} gap={10} wrap align='center' justify='start'>
-                <Button type={selectedEl?.bold ? "primary" : "default"} icon={<FaBold size={20} color='gray' />} onClick={() => toggle("bold")} />
-                <Button type={selectedEl?.italic ? "primary" : "default"} icon={<FaItalic size={20} color='gray' />} onClick={() => toggle("italic")} />
-                <Button type={selectedEl?.underline ? "primary" : "default"} icon={<FaUnderline size={20} color='gray' />} onClick={() => toggle("underline")} />
-                <Button type={selectedEl?.lineThrough ? "primary" : "default"} icon={<FaStrikethrough size={20} color='gray' />} onClick={() => toggle("lineThrough")} />
-            </Flex>
+            {/* Font Align */}
+            <p className={styles.sectionTitle}>Font Align</p>
+            <div className={styles.btnGroup}>
+                <button
+                    className={`${styles.btn} ${selectedEl?.align === "left" ? styles.btnActive : ""}`}
+                    onClick={() => setElement(selectedEl?.id, (el) => ({ ...el, align: "left" }))}
+                >
+                    <CiTextAlignLeft size={18} />
+                </button>
+                <button
+                    className={`${styles.btn} ${selectedEl?.align === "center" ? styles.btnActive : ""}`}
+                    onClick={() => setElement(selectedEl?.id, (el) => ({ ...el, align: "center" }))}
+                >
+                    <CiTextAlignCenter size={18} />
+                </button>
+                <button
+                    className={`${styles.btn} ${selectedEl?.align === "right" ? styles.btnActive : ""}`}
+                    onClick={() => setElement(selectedEl?.id, (el) => ({ ...el, align: "right" }))}
+                >
+                    <CiTextAlignRight size={18} />
+                </button>
+            </div>
 
-            <Typography style={{ padding: 5 }}>Font Case</Typography>
-            <Select style={{ width: "100%", padding: 5 }} size='large' value={selectedEl?.textTransform || "Font Style"} onChange={(value) => setElement(selectedEl?.id, (el) => ({
-                ...el,
-                textTransform: value,
-            }))}>
-                {["lowercase", "uppercase", "none"].map((t) => (
-                    <Select.Option key={t} value={t}>
-                        {t}
-                    </Select.Option>
-                ))}
-            </Select>
+            {/* Font Style */}
+            <p className={styles.sectionTitle}>Font Style</p>
+            <div className={styles.btnGroup}>
+                <button className={`${styles.btn} ${selectedEl?.bold ? styles.btnActive : ""}`} onClick={() => toggle("bold")}>
+                    <FaBold size={14} />
+                </button>
+                <button className={`${styles.btn} ${selectedEl?.italic ? styles.btnActive : ""}`} onClick={() => toggle("italic")}>
+                    <FaItalic size={14} />
+                </button>
+                <button className={`${styles.btn} ${selectedEl?.underline ? styles.btnActive : ""}`} onClick={() => toggle("underline")}>
+                    <FaUnderline size={14} />
+                </button>
+                <button className={`${styles.btn} ${selectedEl?.lineThrough ? styles.btnActive : ""}`} onClick={() => toggle("lineThrough")}>
+                    <FaStrikethrough size={14} />
+                </button>
+            </div>
 
+            {/* Font Case */}
+            <p className={styles.sectionTitle}>Font Case</p>
+            <Select
+                style={{ width: "100%" }}
+                value={selectedEl?.textTransform || "none"}
+                onChange={(value) => setElement(selectedEl?.id, (el) => ({
+                    ...el,
+                    textTransform: value,
+                }))}
+                options={[
+                    { value: "none", label: "None" },
+                    { value: "lowercase", label: "Lowercase" },
+                    { value: "uppercase", label: "Uppercase" },
+                ]}
+            />
 
-            <Typography style={{ padding: 5 }}>Font Stroke</Typography>
-            <Flex style={{ padding: 5 }} gap={10} wrap justify='space-between'>
-                <ColorPicker value={selectedEl?.stroke || "#000"}
+            {/* Font Stroke */}
+            <p className={styles.sectionTitle}>Font Stroke</p>
+            <div className={styles.colorRow}>
+                <span className={styles.label}>Color</span>
+                <ColorPicker
+                    value={selectedEl?.stroke || "#000"}
                     onChange={(c) => setElement(selectedEl?.id, (el) => ({ ...el, stroke: c.toHexString() }))}
                 />
-                <InputNumber min={0} value={selectedEl?.strokeWidth || 0}
+            </div>
+            <div className={styles.row}>
+                <span className={styles.label}>Width</span>
+                <InputNumber
+                    min={0}
+                    value={selectedEl?.strokeWidth || 0}
                     onChange={(val) =>
                         setElement(selectedEl?.id, (el) => ({
                             ...el,
@@ -71,41 +101,50 @@ const TextEdite = ({ selectedEl, setElement, toggle }) => {
                         }))
                     }
                 />
-            </Flex>
+            </div>
 
-            <Typography style={{ padding: 5 }}>Line Height</Typography>
+            {/* Line Height */}
+            <p className={styles.sectionTitle}>Line Height</p>
             <Slider min={0.5} max={3} step={0.1} value={selectedEl?.lineHeight || 1}
                 onChange={(val) => setElement(selectedEl?.id, (el) => ({ ...el, lineHeight: val }))}
             />
 
-            <Typography style={{ padding: 5 }}>Letter Spacing</Typography>
+            {/* Letter Spacing */}
+            <p className={styles.sectionTitle}>Letter Spacing</p>
             <Slider min={-5} max={20} step={0.5} value={selectedEl?.letterSpacing || 0}
                 onChange={(val) => setElement(selectedEl?.id, (el) => ({ ...el, letterSpacing: val }))}
             />
 
-            <Flex style={{ padding: 5 }} align='center' gap={10} justify='space-between'>
-                <Typography>Padding</Typography>
+            {/* Padding */}
+            <div className={styles.row}>
+                <span className={styles.label}>Padding</span>
                 <InputNumber min={0} value={selectedEl?.padding || 0}
                     onChange={(val) => setElement(selectedEl?.id, (el) => ({ ...el, padding: val }))}
                 />
-            </Flex>
+            </div>
 
-            <Flex style={{ padding: 5 }} align='center' gap={10} justify='space-between'>
-                <Typography>Shadow</Typography>
-                <ColorPicker value={selectedEl?.shadowColor || "#000"}
+            {/* Shadow */}
+            <p className={styles.sectionTitle}>Shadow</p>
+            <div className={styles.colorRow}>
+                <span className={styles.label}>Color</span>
+                <ColorPicker
+                    value={selectedEl?.shadowColor || "#000"}
                     onChange={(c) => setElement(selectedEl?.id, (el) => ({ ...el, shadowColor: c.toHexString() }))}
                 />
-            </Flex>
-
-            <Flex style={{ padding: 5 }} align='center' gap={10} justify='space-between'>
-                <Typography>Blur</Typography>
+            </div>
+            <div className={styles.row}>
+                <span className={styles.label}>Blur</span>
                 <InputNumber min={0} value={selectedEl?.shadowBlur || 0}
-                    onChange={(val) => setElement(selectedEl?.id, (el) => ({ ...el, shadowBlur: val }))}
+                    onChange={(val) =>
+                        setElement(selectedEl?.id, (el) => ({
+                            ...el,
+                            shadowBlur: val,
+                        }))
+                    }
                 />
-            </Flex>
-
-            <Flex style={{ padding: 5 }} align='center' gap={10} justify='space-between'>
-                <Typography>Offset X</Typography>
+            </div>
+            <div className={styles.row}>
+                <span className={styles.label}>Offset X</span>
                 <InputNumber value={selectedEl?.shadowOffsetX || 0}
                     onChange={(val) =>
                         setElement(selectedEl?.id, (el) => ({
@@ -113,10 +152,9 @@ const TextEdite = ({ selectedEl, setElement, toggle }) => {
                             shadowOffsetX: val,
                         }))}
                 />
-            </Flex>
-
-            <Flex style={{ padding: 5 }} align='center' gap={10} justify='space-between'>
-                <Typography>Offset Y</Typography>
+            </div>
+            <div className={styles.row}>
+                <span className={styles.label}>Offset Y</span>
                 <InputNumber value={selectedEl?.shadowOffsetY || 0}
                     onChange={(val) =>
                         setElement(selectedEl?.id, (el) => ({
@@ -125,9 +163,10 @@ const TextEdite = ({ selectedEl, setElement, toggle }) => {
                         }))
                     }
                 />
-            </Flex>
+            </div>
 
-            <Typography style={{ padding: 5 }}>Opacity</Typography>
+            {/* Opacity */}
+            <p className={styles.sectionTitle}>Opacity</p>
             <Slider min={0} max={1} step={0.05} value={selectedEl?.shadowOpacity || 1}
                 onChange={(val) =>
                     setElement(selectedEl?.id, (el) => ({
@@ -136,7 +175,8 @@ const TextEdite = ({ selectedEl, setElement, toggle }) => {
                     }))
                 }
             />
-        </>
-    )
-}
+        </div>
+    );
+};
+
 export default TextEdite;
