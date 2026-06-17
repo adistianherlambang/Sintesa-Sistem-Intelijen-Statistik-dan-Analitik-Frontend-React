@@ -1,11 +1,12 @@
-import { useState, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import axios from "axios"
 import style from "./HistoriInfografis.module.css"
-import { getKanvaProjects } from "../../../logic/kanvaStorage"
 
-function formatDate(id) {
+function formatDate(id, createdAt) {
   try {
-    const d = new Date(Number(id))
+    const parseTarget = isNaN(Number(id)) ? createdAt : Number(id);
+    const d = new Date(parseTarget)
     return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
   } catch {
     return '-'
@@ -14,10 +15,43 @@ function formatDate(id) {
 
 export default function HistoriInfografis({ onLoad }) {
   const navigate = useNavigate()
-  const [projects] = useState(() => getKanvaProjects().slice(0, 4))
+  const [projects, setProjects] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        if (!token) return
+        const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000"
+        const response = await axios.get(`${serverUrl}/api/users/infografis`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setProjects((response.data || []).slice(0, 4))
+      } catch (err) {
+        console.error("Gagal memuat histori infografis overview:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProjects()
+  }, [])
 
   const handleOpen = (id) => navigate(`/dashboard/infografis/buatInfografis?id=${id}`)
   const handleAll = () => navigate('/dashboard/infografis/histori')
+
+  if (loading) {
+    return (
+      <div className={style.content}>
+        <div className={style.titleRow}>
+          <p className={style.sectionTitle}>Histori Infografis</p>
+        </div>
+        <div className={style.emptyState}>
+          <p className={style.emptyText}>Memuat...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={style.content}>
@@ -64,7 +98,7 @@ export default function HistoriInfografis({ onLoad }) {
                   </svg>
                 </div>
               </div>
-              <p className={style.cardDate}>{formatDate(project.id)}</p>
+              <p className={style.cardDate}>{formatDate(project.id, project.createdAt)}</p>
             </div>
           ))}
         </div>

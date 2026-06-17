@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Stage, Layer, Line, Rect } from "react-konva";
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from "react-router-dom";
+import axios from "axios";
 
 import {
     setEditorPages,
@@ -10,7 +11,8 @@ import {
     updateTemplate,
     setSelectedUniqueId,
     setZoom,
-    setPath
+    setPath,
+    setCanvasSize
 } from './store/editorReducer';
 
 import { IoDuplicateOutline, IoSaveOutline } from "react-icons/io5";
@@ -175,13 +177,33 @@ export default function KanvaEditor() {
     const duplicateSelectedRef = useRef(null);
     const deleteSelectedRef = useRef(null);
 
-    // Load templates if ID provided
+    const [saving, setSaving] = useState(false);
+
+    // Load template if ID provided
     useEffect(() => {
-        if (tplId && savedTemplates) {
-            const tpl = savedTemplates?.find((t) => String(t?.id) === tplId);
-            if (tpl) dispatch(setEditorPages(tpl?.pages));
-        }
-    }, [tplId, savedTemplates, dispatch]);
+        const loadProject = async () => {
+            if (!tplId) return;
+            try {
+                const token = localStorage.getItem("token");
+                const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000";
+                const response = await axios.get(`${serverUrl}/api/users/infografis/${tplId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const project = response.data;
+                if (project) {
+                    if (project.pages) {
+                        dispatch(setEditorPages(project.pages));
+                    }
+                    if (project.canvasSize) {
+                        dispatch(setCanvasSize(project.canvasSize));
+                    }
+                }
+            } catch (err) {
+                console.error("Gagal memuat infografis dari database:", err);
+            }
+        };
+        loadProject();
+    }, [tplId, dispatch]);
 
     // ResizeObserver for canvas wrapper
     useEffect(() => {
@@ -644,7 +666,10 @@ export default function KanvaEditor() {
         }
     };
 
-    const saveTemplate = () => {
+    const saveTemplate = async () => {
+        if (saving) return;
+        setSaving(true);
+
         const preview = stageRef.current?.toDataURL({
             x: stagePos.x,
             y: stagePos.y,
@@ -654,20 +679,33 @@ export default function KanvaEditor() {
         }) ?? null;
 
         const projectData = {
-            id: tplId ? Number(tplId) : Date.now(), // pakai id lama jika edit file yang sudah ada
             pages: editorPages,
             preview,
+            canvasSize,
         };
 
-        if (tplId) {
-            // Update project yang sudah ada (bukan buat baru)
-            dispatch(updateTemplate(projectData));
-        } else {
-            // Buat project baru
-            dispatch(setSaveTemplate(projectData));
-        }
+        try {
+            const token = localStorage.getItem("token");
+            const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000";
 
-        navigate('/dashboard/infografis/histori');
+            if (tplId) {
+                // Update project yang sudah ada (bukan buat baru)
+                await axios.put(`${serverUrl}/api/users/infografis/${tplId}`, projectData, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            } else {
+                // Buat project baru
+                await axios.post(`${serverUrl}/api/users/infografis`, projectData, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            }
+            navigate('/dashboard/infografis/histori');
+        } catch (err) {
+            console.error("Gagal menyimpan infografis ke database:", err);
+            alert("Gagal menyimpan infografis. Silakan coba lagi.");
+        } finally {
+            setSaving(false);
+        }
     };
 
     const sidebarTabs = [
@@ -829,9 +867,10 @@ export default function KanvaEditor() {
                                 className={styles.backBtn}
                                 style={{ background: '#34B34A', borderColor: '#2da140', color: '#fff', fontWeight: 600 }}
                                 onClick={saveTemplate}
+                                disabled={saving}
                             >
                                 <IoSaveOutline size={16} />
-                                <span>Simpan</span>
+                                <span>{saving ? "Menyimpan..." : "Simpan"}</span>
                             </button>
                         </div>
                     </div>

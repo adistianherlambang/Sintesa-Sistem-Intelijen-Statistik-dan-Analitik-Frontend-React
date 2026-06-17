@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { kanvaStore } from '../../../kanva/store/editorStore'
-import { deleteTemplate } from '../../../kanva/store/editorReducer'
+import axios from 'axios'
 import styles from './HistoriInfografisPage.module.css'
 
-function formatDate(id) {
-  // id is a timestamp (Date.now())
+function formatDate(id, createdAt) {
   try {
-    const d = new Date(Number(id))
+    const parseTarget = isNaN(Number(id)) ? createdAt : Number(id);
+    const d = new Date(parseTarget)
     return d.toLocaleDateString('id-ID', {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
@@ -19,19 +18,29 @@ function formatDate(id) {
 
 export default function HistoriInfografisPage() {
   const navigate = useNavigate()
-
-  // Baca langsung dari kanvaStore (karena halaman ini di luar <Provider>)
-  const [projects, setProjects] = useState(
-    () => kanvaStore.getState()?.editor?.savedTemplates ?? []
-  )
+  const [projects, setProjects] = useState([])
+  const [loading, setLoading] = useState(true)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
 
-  // Subscribe ke perubahan store agar UI update otomatis
+  const token = localStorage.getItem("token")
+  const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000"
+
+  const fetchProjects = async () => {
+    try {
+      setLoading(true)
+      const response = await axios.get(`${serverUrl}/api/users/infografis`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setProjects(response.data || [])
+    } catch (err) {
+      console.error("Gagal memuat histori infografis:", err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    const unsubscribe = kanvaStore.subscribe(() => {
-      setProjects(kanvaStore.getState()?.editor?.savedTemplates ?? [])
-    })
-    return unsubscribe
+    fetchProjects()
   }, [])
 
   const handleOpen = (id) => {
@@ -42,14 +51,32 @@ export default function HistoriInfografisPage() {
     navigate('/dashboard/infografis/buatInfografis')
   }
 
-  const handleDeleteConfirm = (id) => {
-    // Dispatch langsung ke kanvaStore
-    kanvaStore.dispatch(deleteTemplate(id))
-    setDeleteConfirm(null)
+  const handleDeleteConfirm = async (id) => {
+    try {
+      await axios.delete(`${serverUrl}/api/users/infografis/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setProjects((prev) => prev.filter((p) => p.id !== id))
+    } catch (err) {
+      console.error("Gagal menghapus infografis:", err)
+      alert("Gagal menghapus infografis.")
+    } finally {
+      setDeleteConfirm(null)
+    }
   }
 
-
-
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <p className={styles.tabTitle}>Histori Infografis</p>
+        </div>
+        <div className={styles.emptyState}>
+          <p className={styles.emptyTitle}>Memuat histori...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={styles.container}>
@@ -125,9 +152,9 @@ export default function HistoriInfografisPage() {
               <div className={styles.cardFooter}>
                 <div className={styles.cardInfo}>
                   <p className={styles.cardTitle}>
-                    Infografis {formatDate(project.id).split(',')[0]}
+                    Infografis {formatDate(project.id, project.createdAt).split(',')[0]}
                   </p>
-                  <p className={styles.cardDate}>{formatDate(project.id)}</p>
+                  <p className={styles.cardDate}>{formatDate(project.id, project.createdAt)}</p>
                 </div>
                 <button
                   className={styles.deleteBtn}
