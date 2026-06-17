@@ -1,0 +1,107 @@
+/* Resize.module.css */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.controlRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.resizeBtn {
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 12px 0;
+}
+
+/* Platform group */
+.platformGroup {
+  margin-bottom: 8px;
+}
+
+.platformTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 0 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  margin-bottom: 6px;
+}
+
+/* Preset cards */
+.presetGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.presetCard {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.presetCard:hover {
+  background: rgba(52, 179, 74, 0.08);
+  border-color: rgba(52, 179, 74, 0.35);
+}
+
+.presetName {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.presetSize {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.presetIcon {
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 2px;
+}
+
+/* Paper icon (document shape) */
+.paperIcon {
+  width: 20px;
+  height: 26px;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 2px;
+  position: relative;
+  margin-bottom: 2px;
+}
+
+.paperIconWide {
+  width: 26px;
+  height: 20px;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 2px;
+  margin-bottom: 2px;
+}

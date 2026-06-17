@@ -110,7 +110,7 @@ export default function KanvaEditor() {
 
     const pasteSelected = () => {
         if (!clipboard) return;
-        
+
         const clipboardArr = Array.isArray(clipboard) ? clipboard : [clipboard];
         const newIds = [];
         const elementsToPaste = [];
@@ -217,8 +217,8 @@ export default function KanvaEditor() {
         const handleKeyDown = (e) => {
             const activeEl = document.activeElement;
             const isTyping = activeEl && (
-                activeEl.tagName === "INPUT" || 
-                activeEl.tagName === "TEXTAREA" || 
+                activeEl.tagName === "INPUT" ||
+                activeEl.tagName === "TEXTAREA" ||
                 activeEl.isContentEditable
             );
 
@@ -358,7 +358,7 @@ export default function KanvaEditor() {
         if (!canvasSize?.w || !containerSize?.w) return;
         const oldScale = zoom;
         const clampedZoom = Math.min(3, Math.max(0.1, newZoom));
-        
+
         const pointer = {
             x: containerSize.w / 2,
             y: containerSize.h / 2
@@ -520,24 +520,24 @@ export default function KanvaEditor() {
         setPagesWithHistory((prev) => {
             const cp = JSON.parse(JSON.stringify(prev));
             const activeChildren = cp[activeIndex]?.children || [];
-            
+
             const originalEl = activeChildren.find((el) => el?.id === id);
             if (!originalEl) return prev;
-            
+
             const updatedEl = updater(originalEl);
-            
+
             const dx = (updatedEl.x ?? originalEl.x) - (originalEl.x ?? 0);
             const dy = (updatedEl.y ?? originalEl.y) - (originalEl.y ?? 0);
-            
+
             const selectedIds = Array.isArray(selectedUniqueId) ? selectedUniqueId : [selectedUniqueId].filter(Boolean);
             const isDragging = dragStartPositionsRef.current !== null;
-            
+
             const els = activeChildren.map((el) => {
                 if (!el) return el;
                 if (el.id === id) {
                     return updatedEl;
                 }
-                
+
                 if (selectedIds.includes(el.id) && selectedIds.includes(id)) {
                     if (isDragging) {
                         const nextEl = { ...el };
@@ -547,7 +547,7 @@ export default function KanvaEditor() {
                         }
                         return nextEl;
                     }
-                    
+
                     const nextEl = { ...el };
                     for (const key in updatedEl) {
                         if (updatedEl[key] !== originalEl[key]) {
@@ -559,7 +559,7 @@ export default function KanvaEditor() {
                 }
                 return el;
             });
-            
+
             cp[activeIndex] = { ...cp[activeIndex], children: els };
             return cp;
         });
@@ -855,7 +855,7 @@ export default function KanvaEditor() {
 
                 {/* Sub Panel Content Sidebar - Absolute Overlay */}
                 {(path !== undefined || selectedEl !== undefined) && (
-                    <div 
+                    <div
                         className={styles.sidebarContainer}
                         style={{
                             position: 'absolute',
@@ -866,7 +866,8 @@ export default function KanvaEditor() {
                             zIndex: 50,
                             borderRadius: '8px',
                             boxShadow: '10px 0 30px rgba(0, 0, 0, 0.5)',
-                            backgroundColor: '#121a21',
+                            backgroundColor: 'rgba(255, 255, 255, 0.01)',
+                            border: "solid rgba(255, 255, 255, 0.2) 1px"
                         }}
                     >
                         <Sidebar
