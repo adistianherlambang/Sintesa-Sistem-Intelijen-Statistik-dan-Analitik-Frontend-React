@@ -7,7 +7,7 @@ import { TbPhotoDown } from "react-icons/tb";
 import styles from './Share.module.css';
 
 export default function Share({ stageRef }) {
-    const { editorPages, activeIndex } = useSelector((state) => state?.editor ?? {});
+    const { editorPages, activeIndex, canvasSize } = useSelector((state) => state?.editor ?? {});
     const [open, setOpen] = useState(false);
     const [dropPos, setDropPos] = useState({ top: 0, right: 0 });
     const btnRef = useRef(null);
@@ -24,25 +24,75 @@ export default function Share({ stageRef }) {
         document.body.removeChild(link);
     };
 
+    /**
+     * Ekspor hanya area halaman infografis.
+     * Pendekatan: simpan state stage, reset posisi/skala/ukuran ke canvasSize,
+     * ekspor (canvas HTML secara native memotong konten di luar batasnya),
+     * lalu kembalikan state semula.
+     */
+    const getPageDataURL = (mimeType) => {
+        const stage = stageRef?.current;
+        if (!stage) return null;
+
+        const w = canvasSize?.w;
+        const h = canvasSize?.h;
+        if (!w || !h) return stage.toDataURL({ mimeType, pixelRatio: 1 });
+
+        // Simpan state saat ini
+        const savedX      = stage.x();
+        const savedY      = stage.y();
+        const savedScaleX = stage.scaleX();
+        const savedScaleY = stage.scaleY();
+        const savedW      = stage.width();
+        const savedH      = stage.height();
+
+        // Reset ke full-page 1:1 di origin
+        stage.x(0);
+        stage.y(0);
+        stage.scaleX(1);
+        stage.scaleY(1);
+        stage.width(w);
+        stage.height(h);
+        stage.draw(); // redraw sinkron dengan transform baru
+
+        const uri = stage.toDataURL({ mimeType, pixelRatio: 1 });
+
+        // Kembalikan state semula
+        stage.x(savedX);
+        stage.y(savedY);
+        stage.scaleX(savedScaleX);
+        stage.scaleY(savedScaleY);
+        stage.width(savedW);
+        stage.height(savedH);
+        stage.draw();
+
+        return uri;
+    };
+
+
     const exportPNG = () => {
-        const uri = stageRef?.current?.toDataURL({ pixelRatio: 2, mimeType: "image/png" });
+        const uri = getPageDataURL("image/png");
         downloadURI(uri, getFileName("png"));
         setOpen(false);
     };
 
     const exportJPG = () => {
-        const uri = stageRef?.current?.toDataURL({ pixelRatio: 2, mimeType: "image/jpeg" });
+        const uri = getPageDataURL("image/jpeg");
         downloadURI(uri, getFileName("jpg"));
         setOpen(false);
     };
 
     const exportPDF = () => {
-        const uri = stageRef?.current?.toDataURL({ pixelRatio: 2, mimeType: "image/png" });
-        const pdf = new jsPDF("l", "pt", [stageRef?.current?.width(), stageRef?.current?.height()]);
-        pdf?.addImage(uri, "PNG", 0, 0, stageRef?.current?.width(), stageRef?.current?.height());
-        pdf?.save(getFileName("pdf"));
+        const uri = getPageDataURL("image/png");
+        const w = canvasSize?.w || stageRef?.current?.width();
+        const h = canvasSize?.h || stageRef?.current?.height();
+        const orientation = w >= h ? "l" : "p";
+        const pdf = new jsPDF(orientation, "pt", [w, h]);
+        pdf.addImage(uri, "PNG", 0, 0, w, h);
+        pdf.save(getFileName("pdf"));
         setOpen(false);
     };
+
 
     const handleToggle = () => {
         if (!open && btnRef.current) {

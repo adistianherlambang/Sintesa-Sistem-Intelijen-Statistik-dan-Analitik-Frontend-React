@@ -12,71 +12,66 @@ import styles from "./Resize.module.css";
 
 const { Text } = Typography;
 
-// Ukuran kertas dalam px pada 96 DPI
-// A4:  210mm × 297mm  → 794 × 1123 px
-// A3:  297mm × 420mm  → 1123 × 1587 px
-// F4:  215mm × 330mm  → 813 × 1247 px
-
 const PRESETS = {
     "Kertas": [
-        { name: "A4 Portrait",   w: 794,  h: 1123 },
-        { name: "A4 Landscape",  w: 1123, h: 794  },
-        { name: "A3 Portrait",   w: 1123, h: 1587 },
-        { name: "A3 Landscape",  w: 1587, h: 1123 },
-        { name: "F4 Portrait",   w: 813,  h: 1247 },
-        { name: "F4 Landscape",  w: 1247, h: 813  },
-    ],
-
-    YouTube: [
-        { name: "Channel Art",     w: 2560, h: 1440 },
-        { name: "Thumbnail",       w: 1280, h: 720  },
-        { name: "Shorts / Vertical", w: 1080, h: 1920 },
+        { name: "A4 Portrait", w: 794, h: 1123 },
+        { name: "A4 Landscape", w: 1123, h: 794 },
+        { name: "A3 Portrait", w: 1123, h: 1587 },
+        { name: "A3 Landscape", w: 1587, h: 1123 },
+        { name: "F4 Portrait", w: 813, h: 1247 },
+        { name: "F4 Landscape", w: 1247, h: 813 },
     ],
 
     Instagram: [
-        { name: "Post (Square)",         w: 1080, h: 1080 },
-        { name: "Post (Portrait 4:5)",   w: 1080, h: 1350 },
+        { name: "Post (Square)", w: 1080, h: 1080 },
+        { name: "Post (Portrait 4:5)", w: 1080, h: 1350 },
         { name: "Post (Landscape 1.91:1)", w: 1080, h: 566 },
-        { name: "Story / Reel",          w: 1080, h: 1920 },
+        { name: "Story / Reel", w: 1080, h: 1920 },
+    ],
+
+    YouTube: [
+        { name: "Channel Art", w: 2560, h: 1440 },
+        { name: "Thumbnail", w: 1280, h: 720 },
+        { name: "Shorts / Vertical", w: 1080, h: 1920 },
     ],
 
     Facebook: [
-        { name: "Cover (Desktop)",   w: 820,  h: 312  },
-        { name: "Cover (Classic)",   w: 851,  h: 315  },
-        { name: "Event Cover (Std)", w: 1200, h: 628  },
-        { name: "Event Cover (Hi)",  w: 1920, h: 1005 },
-        { name: "Post (Landscape)",  w: 1200, h: 630  },
-        { name: "Post (Square)",     w: 1080, h: 1080 },
-        { name: "Story",             w: 1080, h: 1920 },
-        { name: "Profile Picture",   w: 400,  h: 400  },
+        { name: "Cover (Desktop)", w: 820, h: 312 },
+        { name: "Cover (Classic)", w: 851, h: 315 },
+        { name: "Event Cover (Std)", w: 1200, h: 628 },
+        { name: "Event Cover (Hi)", w: 1920, h: 1005 },
+        { name: "Post (Landscape)", w: 1200, h: 630 },
+        { name: "Post (Square)", w: 1080, h: 1080 },
+        { name: "Story", w: 1080, h: 1920 },
+        { name: "Profile Picture", w: 400, h: 400 },
     ],
 
     LinkedIn: [
-        { name: "Personal Banner",     w: 1584, h: 396 },
-        { name: "Company Banner",      w: 1536, h: 768 },
-        { name: "Overview Tab Image",  w: 360,  h: 120 },
-        { name: "Life Tab Hero",       w: 1128, h: 376 },
-        { name: "Post (with Link)",    w: 1200, h: 627 },
-        { name: "Profile Picture",     w: 400,  h: 400 },
+        { name: "Personal Banner", w: 1584, h: 396 },
+        { name: "Company Banner", w: 1536, h: 768 },
+        { name: "Overview Tab Image", w: 360, h: 120 },
+        { name: "Life Tab Hero", w: 1128, h: 376 },
+        { name: "Post (with Link)", w: 1200, h: 627 },
+        { name: "Profile Picture", w: 400, h: 400 },
     ],
 
     Twitter: [
-        { name: "Header",              w: 1500, h: 500  },
-        { name: "Post (16:9)",         w: 1200, h: 675  },
-        { name: "Post (Square)",       w: 1080, h: 1080 },
-        { name: "Profile Picture",     w: 400,  h: 400  },
+        { name: "Header", w: 1500, h: 500 },
+        { name: "Post (16:9)", w: 1200, h: 675 },
+        { name: "Post (Square)", w: 1080, h: 1080 },
+        { name: "Profile Picture", w: 400, h: 400 },
     ],
 };
 
 const PlatformIcon = ({ platform, size = 22 }) => {
     switch (platform) {
         case "Instagram": return <FaInstagram size={size} />;
-        case "Facebook":  return <LiaFacebookSquare size={size + 3} />;
-        case "YouTube":   return <CiYoutube size={size + 2} />;
-        case "LinkedIn":  return <CiLinkedin size={size + 4} />;
-        case "Twitter":   return <CiTwitter size={size + 3} />;
-        case "Kertas":    return <TbFileText size={size} />;
-        default:          return null;
+        case "Facebook": return <LiaFacebookSquare size={size + 3} />;
+        case "YouTube": return <CiYoutube size={size + 2} />;
+        case "LinkedIn": return <CiLinkedin size={size + 4} />;
+        case "Twitter": return <CiTwitter size={size + 3} />;
+        case "Kertas": return <TbFileText size={size} />;
+        default: return null;
     }
 };
 
@@ -99,7 +94,7 @@ export default function Resize() {
                     ...el,
                     x: el?.x * scaleX,
                     y: el?.y * scaleY,
-                    width:  el?.width  ? el?.width  * scaleX : el?.width,
+                    width: el?.width ? el?.width * scaleX : el?.width,
                     height: el?.height ? el?.height * scaleY : el?.height,
                 })),
             };
