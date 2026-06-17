@@ -30,7 +30,7 @@ import EditorLayer from "./components/EditorLayer";
 import Sidebar from "./components/Sidebar";
 import Share from './components/Share';
 import UndoRedo from './components/UndoRedo';
-import AddPage from './components/AddPage';
+
 import EditorColorPicker from './components/EditorColorPicker';
 import Wrapper from '../components/Wrapper/Wrapper';
 
@@ -978,10 +978,7 @@ export default function KanvaEditor() {
                             </Stage>
                         </div>
 
-                        {/* Bottom Page Bar */}
-                        <div className={styles.footerBar}>
-                            <AddPage setPagesWithHistory={setPagesWithHistory} />
-                        </div>
+
                     </div>
                 </Wrapper>
             </div>
