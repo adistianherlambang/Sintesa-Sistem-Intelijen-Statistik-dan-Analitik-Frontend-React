@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Row, Col, Image, Space, Skeleton } from "./UIControls";
 import { Stage, Layer, Rect, Text, Image as KonvaImage } from "react-konva";
 import { useDispatch, useSelector } from "react-redux";
-import { setSelectedUniqueId, setPopUp } from "../store/editorReducer";
+import { setSelectedUniqueId, setPopUp, setCanvasSize } from "../store/editorReducer";
 
 import tea from "../assets/tea.png";
 import banner7 from "../assets/banner-7.png";
@@ -19,6 +19,8 @@ const banners = [
     {
         name: "Creative Portfolio Banner",
         type: "banner",
+        w: 950,
+        h: 500,
         x: 100,
         y: 60,
         children: [
@@ -115,6 +117,8 @@ const banners = [
     },
     {
         name: "Freya Moore Portfolio Banner",
+        w: 950,
+        h: 500,
         type: "banner",
         x: 0,
         y: 0,
@@ -193,6 +197,8 @@ const banners = [
     },
     {
         name: "Morgana Perry Anniversary Banner",
+        w: 950,
+        h: 500,
         type: "banner",
         x: 0,
         y: 0,
@@ -283,6 +289,8 @@ const banners = [
     },
     {
         name: "AI Banner",
+        w: 950,
+        h: 500,
         type: "banner",
         x: 0,
         y: 0,
@@ -383,6 +391,8 @@ const banners = [
     },
     {
         name: "Art Workshop Banner",
+        w: 900,
+        h: 600,
         preview: "art_workshop_banner.png",
         x: 100,
         y: 60,
@@ -599,6 +609,8 @@ const banners = [
     },
     {
         name: "Rimberio Cafe Banner",
+        w: 900,
+        h: 600,
         preview: "rimberio_cafe_banner.png",
         x: 100,
         y: 60,
@@ -775,6 +787,10 @@ export default function BannerList({ setPagesWithHistory }) {
             cp[activeIndex] = { ...(cp[activeIndex] || {}), children, background: template?.background };
             return cp;
         });
+        // Sesuaikan ukuran kanvas dengan ukuran template
+        if (template?.w && template?.h) {
+            dispatch(setCanvasSize({ w: template.w, h: template.h }));
+        }
         dispatch(setSelectedUniqueId(null));
         dispatch(setPopUp(false));
     };
