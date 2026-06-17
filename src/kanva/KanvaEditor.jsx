@@ -7,6 +7,7 @@ import {
     setEditorPages,
     setPopUp,
     setSaveTemplate,
+    updateTemplate,
     setSelectedUniqueId,
     setZoom,
     setPath
@@ -644,22 +645,28 @@ export default function KanvaEditor() {
     };
 
     const saveTemplate = () => {
-        if (stageRef.current) {
-            const preview = stageRef.current.toDataURL({
-                x: stagePos.x,
-                y: stagePos.y,
-                width: canvasSize.w * zoom,
-                height: canvasSize.h * zoom,
-                pixelRatio: 0.3
-            });
-            dispatch(
-                setSaveTemplate({
-                    id: Date.now(),
-                    pages: editorPages,
-                    preview,
-                })
-            );
+        const preview = stageRef.current?.toDataURL({
+            x: stagePos.x,
+            y: stagePos.y,
+            width: canvasSize.w * zoom,
+            height: canvasSize.h * zoom,
+            pixelRatio: 0.3
+        }) ?? null;
+
+        const projectData = {
+            id: tplId ? Number(tplId) : Date.now(), // pakai id lama jika edit file yang sudah ada
+            pages: editorPages,
+            preview,
+        };
+
+        if (tplId) {
+            // Update project yang sudah ada (bukan buat baru)
+            dispatch(updateTemplate(projectData));
+        } else {
+            // Buat project baru
+            dispatch(setSaveTemplate(projectData));
         }
+
         navigate('/dashboard/infografis/histori');
     };
 

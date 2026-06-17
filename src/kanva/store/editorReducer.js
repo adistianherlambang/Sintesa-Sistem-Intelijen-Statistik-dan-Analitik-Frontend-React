@@ -56,6 +56,17 @@ const editorSlice = createSlice({
         setSaveTemplate: (state, action) => {
             state.savedTemplates.push(action.payload);
         },
+        updateTemplate: (state, action) => {
+            // Perbarui template yang sudah ada berdasarkan id
+            const idx = state.savedTemplates.findIndex(
+                (tpl) => String(tpl?.id) === String(action.payload.id)
+            );
+            if (idx !== -1) {
+                state.savedTemplates[idx] = action.payload;
+            } else {
+                state.savedTemplates.push(action.payload);
+            }
+        },
         deleteTemplate: (state, action) => {
             state.savedTemplates = state.savedTemplates.filter(
                 (tpl) => String(tpl?.id) !== String(action.payload)
@@ -76,6 +87,7 @@ export const {
     setCanvasSize,
     setUploadsPhotos,
     setSaveTemplate,
+    updateTemplate,
     deleteTemplate
 } = editorSlice.actions;
 export default editorSlice.reducer;

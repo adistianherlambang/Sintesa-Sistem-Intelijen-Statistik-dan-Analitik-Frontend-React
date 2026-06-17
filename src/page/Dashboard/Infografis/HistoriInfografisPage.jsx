@@ -1,7 +1,8 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { kanvaStore } from '../../../kanva/store/editorStore'
+import { deleteTemplate } from '../../../kanva/store/editorReducer'
 import styles from './HistoriInfografisPage.module.css'
-import { getKanvaProjects, deleteKanvaProject } from '../../../logic/kanvaStorage'
 
 function formatDate(id) {
   // id is a timestamp (Date.now())
@@ -18,10 +19,20 @@ function formatDate(id) {
 
 export default function HistoriInfografisPage() {
   const navigate = useNavigate()
-  const [projects, setProjects] = useState(() => getKanvaProjects())
-  const [deleteConfirm, setDeleteConfirm] = useState(null) // id being confirmed
 
-  const refresh = useCallback(() => setProjects(getKanvaProjects()), [])
+  // Baca langsung dari kanvaStore (karena halaman ini di luar <Provider>)
+  const [projects, setProjects] = useState(
+    () => kanvaStore.getState()?.editor?.savedTemplates ?? []
+  )
+  const [deleteConfirm, setDeleteConfirm] = useState(null)
+
+  // Subscribe ke perubahan store agar UI update otomatis
+  useEffect(() => {
+    const unsubscribe = kanvaStore.subscribe(() => {
+      setProjects(kanvaStore.getState()?.editor?.savedTemplates ?? [])
+    })
+    return unsubscribe
+  }, [])
 
   const handleOpen = (id) => {
     navigate(`/dashboard/infografis/buatInfografis?id=${id}`)
@@ -32,10 +43,13 @@ export default function HistoriInfografisPage() {
   }
 
   const handleDeleteConfirm = (id) => {
-    deleteKanvaProject(id)
-    refresh()
+    // Dispatch langsung ke kanvaStore
+    kanvaStore.dispatch(deleteTemplate(id))
     setDeleteConfirm(null)
   }
+
+
+
 
   return (
     <div className={styles.container}>
