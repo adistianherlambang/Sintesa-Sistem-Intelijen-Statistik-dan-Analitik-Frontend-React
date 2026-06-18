@@ -1,8 +1,11 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Text, Transformer } from "react-konva";
 import { useKonvaSnapping } from "use-konva-snapping";
+import { useDispatch } from "react-redux";
+import { setPath } from "../store/editorReducer";
 
 export default function SelectableText({ shape, selected, onSelect, onChange}) {
+    const dispatch = useDispatch();
     const ref = useRef();
     const trRef = useRef();
     const [isEditing, setIsEditing] = useState(false);
@@ -112,10 +115,12 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
                 onDblClick={() =>{
                     isLocked() 
                     setIsEditing(true)
+                    dispatch(setPath("text"))
                     }}
                 onDblTap={() =>{
                     isLocked()
                      setIsEditing(true)
+                     dispatch(setPath("text"))
                      }}
                 onDragMove={(e) => {
                       isLocked(); 

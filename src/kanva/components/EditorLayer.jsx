@@ -73,7 +73,7 @@ const EditorLayer = ({ el, setElement, stageRef, isSpacePressed }) => {
         />;
     }
 
-    if (el?.type === "banner") {
+    if (el?.type === "banner" || el?.type === "group") {
         return (
             <Group
                 key={el?.id}

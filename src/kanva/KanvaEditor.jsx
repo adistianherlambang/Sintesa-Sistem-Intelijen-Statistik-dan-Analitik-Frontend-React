@@ -31,6 +31,8 @@ import EditorLayer from "./components/EditorLayer";
 import Sidebar from "./components/Sidebar";
 import Share from './components/Share';
 import UndoRedo from './components/UndoRedo';
+import SidebarLayer from "./components/Layer";
+import sidebarStyles from "./components/Sidebar.module.css";
 
 import EditorColorPicker from './components/EditorColorPicker';
 import Wrapper from '../components/Wrapper/Wrapper';
@@ -276,6 +278,7 @@ export default function KanvaEditor() {
 
     const duplicateSelectedRef = useRef(null);
     const deleteSelectedRef = useRef(null);
+    const groupSelectedRef = useRef(null);
 
     const undoRef = useRef(null);
     const redoRef = useRef(null);
@@ -411,6 +414,24 @@ export default function KanvaEditor() {
             if (!isTyping) {
                 const isCtrlOrCmd = e.ctrlKey || e.metaKey;
                 const keyLower = e.key.toLowerCase();
+
+                // T (Text Tool shortcut)
+                if (!isCtrlOrCmd && keyLower === "t") {
+                    e.preventDefault();
+                    dispatch(setPath("text"));
+                }
+
+                // V (Move Tool shortcut)
+                if (!isCtrlOrCmd && keyLower === "v") {
+                    e.preventDefault();
+                    dispatch(setPath(undefined));
+                }
+
+                // Ctrl/Cmd + G (Group elements)
+                if (isCtrlOrCmd && keyLower === "g") {
+                    e.preventDefault();
+                    if (groupSelectedRef.current) groupSelectedRef.current();
+                }
 
                 // Ctrl/Cmd + Z (Undo)
                 if (isCtrlOrCmd && !e.shiftKey && keyLower === "z") {
@@ -933,6 +954,53 @@ export default function KanvaEditor() {
     };
     duplicateSelectedRef.current = duplicateSelected;
 
+    const groupSelected = () => {
+        if (!selectedUniqueId) return;
+        const selectedIds = Array.isArray(selectedUniqueId) ? selectedUniqueId : [selectedUniqueId];
+        if (selectedIds.length < 2) return;
+
+        const pageChildren = activePage?.children || [];
+        const elementsToGroup = pageChildren.filter(el => selectedIds.includes(el.id));
+        if (elementsToGroup.length < 2) return;
+
+        let minX = Infinity;
+        let minY = Infinity;
+        
+        elementsToGroup.forEach(el => {
+            const x = el.x ?? 0;
+            const y = el.y ?? 0;
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+        });
+
+        if (minX === Infinity) minX = 0;
+        if (minY === Infinity) minY = 0;
+
+        const groupElement = {
+            id: `group-${Date.now()}`,
+            type: 'group',
+            x: minX,
+            y: minY,
+            children: elementsToGroup.map(el => ({
+                ...el,
+                x: (el.x ?? 0) - minX,
+                y: (el.y ?? 0) - minY
+            }))
+        };
+
+        setPagesWithHistory((prev) => {
+            const cp = JSON.parse(JSON.stringify(prev));
+            const page = cp[activeIndex] || { children: [] };
+            page.children = (page?.children || []).filter(el => !selectedIds.includes(el.id));
+            page.children.push(groupElement);
+            cp[activeIndex] = page;
+            return cp;
+        });
+
+        dispatch(setSelectedUniqueId(groupElement.id));
+    };
+    groupSelectedRef.current = groupSelected;
+
     const handleNavClick = (panelName) => {
         dispatch(setSelectedUniqueId(null));
         dispatch(setPopUp(false));
@@ -1312,6 +1380,44 @@ export default function KanvaEditor() {
                         </div>
 
 
+                    </div>
+                </Wrapper>
+
+                {/* Right side Layers Panel - wrapped in Wrapper */}
+                <Wrapper width="300px" height="100%" padding="0" hoverable={false}>
+                    <div
+                        className={styles.sidebarContainer}
+                        style={{
+                            width: '300px',
+                            height: '100%',
+                            backgroundColor: 'rgba(255, 255, 255, 0.01)',
+                            borderLeft: "1px solid rgba(255, 255, 255, 0.08)"
+                        }}
+                    >
+                        <div className={sidebarStyles.sidebar}>
+                            <div className={sidebarStyles.header}>
+                                <SlLayers style={{ fontSize: 18 }} />
+                                <span className={sidebarStyles.title}>Daftar Layar</span>
+                            </div>
+                            <div className={sidebarStyles.content}>
+                                <SidebarLayer
+                                    elements={activePage?.children || []}
+                                    onToggleLock={(id) => {
+                                        setElement(id, (el) => ({ ...el, locked: !el?.locked }));
+                                    }}
+                                    onToggleVisibility={(id) => {
+                                        setElement(id, (el) => ({ ...el, visible: !el?.visible }));
+                                    }}
+                                    onReorder={(newChildren) => {
+                                        setPagesWithHistory((pages) =>
+                                            pages?.map((p) =>
+                                                p?.id === activePage?.id ? { ...p, children: newChildren } : p
+                                            )
+                                        );
+                                    }}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </Wrapper>
             </div>
