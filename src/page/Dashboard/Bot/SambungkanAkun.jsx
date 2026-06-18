@@ -3,6 +3,7 @@ import axios from "axios";
 import styles from "./SambungkanAkun.module.css";
 import Wrapper from "../../../components/Wrapper/Wrapper";
 import MainButton from "../../../components/MainButton/MainButton";
+import SearchableSelect from "../../../components/SearchableSelect/SearchableSelect";
 
 export default function SambungkanAkun() {
   const [session, setSession] = useState(null);
@@ -275,14 +276,14 @@ export default function SambungkanAkun() {
                   <div className={styles.formGroup}>
                     <label className={styles.label}>Status Aktif Bot</label>
                     <div className={styles.selectWrapper}>
-                      <select
-                        className={styles.selectInput}
+                      <SearchableSelect
                         value={botEnabled ? "on" : "off"}
-                        onChange={(e) => setBotEnabled(e.target.value === "on")}
-                      >
-                        <option value="on">AKTIF (ON)</option>
-                        <option value="off">NONAKTIF (OFF)</option>
-                      </select>
+                        onChange={(val) => setBotEnabled(val === "on")}
+                        options={[
+                          { value: "on", label: "AKTIF (ON)" },
+                          { value: "off", label: "NONAKTIF (OFF)" }
+                        ]}
+                      />
                     </div>
                   </div>
 

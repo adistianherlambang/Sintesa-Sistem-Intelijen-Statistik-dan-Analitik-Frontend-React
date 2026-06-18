@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './UIControls.module.css';
+import SearchableSelect from '../../components/SearchableSelect/SearchableSelect';
 
 // Row & Col
 export const Row = ({ children, gutter, style, className = '', onClick }) => {
@@ -173,16 +174,18 @@ export const Slider = ({ min = 0, max = 100, step = 1, value, onChange, style })
 };
 
 // Select & Option
-export const Select = ({ children, value, onChange, style, size, className = '' }) => {
+export const Select = ({ children, value, onChange, style, size = 'small', className = '', options }) => {
   return (
-    <select
-      className={`${styles.select} ${className}`}
+    <SearchableSelect
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={onChange}
+      options={options}
       style={style}
+      size={size}
+      className={className}
     >
       {children}
-    </select>
+    </SearchableSelect>
   );
 };
 

@@ -1,0 +1,171 @@
+/* SearchableSelect.module.css */
+
+.container {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #fff;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.trigger:hover:not(.triggerDisabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.triggerActive {
+  border-color: #34B34A !important;
+  box-shadow: 0 0 0 2px rgba(52, 179, 74, 0.2);
+}
+
+.triggerDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.displayValue {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 8px;
+}
+
+.chevron {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+  color: #fff;
+}
+
+/* Size small (for Kanva Editor sidebar) */
+.sizeSmall {
+  padding: 5px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+/* Dropdown overlay */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background-color: #0A180B; /* Match register's dropdown background */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  max-height: 250px;
+  overflow: hidden;
+  box-sizing: border-box;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.searchWrapper {
+  padding: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.searchInput {
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  padding: 6px 10px;
+  width: 100%;
+  box-sizing: border-box;
+  color: white;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.searchInput:focus {
+  border-color: #34B34A;
+}
+
+.optionList {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  box-sizing: border-box;
+}
+
+.optionList::-webkit-scrollbar {
+  width: 5px;
+}
+
+.optionList::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.option {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+  user-select: none;
+  -webkit-user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.option:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+.optionSelected {
+  background-color: rgba(52, 179, 74, 0.18) !important;
+  color: #34B34A !important;
+  font-weight: 600;
+}
+
+.noOptions {
+  padding: 12px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+}
+
+/* Adjust sizes for small dropdown */
+.dropdownSmall {
+  max-height: 200px;
+}
+
+.dropdownSmall .option {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.dropdownSmall .searchInput {
+  padding: 4px 8px;
+  font-size: 12px;
+}
