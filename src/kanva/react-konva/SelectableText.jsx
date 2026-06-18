@@ -18,6 +18,12 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
         snapToShapes: true,
     });
 
+    const shapeRef = useRef(shape);
+    shapeRef.current = shape;
+
+    const onChangeRef = useRef(onChange);
+    onChangeRef.current = onChange;
+
     // Sync draftText when shape.text changes externally
     useEffect(() => {
         if (shape?.text !== undefined) {
@@ -41,6 +47,9 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
         const stage = textNode.getStage();
         if (!stage) return;
 
+        const currentShape = shapeRef.current;
+        const currentOnChange = onChangeRef.current;
+
         const stageContainer = stage.container();
         const stageBox = stageContainer.getBoundingClientRect();
         
@@ -55,7 +64,7 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
         document.body.appendChild(textarea);
 
         // Styling the textarea overlay to align perfectly with Konva Text
-        textarea.value = draftText;
+        textarea.value = textNode.text();
         textarea.style.position = "absolute";
         textarea.style.top = (stageBox.top + window.scrollY + absPos.y) + "px";
         textarea.style.left = (stageBox.left + window.scrollX + absPos.x) + "px";
@@ -72,12 +81,12 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
         textarea.style.mozUserSelect = "text";
         textarea.style.msUserSelect = "text";
         
-        textarea.style.fontSize = (shape.fontSize || 16) * scaleY + "px";
-        textarea.style.fontFamily = shape.fontFamily || "sans-serif";
-        textarea.style.fontWeight = shape.bold ? "bold" : "normal";
-        textarea.style.fontStyle = shape.italic ? "italic" : "normal";
-        textarea.style.color = shape.fill || "#000000";
-        textarea.style.textAlign = shape.align || "left";
+        textarea.style.fontSize = (currentShape.fontSize || 16) * scaleY + "px";
+        textarea.style.fontFamily = currentShape.fontFamily || "sans-serif";
+        textarea.style.fontWeight = currentShape.bold ? "bold" : "normal";
+        textarea.style.fontStyle = currentShape.italic ? "italic" : "normal";
+        textarea.style.color = currentShape.fill || "#000000";
+        textarea.style.textAlign = currentShape.align || "left";
         
         // Reset default styles
         textarea.style.border = "none";
@@ -111,7 +120,7 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
         textarea.addEventListener("touchend", stopPropagation);
         textarea.addEventListener("keyup", stopPropagation);
 
-        // Auto growing height adjustment
+        // Auto growing height adjustment and real-time syncing
         const autoResize = () => {
             textarea.style.height = "auto";
             textarea.style.height = textarea.scrollHeight + "px";
@@ -133,8 +142,8 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
             const nextVal = textarea.value;
             setDraftText(nextVal);
             setIsEditing(false);
-            if (shape?.text !== nextVal) {
-                onChange({ ...shape, text: nextVal });
+            if (currentShape?.text !== nextVal) {
+                currentOnChange({ ...currentShape, text: nextVal });
             }
             
             if (textarea.parentNode) {
@@ -168,7 +177,7 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
                 textarea.parentNode.removeChild(textarea);
             }
         };
-    }, [isEditing, draftText, shape, onChange]);
+    }, [isEditing]);
 
     const commitEdit = () => {
         if (isEditing) {
