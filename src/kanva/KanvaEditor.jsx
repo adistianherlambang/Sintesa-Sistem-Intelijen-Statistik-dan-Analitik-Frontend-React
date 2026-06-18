@@ -72,6 +72,7 @@ export default function KanvaEditor() {
 
     // pen/draw tool state
     const [isPenTool, setIsPenTool] = useState(false);
+    const [isTextTool, setIsTextTool] = useState(false);
     const [lines, setLines] = useState([]);
     const isDrawing = useRef(false);
 
@@ -418,12 +419,15 @@ export default function KanvaEditor() {
                 // T (Text Tool shortcut)
                 if (!isCtrlOrCmd && keyLower === "t") {
                     e.preventDefault();
-                    dispatch(setPath("text"));
+                    setIsTextTool(true);
+                    dispatch(setPath(undefined));
                 }
 
                 // V (Move Tool shortcut)
                 if (!isCtrlOrCmd && keyLower === "v") {
                     e.preventDefault();
+                    setIsTextTool(false);
+                    setIsPenTool(false);
                     dispatch(setPath(undefined));
                 }
 
@@ -607,6 +611,9 @@ export default function KanvaEditor() {
         }
         if (isPenTool) {
             return 'crosshair';
+        }
+        if (isTextTool) {
+            return 'text';
         }
         return 'default';
     };
@@ -1001,9 +1008,46 @@ export default function KanvaEditor() {
     };
     groupSelectedRef.current = groupSelected;
 
+    const addTextAtPosition = (x, y) => {
+        const id = `t${Date.now()}`;
+        setPagesWithHistory((prev) => {
+            const cp = JSON.parse(JSON.stringify(prev));
+            const page = cp[activeIndex] || {
+                id: activeIndex + 1,
+                children: [],
+                background: "#ffffff",
+            };
+            page.children = page?.children || [];
+            page?.children?.push({
+                id,
+                type: "text",
+                text: "Tulis teks di sini",
+                x,
+                y,
+                width: 250,
+                fontSize: 24,
+                fill: "#111827",
+                fontFamily: "Roboto",
+                autoFocus: true,
+            });
+            cp[activeIndex] = page;
+            return cp;
+        });
+        dispatch(setSelectedUniqueId(id));
+        setIsTextTool(false);
+    };
+
     const handleNavClick = (panelName) => {
         dispatch(setSelectedUniqueId(null));
         dispatch(setPopUp(false));
+        
+        if (panelName === "text") {
+            setIsTextTool(true);
+            dispatch(setPath(undefined));
+            return;
+        }
+
+        setIsTextTool(false);
         if (path === panelName) {
             dispatch(setPath(undefined));
         } else {
@@ -1308,6 +1352,15 @@ export default function KanvaEditor() {
                                         dispatch(setPopUp(false));
                                         dispatch(setPath(undefined));
                                     }
+                                    
+                                    // Klik stage untuk menempatkan teks baru jika tool Teks aktif
+                                    if (isTextTool && (e.target === e.target.getStage() || e.target.name() === 'page-background')) {
+                                        const stage = e.target.getStage();
+                                        const pos = stage.getRelativePointerPosition();
+                                        addTextAtPosition(pos.x, pos.y);
+                                        return;
+                                    }
+
                                     handleMouseDown(e);
                                 }}
                                 onMouseMove={handleMouseMove}
@@ -1380,44 +1433,6 @@ export default function KanvaEditor() {
                         </div>
 
 
-                    </div>
-                </Wrapper>
-
-                {/* Right side Layers Panel - wrapped in Wrapper */}
-                <Wrapper width="300px" height="100%" padding="0" hoverable={false}>
-                    <div
-                        className={styles.sidebarContainer}
-                        style={{
-                            width: '300px',
-                            height: '100%',
-                            backgroundColor: 'rgba(255, 255, 255, 0.01)',
-                            borderLeft: "1px solid rgba(255, 255, 255, 0.08)"
-                        }}
-                    >
-                        <div className={sidebarStyles.sidebar}>
-                            <div className={sidebarStyles.header}>
-                                <SlLayers style={{ fontSize: 18 }} />
-                                <span className={sidebarStyles.title}>Daftar Layar</span>
-                            </div>
-                            <div className={sidebarStyles.content}>
-                                <SidebarLayer
-                                    elements={activePage?.children || []}
-                                    onToggleLock={(id) => {
-                                        setElement(id, (el) => ({ ...el, locked: !el?.locked }));
-                                    }}
-                                    onToggleVisibility={(id) => {
-                                        setElement(id, (el) => ({ ...el, visible: !el?.visible }));
-                                    }}
-                                    onReorder={(newChildren) => {
-                                        setPagesWithHistory((pages) =>
-                                            pages?.map((p) =>
-                                                p?.id === activePage?.id ? { ...p, children: newChildren } : p
-                                            )
-                                        );
-                                    }}
-                                />
-                            </div>
-                        </div>
                     </div>
                 </Wrapper>
             </div>

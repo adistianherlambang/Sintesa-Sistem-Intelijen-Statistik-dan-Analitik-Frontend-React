@@ -1,17 +1,14 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Text, Transformer } from "react-konva";
 import { useKonvaSnapping } from "use-konva-snapping";
-import { useDispatch } from "react-redux";
-import { setPath } from "../store/editorReducer";
 
 export default function SelectableText({ shape, selected, onSelect, onChange}) {
-    const dispatch = useDispatch();
     const ref = useRef();
     const trRef = useRef();
     const [isEditing, setIsEditing] = useState(false);
     const [draftText, setDraftText] = useState(shape?.text || "");
 
-        const { handleDragging, handleDragEnd } = useKonvaSnapping({
+    const { handleDragging, handleDragEnd } = useKonvaSnapping({
         snapRange: 5,
         guidelineColor: "blue",
         guidelineWidth: 1,
@@ -21,37 +18,131 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
         snapToShapes: true,
     });
 
+    // Sync draftText when shape.text changes externally
     useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (!isEditing || !ref.current) return;
-            e.preventDefault();
-            let newText =draftText;
+        if (shape?.text !== undefined) {
+            setDraftText(shape.text);
+        }
+    }, [shape?.text]);
 
-            if (e.key === "Backspace") {
-                newText = newText.slice(0, -1);
-            } else if (e.key.length === 1) {
-                newText = newText + e.key;
-            } else if (e.key === "Enter") {
-                newText = newText + "\n";
-            } else if (e.key === "Escape") {
-                setIsEditing(false);
-                return;
-            }
-            
-            setDraftText(newText)
-            // ref.current.text(newText);
-            // ref.current.getLayer().batchDraw();
+    // Handle autoFocus flag for newly created text elements
+    useEffect(() => {
+        if (shape?.autoFocus) {
+            setIsEditing(true);
+            onChange({ ...shape, autoFocus: undefined });
+        }
+    }, [shape?.autoFocus, onChange, shape]);
+
+    // Dynamic HTML textarea overlay for Figma-like text editing
+    useEffect(() => {
+        if (!isEditing || !ref.current) return;
+
+        const textNode = ref.current;
+        const stage = textNode.getStage();
+        if (!stage) return;
+
+        const stageContainer = stage.container();
+        const stageBox = stageContainer.getBoundingClientRect();
+        
+        // Absolute position of the text relative to the stage
+        const absPos = textNode.getAbsolutePosition();
+        const rotation = textNode.rotation();
+        const scaleX = stage.scaleX();
+        const scaleY = stage.scaleY();
+
+        // Create HTML textarea
+        const textarea = document.createElement("textarea");
+        document.body.appendChild(textarea);
+
+        // Styling the textarea overlay to align perfectly with Konva Text
+        textarea.value = draftText;
+        textarea.style.position = "absolute";
+        textarea.style.top = (stageBox.top + window.scrollY + absPos.y) + "px";
+        textarea.style.left = (stageBox.left + window.scrollX + absPos.x) + "px";
+        
+        const width = textNode.width() * scaleX;
+        textarea.style.width = width + "px";
+        textarea.style.height = "auto";
+        
+        textarea.style.fontSize = (shape.fontSize || 16) * scaleY + "px";
+        textarea.style.fontFamily = shape.fontFamily || "sans-serif";
+        textarea.style.fontWeight = shape.bold ? "bold" : "normal";
+        textarea.style.fontStyle = shape.italic ? "italic" : "normal";
+        textarea.style.color = shape.fill || "#000000";
+        textarea.style.textAlign = shape.align || "left";
+        
+        // Reset default styles
+        textarea.style.border = "none";
+        textarea.style.padding = "0px";
+        textarea.style.margin = "0px";
+        textarea.style.overflow = "hidden";
+        textarea.style.background = "none";
+        textarea.style.outline = "none";
+        textarea.style.resize = "none";
+        textarea.style.lineHeight = textNode.lineHeight() || 1.2;
+        textarea.style.whiteSpace = "pre-wrap";
+        textarea.style.wordBreak = "break-word";
+        
+        let transform = "";
+        if (rotation) {
+            transform += `rotate(${rotation}deg)`;
+        }
+        textarea.style.transform = transform;
+        textarea.style.transformOrigin = "left top";
+
+        // Auto growing height adjustment
+        const autoResize = () => {
+            textarea.style.height = "auto";
+            textarea.style.height = textarea.scrollHeight + "px";
         };
 
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [isEditing,draftText,shape?.text]);
+        autoResize();
+        textarea.addEventListener("input", autoResize);
+
+        textarea.focus();
+        textarea.select();
+
+        let isSaved = false;
+        
+        const saveAndClose = () => {
+            if (isSaved) return;
+            isSaved = true;
+            
+            const nextVal = textarea.value;
+            setDraftText(nextVal);
+            setIsEditing(false);
+            if (shape?.text !== nextVal) {
+                onChange({ ...shape, text: nextVal });
+            }
+            
+            if (textarea.parentNode) {
+                textarea.parentNode.removeChild(textarea);
+            }
+        };
+
+        const handleKeyDown = (e) => {
+            if (e.key === "Escape") {
+                e.preventDefault();
+                saveAndClose();
+            }
+        };
+
+        textarea.addEventListener("blur", saveAndClose);
+        textarea.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            textarea.removeEventListener("input", autoResize);
+            textarea.removeEventListener("blur", saveAndClose);
+            textarea.removeEventListener("keydown", handleKeyDown);
+            if (textarea.parentNode) {
+                textarea.parentNode.removeChild(textarea);
+            }
+        };
+    }, [isEditing, draftText, shape, onChange]);
 
     const commitEdit = () => {
-        if (!isEditing) return;
-        setIsEditing(false);
-        if (shape?.text !== draftText) {
-            onChange({ ...shape, text: draftText });
+        if (isEditing) {
+            setIsEditing(false);
         }
     };
 
@@ -100,8 +191,8 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
 
                 fontStyle={`${shape?.bold ? "bold " : ""}${shape?.italic ? "italic" : ""}`}
                 text={draftText}
-                draggable={!isEditing===!shape?.locked}
-                visible={shape?.visible}
+                draggable={!isEditing && !shape?.locked}
+                visible={shape?.visible && !isEditing}
                 onMouseDown={(e) => {
                      isLocked();
                     onSelect(e);
@@ -115,12 +206,10 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
                 onDblClick={() =>{
                     isLocked() 
                     setIsEditing(true)
-                    dispatch(setPath("text"))
                     }}
                 onDblTap={() =>{
                     isLocked()
                      setIsEditing(true)
-                     dispatch(setPath("text"))
                      }}
                 onDragMove={(e) => {
                       isLocked(); 
@@ -160,7 +249,7 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
                 onMouseEnter={(e) => {
                       isLocked()
                     const stage = e.target.getStage();
-                    if (stage) stage.container().style.cursor = "move";
+                    if (stage) stage.container().style.cursor = isEditing ? "text" : "move";
                 }}
                 onMouseLeave={(e) => {
                     isLocked() 
