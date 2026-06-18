@@ -279,7 +279,6 @@ export default function KanvaEditor() {
 
     const duplicateSelectedRef = useRef(null);
     const deleteSelectedRef = useRef(null);
-    const groupSelectedRef = useRef(null);
 
     const undoRef = useRef(null);
     const redoRef = useRef(null);
@@ -431,11 +430,7 @@ export default function KanvaEditor() {
                     dispatch(setPath(undefined));
                 }
 
-                // Ctrl/Cmd + G (Group elements)
-                if (isCtrlOrCmd && keyLower === "g") {
-                    e.preventDefault();
-                    if (groupSelectedRef.current) groupSelectedRef.current();
-                }
+
 
                 // Ctrl/Cmd + Z (Undo)
                 if (isCtrlOrCmd && !e.shiftKey && keyLower === "z") {
@@ -961,52 +956,7 @@ export default function KanvaEditor() {
     };
     duplicateSelectedRef.current = duplicateSelected;
 
-    const groupSelected = () => {
-        if (!selectedUniqueId) return;
-        const selectedIds = Array.isArray(selectedUniqueId) ? selectedUniqueId : [selectedUniqueId];
-        if (selectedIds.length < 2) return;
 
-        const pageChildren = activePage?.children || [];
-        const elementsToGroup = pageChildren.filter(el => selectedIds.includes(el.id));
-        if (elementsToGroup.length < 2) return;
-
-        let minX = Infinity;
-        let minY = Infinity;
-        
-        elementsToGroup.forEach(el => {
-            const x = el.x ?? 0;
-            const y = el.y ?? 0;
-            if (x < minX) minX = x;
-            if (y < minY) minY = y;
-        });
-
-        if (minX === Infinity) minX = 0;
-        if (minY === Infinity) minY = 0;
-
-        const groupElement = {
-            id: `group-${Date.now()}`,
-            type: 'group',
-            x: minX,
-            y: minY,
-            children: elementsToGroup.map(el => ({
-                ...el,
-                x: (el.x ?? 0) - minX,
-                y: (el.y ?? 0) - minY
-            }))
-        };
-
-        setPagesWithHistory((prev) => {
-            const cp = JSON.parse(JSON.stringify(prev));
-            const page = cp[activeIndex] || { children: [] };
-            page.children = (page?.children || []).filter(el => !selectedIds.includes(el.id));
-            page.children.push(groupElement);
-            cp[activeIndex] = page;
-            return cp;
-        });
-
-        dispatch(setSelectedUniqueId(groupElement.id));
-    };
-    groupSelectedRef.current = groupSelected;
 
     const addTextAtPosition = (x, y) => {
         const id = `t${Date.now()}`;

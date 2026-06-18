@@ -39,6 +39,31 @@ export default function Layer({ elements = [], onToggleLock, onToggleVisibility,
         onReorder?.(newElements);
     };
 
+    const handleDragStart = (e, index) => {
+        e.dataTransfer.setData("text/plain", index);
+        e.currentTarget.classList.add(styles.dragging);
+    };
+
+    const handleDragEnd = (e) => {
+        e.currentTarget.classList.remove(styles.dragging);
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+    };
+
+    const handleDrop = (e, targetIndex) => {
+        e.preventDefault();
+        const sourceIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+        if (isNaN(sourceIndex) || sourceIndex === targetIndex) return;
+
+        const newElements = [...elements];
+        const [draggedElement] = newElements.splice(sourceIndex, 1);
+        newElements.splice(targetIndex, 0, draggedElement);
+
+        onReorder?.(newElements);
+    };
+
     if (elements.length === 0) {
         return (
             <div className={styles.empty}>
@@ -62,6 +87,11 @@ export default function Layer({ elements = [], onToggleLock, onToggleVisibility,
                     <div
                         key={el.id}
                         className={`${styles.layerItem} ${isSelected ? styles.selected : ""}`}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, origIndex)}
+                        onDragEnd={handleDragEnd}
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, origIndex)}
                         onClick={(e) => {
                             if (e.shiftKey) {
                                 const currentSelection = selectedUniqueId;

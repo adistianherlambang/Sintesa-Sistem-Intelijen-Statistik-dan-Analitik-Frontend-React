@@ -63,6 +63,14 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
         const width = textNode.width() * scaleX;
         textarea.style.width = width + "px";
         textarea.style.height = "auto";
+        textarea.style.zIndex = "10000";
+        textarea.style.boxSizing = "border-box";
+        
+        // Explicitly enable user text selection
+        textarea.style.userSelect = "text";
+        textarea.style.webkitUserSelect = "text";
+        textarea.style.mozUserSelect = "text";
+        textarea.style.msUserSelect = "text";
         
         textarea.style.fontSize = (shape.fontSize || 16) * scaleY + "px";
         textarea.style.fontFamily = shape.fontFamily || "sans-serif";
@@ -90,10 +98,24 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
         textarea.style.transform = transform;
         textarea.style.transformOrigin = "left top";
 
+        // Stop propagation of pointer and touch events so they don't leak into the Konva Stage
+        const stopPropagation = (e) => {
+            e.stopPropagation();
+        };
+
+        textarea.addEventListener("mousedown", stopPropagation);
+        textarea.addEventListener("mouseup", stopPropagation);
+        textarea.addEventListener("click", stopPropagation);
+        textarea.addEventListener("dblclick", stopPropagation);
+        textarea.addEventListener("touchstart", stopPropagation);
+        textarea.addEventListener("touchend", stopPropagation);
+        textarea.addEventListener("keyup", stopPropagation);
+
         // Auto growing height adjustment
         const autoResize = () => {
             textarea.style.height = "auto";
             textarea.style.height = textarea.scrollHeight + "px";
+            setDraftText(textarea.value); // Sinkronkan ke state React secara real-time!
         };
 
         autoResize();
@@ -121,6 +143,7 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
         };
 
         const handleKeyDown = (e) => {
+            e.stopPropagation(); // Stop keyboard shortcuts from triggering on the stage (e.g. Del deleting elements, Space dragging)
             if (e.key === "Escape") {
                 e.preventDefault();
                 saveAndClose();
@@ -134,6 +157,13 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
             textarea.removeEventListener("input", autoResize);
             textarea.removeEventListener("blur", saveAndClose);
             textarea.removeEventListener("keydown", handleKeyDown);
+            textarea.removeEventListener("mousedown", stopPropagation);
+            textarea.removeEventListener("mouseup", stopPropagation);
+            textarea.removeEventListener("click", stopPropagation);
+            textarea.removeEventListener("dblclick", stopPropagation);
+            textarea.removeEventListener("touchstart", stopPropagation);
+            textarea.removeEventListener("touchend", stopPropagation);
+            textarea.removeEventListener("keyup", stopPropagation);
             if (textarea.parentNode) {
                 textarea.parentNode.removeChild(textarea);
             }
@@ -192,7 +222,7 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
                 fontStyle={`${shape?.bold ? "bold " : ""}${shape?.italic ? "italic" : ""}`}
                 text={draftText}
                 draggable={!isEditing && !shape?.locked}
-                visible={shape?.visible && !isEditing}
+                visible={shape?.visible !== false && !isEditing}
                 onMouseDown={(e) => {
                      isLocked();
                     onSelect(e);

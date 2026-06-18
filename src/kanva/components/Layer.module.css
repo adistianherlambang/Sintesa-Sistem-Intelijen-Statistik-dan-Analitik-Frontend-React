@@ -86,3 +86,9 @@
   font-size: 13px;
   text-align: center;
 }
+
+.dragging {
+  opacity: 0.4;
+  border: 1px dashed #34b34a !important;
+  background: rgba(255, 255, 255, 0.01) !important;
+}
