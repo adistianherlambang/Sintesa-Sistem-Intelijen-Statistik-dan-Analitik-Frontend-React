@@ -240,7 +240,7 @@ export default function TentangAkun() {
         </Wrapper>
       </div>
 
-      <div className={styles.section}>
+      {/* <div className={styles.section}>
         <Wrapper>
           <div className={styles.content}>
             <p className={styles.sectionTitle}>Informasi PIC (Penanggung Jawab)</p>
@@ -273,7 +273,7 @@ export default function TentangAkun() {
             </div>
           </div>
         </Wrapper>
-      </div>
+      </div> */}
 
       <div className={styles.section}>
         <Wrapper>
