@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "./HitoriAnalisis.module.css";
+import Skeleton from "../../Skeleton/Skeleton";
 
 export default function HitoriAnalisis({ onLoad }) {
   const [historyList, setHistoryList] = useState([]);
@@ -67,7 +68,9 @@ export default function HitoriAnalisis({ onLoad }) {
     <div className={styles.content}>
       <p className={styles.sectionTitle}>Histori Analisis</p>
       {loading ? (
-        <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "14px" }}>Memuat histori...</p>
+        <div style={{ marginTop: '12px' }}>
+          <Skeleton height="200px" />
+        </div>
       ) : error ? (
         <p style={{ color: "#ef4444", fontSize: "14px" }}>{error}</p>
       ) : historyList.length === 0 ? (

@@ -4,6 +4,7 @@ import styles from "./BotKnowledge.module.css";
 import Wrapper from "../../../components/Wrapper/Wrapper";
 import MainButton from "../../../components/MainButton/MainButton";
 import Input from "../../../components/Input/Input";
+import Skeleton from "../../../components/Skeleton/Skeleton";
 
 export default function BotKnowledge() {
   const [knowledgeList, setKnowledgeList] = useState([]);
@@ -234,7 +235,9 @@ export default function BotKnowledge() {
         <Wrapper>
           <div className={styles.content}>
             {loading ? (
-              <p className={styles.loadingText}>Memuat basis data knowledge...</p>
+              <div style={{ padding: '16px 0' }}>
+                <Skeleton height="180px" />
+              </div>
             ) : knowledgeList.length > 0 ? (
               <div className={styles.tableResponsive}>
                 <table className={styles.knowledgeTable}>

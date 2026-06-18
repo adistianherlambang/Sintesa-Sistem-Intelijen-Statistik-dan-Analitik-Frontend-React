@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import styles from './Hierarchy.module.css';
 
 const NODE_WIDTH = 180;
@@ -73,7 +73,8 @@ function layoutTree(data, depth = 0, startY = 0) {
 
   return { nodes, edges };
 }
-export default function Hierarchy({ data, width = 900, height = 600, fill, stroke, lineColor, textColor }) {
+
+const Hierarchy = memo(function Hierarchy({ data, width = 900, height = 600, fill, stroke, lineColor, textColor }) {
   if (!data || typeof data !== 'object') return null;
 
   const { nodes: rawNodes, edges } = layoutTree(data);
@@ -176,4 +177,7 @@ export default function Hierarchy({ data, width = 900, height = 600, fill, strok
       </svg>
     </div>
   );
-}
+});
+
+export default Hierarchy;
+

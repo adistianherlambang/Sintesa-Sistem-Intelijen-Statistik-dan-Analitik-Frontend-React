@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import styles from "./kpi.module.css"
 import { userStore } from "../../../../logic/state/store"
+import Skeleton from '../../../../components/Skeleton/Skeleton'
 
 export default function Inflasi({ onLoad }) {
 
@@ -36,6 +37,10 @@ export default function Inflasi({ onLoad }) {
 
   const now = data?.data?.dashboard?.now
   const compare = data?.data?.dashboard?.compare
+
+  if (load || !data) {
+    return <Skeleton height="108px" />;
+  }
 
   const isDecrease = parseFloat(compare) < 0;
 

@@ -1,9 +1,7 @@
-import React from 'react'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import axios from 'axios'
 import styles from "./Analisis.module.css"
 import { userStore } from "../../../logic/state/store"
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 // component
 import Stepper from '../../../components/Stepper/Stepper'
@@ -11,6 +9,7 @@ import Wrapper from '../../../components/Wrapper/Wrapper'
 import Hierarchy from '../../../components/Hierarchy/Hierarchy'
 import MainButton from '../../../components/MainButton/MainButton'
 import Input from '../../../components/Input/Input'
+import Skeleton from '../../../components/Skeleton/Skeleton'
 
 export default function Analisis() {
   const [datasetSource, setDatasetSource] = useState("available") // "available" or "manual"
@@ -394,6 +393,15 @@ function StepTwoAvailable(props) {
   const [activeSheet, setActiveSheet] = useState("main") // "main" or commodity index string ("0", "1", ...)
   const [forecastingEnabled, setForecastingEnabled] = useState(false)
 
+  const komoditasList = useMemo(() => {
+    return activeYear === "now" ? (komoditas?.hierarki || []) : (komoditas?.yoy || [])
+  }, [komoditas, activeYear])
+
+  const komoditasLabelsKey = useMemo(() => {
+    if (!komoditasList) return "";
+    return komoditasList.map(c => `${c.label}:${(c.sub || []).map(s => s.label).join(",")}`).join("|");
+  }, [komoditasList]);
+
   const countTreeLeaves = (node) => {
     if (!node || typeof node !== 'object') return 0
     const keys = Object.keys(node)
@@ -401,7 +409,7 @@ function StepTwoAvailable(props) {
     return Object.values(node).reduce((sum, child) => sum + countTreeLeaves(child), 0)
   }
 
-  const buildHierarchyData = () => {
+  const hierarchyData = useMemo(() => {
     if (!inflasi || !ihk || !komoditas) return {}
 
     const rootLabel = "Umum"
@@ -425,7 +433,8 @@ function StepTwoAvailable(props) {
     return {
       [rootLabel]: rootChildren
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [komoditasLabelsKey])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -536,7 +545,11 @@ function StepTwoAvailable(props) {
     return (
       <div className={styles.container}>
         <Wrapper>
-          <p className={styles.loadingText}>Memuat data...</p>
+          <p className={styles.sectionTitle}>Memuat Data BPS...</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+            <Skeleton height="42px" />
+            <Skeleton height="200px" />
+          </div>
         </Wrapper>
       </div>
     )
@@ -547,13 +560,11 @@ function StepTwoAvailable(props) {
 
   const activeDataInflasi = activeYear === "now" ? inflasi.data : inflasi.yoy
   const activeDataIhk = activeYear === "now" ? ihk.data : ihk.yoy
-  const komoditasList = activeYear === "now" ? (komoditas?.hierarki || []) : (komoditas?.yoy || [])
 
   const activeCommodityIndex = activeSheet !== "main" ? Number(activeSheet) : null
   const activeCommodity = activeCommodityIndex !== null ? komoditasList[activeCommodityIndex] : null
   const subList = activeCommodity?.sub || []
 
-  const hierarchyData = buildHierarchyData()
   const treeHeight = Math.max(600, countTreeLeaves(hierarchyData) * 90 + 100)
 
   function capitalize(str) {
@@ -782,7 +793,9 @@ function StepThree(props) {
   const [error, setError] = useState("")
 
   // Parameters extracted from manual dataset
-  const dataRows = uploadedDataset?.parsedData || []
+  const dataRows = useMemo(() => {
+    return uploadedDataset?.parsedData || [];
+  }, [uploadedDataset?.parsedData]);
 
   // Look for UMUM row
   const umumRow = dataRows.find(row => String(row[4]) === "0")
@@ -805,20 +818,21 @@ function StepThree(props) {
     }
   });
 
-  // Extract BPS divisions for chart
-  const divisionData = dataRows.filter(row => {
-    const code = String(row[4]);
-    return code.length === 2 && code !== "0";
-  }).map(row => ({
-    name: String(row[5]).replace(/MAKANAN, MINUMAN DAN TEMBAKAU/i, "Makanan & Rokok")
-      .replace(/PERUMAHAN, AIR, LISTRIK, DAN BAHAN BAKAR RUMAH TANGGA/i, "Perumahan & Energi")
-      .replace(/PERLENGKAPAN, PERALATAN DAN PEMELIHARAAN RUTIN RUMAH TANGGA/i, "Perlengkapan RT")
-      .replace(/INFORMASI, KOMUNIKASI, DAN JASA KEUANGAN/i, "Infokom & Finansial")
-      .replace(/REKREASI, OLAHRAGA, DAN BUDAYA/i, "Rekreasi & Budaya")
-      .replace(/JASA PELAYANAN MAKANAN DAN MINUMAN/i, "Restoran/Kuliner")
-      .substring(0, 18),
-    inflasi: parseFloat(row[9]) || 0
-  }));
+  const divisionData = useMemo(() => {
+    return dataRows.filter(row => {
+      const code = String(row[4]);
+      return code.length === 2 && code !== "0";
+    }).map(row => ({
+      name: String(row[5]).replace(/MAKANAN, MINUMAN DAN TEMBAKAU/i, "Makanan & Rokok")
+        .replace(/PERUMAHAN, AIR, LISTRIK, DAN BAHAN BAKAR RUMAH TANGGA/i, "Perumahan & Energi")
+        .replace(/PERLENGKAPAN, PERALATAN DAN PEMELIHARAAN RUTIN RUMAH TANGGA/i, "Perlengkapan RT")
+        .replace(/INFORMASI, KOMUNIKASI, DAN JASA KEUANGAN/i, "Infokom & Finansial")
+        .replace(/REKREASI, OLAHRAGA, DAN BUDAYA/i, "Rekreasi & Budaya")
+        .replace(/JASA PELAYANAN MAKANAN DAN MINUMAN/i, "Restoran/Kuliner")
+        .substring(0, 18),
+      inflasi: parseFloat(row[9]) || 0
+    }));
+  }, [dataRows]);
 
   // Fetch structured JSON AI summary on mount/load
   useEffect(() => {
@@ -1056,9 +1070,7 @@ function StepThree(props) {
                     alignItems: 'center',
                     gap: '8px',
                     width: "100%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center"
+                    justifyContent: "center"
                   }}
                 >
                   {generatingBRS ? (
@@ -1117,9 +1129,7 @@ function StepThree(props) {
                       boxShadow: '0 4px 14px rgba(52, 179, 74, 0.4)',
                       transition: 'background 0.2s',
                       width: "100%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center"
+                      justifyContent: "center"
                     }}
                     onMouseOver={(e) => e.currentTarget.style.background = '#2da140'}
                     onMouseOut={(e) => e.currentTarget.style.background = '#34B34A'}

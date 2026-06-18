@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import styles from "./kpi.module.css"
 import { userStore } from "../../../../logic/state/store"
+import Skeleton from '../../../../components/Skeleton/Skeleton'
 
 export default function KomoditasDom({ onLoad }) {
 
@@ -26,8 +27,8 @@ export default function KomoditasDom({ onLoad }) {
       } catch (err) {
         console.log(err.message)
       } finally {
+        setLoad(false)
         onLoad()
-        setLoad(true)
       }
     }
 
@@ -36,6 +37,10 @@ export default function KomoditasDom({ onLoad }) {
 
   const biggest = data?.biggest?.value
   const name = data?.biggest?.label
+
+  if (load || !data) {
+    return <Skeleton height="108px" />;
+  }
 
   return (
     <div className={styles.container}>

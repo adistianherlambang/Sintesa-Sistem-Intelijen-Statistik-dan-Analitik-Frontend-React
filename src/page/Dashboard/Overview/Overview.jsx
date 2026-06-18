@@ -1,12 +1,8 @@
 import React from 'react'
-import { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
 import styles from "./Overview.module.css"
 
 //component
-import MainButton from '../../../components/Button/MainButton/MainButton'
 import Graph from '../../../components/FromPage/Overview/Graph'
-import Skeleton from '../../../components/Skeleton/Skeleton'
 import Wrapper from '../../../components/Wrapper/Wrapper'
 
 //kpi
@@ -19,49 +15,24 @@ import HitoriAnalisis from '../../../components/FromPage/Overview/HitoriAnalisis
 import HistoriInfografis from '../../../components/FromPage/Overview/HistoriInfografis'
 
 export default function Overview() {
-
-  const [load, setLoad] = useState({})
-
-  const handleLoaded = (id) => {
-    setLoad(prev => ({
-      ...prev,
-      [id]: true
-    }))
-  }
-
-  const components = ["graph", "KPI Inflasi", "KPI IHK", "Komoditas Dominan"]
-  const allLoad = components.every(id => load[id])
-
   return (
     <>
       <div className={styles.container}>
         <p className={styles.tabTitle}>Overview</p>
-        {!allLoad && (
-          <div className={styles.containerr}>
-            <div className={styles.wrapper}>
-              <p className={styles.sectionTitle}>KPI Utama</p>
-              <div className={styles.section}>
-                <Wrapper padding="0"><Skeleton /></Wrapper>
-              </div>
-            </div>
-            <div className={styles.placeholderBox}></div>
-          </div>
-        )}
 
-        <div className={styles.containerr} style={{ display: allLoad ? "flex" : "none" }}>
-
+        <div className={styles.containerr}>
           <div className={styles.wrapper}>
             <p className={styles.sectionTitle}>KPI Utama <i>(BPS Indicator)</i></p>
             <div className={styles.section}>
-              <Wrapper><div className={styles.kpiUtama}><Inflasi onLoad={() => handleLoaded("KPI Inflasi")} /></div></Wrapper>
-              <Wrapper><div className={styles.kpiUtama}><IHK onLoad={() => handleLoaded("KPI IHK")} /></div></Wrapper>
-              <Wrapper><div className={styles.kpiUtama}><KomoditasDom onLoad={() => handleLoaded("Komoditas Dominan")} /></div></Wrapper>
+              <Wrapper><div className={styles.kpiUtama}><Inflasi onLoad={() => {}} /></div></Wrapper>
+              <Wrapper><div className={styles.kpiUtama}><IHK onLoad={() => {}} /></div></Wrapper>
+              <Wrapper><div className={styles.kpiUtama}><KomoditasDom onLoad={() => {}} /></div></Wrapper>
             </div>
           </div>
 
           <div className={styles.wrapper}>
             <div className={styles.section}>
-              <Wrapper width="50%" padding="0"><Graph onLoad={() => handleLoaded("graph")} /></Wrapper>
+              <Wrapper width="50%" padding="0"><Graph onLoad={() => {}} /></Wrapper>
               <div className={styles.wrapper}>
                 <Wrapper>bot1</Wrapper>
                 <Wrapper>bot2</Wrapper>
@@ -70,20 +41,20 @@ export default function Overview() {
           </div>
         </div>
 
-        <div className={styles.containerr} style={{ display: allLoad ? "flex" : "none" }}>
+        <div className={styles.containerr}>
           <div className={styles.section}>
             <Wrapper><UserActivity /></Wrapper>
             <Wrapper><AISummary /></Wrapper>
           </div>
         </div>
 
-        <div className={styles.containerr} style={{ display: allLoad ? "flex" : "none" }}>
+        <div className={styles.containerr}>
           <div className={styles.section}>
             <Wrapper><HitoriAnalisis /></Wrapper>
           </div>
         </div>
 
-        <div className={styles.containerr} style={{ display: allLoad ? "flex" : "none" }}>
+        <div className={styles.containerr}>
           <div className={styles.section}>
             <Wrapper><HistoriInfografis /></Wrapper>
           </div>

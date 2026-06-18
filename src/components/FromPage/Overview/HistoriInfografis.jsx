@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import style from "./HistoriInfografis.module.css"
+import Skeleton from "../../Skeleton/Skeleton"
 
 function formatDate(id, createdAt) {
   try {
@@ -46,8 +47,8 @@ export default function HistoriInfografis({ onLoad }) {
         <div className={style.titleRow}>
           <p className={style.sectionTitle}>Histori Infografis</p>
         </div>
-        <div className={style.emptyState}>
-          <p className={style.emptyText}>Memuat...</p>
+        <div style={{ marginTop: '12px' }}>
+          <Skeleton height="150px" />
         </div>
       </div>
     )

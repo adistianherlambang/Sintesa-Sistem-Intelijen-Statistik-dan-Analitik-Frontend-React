@@ -57,65 +57,65 @@ export default function Graph({ onLoad }) {
 
   const month = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
 
+  if (load) {
+    return <Skeleton height="280px" />;
+  }
+
   return (
-    <>
-      {!load &&
-        <div className={styles.container}>
-          <div className={styles.header}>
-            <p className={styles.subtitle}>Grafik Inflasi {year}</p>
-            <div className={styles.titleBlock}>
-              <p className={styles.title}>Month to Month</p>
-              <i className={styles.monthInfo}>{month[data.length - 1]}</i>
-            </div>
-          </div>
-          <div className={styles.chartWrapper}>
-            <ResponsiveContainer>
-              <AreaChart
-                data={data}
-                margin={{
-                  top: 0,
-                  right: 0,
-                  left: 0,
-                  bottom: 0
-                }}
-              >
-                <defs>
-                  <linearGradient
-                    id="gradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop
-                      offset="0%"
-                      stopColor="#ff0000ff"
-                    />
-
-                    <stop
-                      offset="100%"
-                      stopColor="#711111ff"
-                    />
-                  </linearGradient>
-                </defs>
-
-                <YAxis
-                  hide
-                  domain={['dataMin', 'dataMax']}
-                />
-                <Area
-                  type="linear"
-                  dataKey="y"
-                  stroke="#fb3131ff"
-                  fill="url(#gradient)"
-                  strokeWidth={1}
-                  baseValue="dataMin"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <p className={styles.subtitle}>Grafik Inflasi {year}</p>
+        <div className={styles.titleBlock}>
+          <p className={styles.title}>Month to Month</p>
+          <i className={styles.monthInfo}>{month[data.length - 1]}</i>
         </div>
-      }
-    </>
-  )
+      </div>
+      <div className={styles.chartWrapper}>
+        <ResponsiveContainer>
+          <AreaChart
+            data={data}
+            margin={{
+              top: 0,
+              right: 0,
+              left: 0,
+              bottom: 0
+            }}
+          >
+            <defs>
+              <linearGradient
+                id="gradient"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop
+                  offset="0%"
+                  stopColor="#ff0000ff"
+                />
+
+                <stop
+                  offset="100%"
+                  stopColor="#711111ff"
+                />
+              </linearGradient>
+            </defs>
+
+            <YAxis
+              hide
+              domain={['dataMin', 'dataMax']}
+            />
+            <Area
+              type="linear"
+              dataKey="y"
+              stroke="#fb3131ff"
+              fill="url(#gradient)"
+              strokeWidth={1}
+              baseValue="dataMin"
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
 }
