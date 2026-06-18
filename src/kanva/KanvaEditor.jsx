@@ -533,6 +533,117 @@ export default function KanvaEditor() {
 
     const clearAnnotations = () => setLines([]);
 
+    const addNewImageElement = (src, x, y, w = 300, h = 200) => {
+        const id = `i${Date.now()}`;
+        setPagesWithHistory((prev) => {
+            const cp = JSON.parse(JSON.stringify(prev));
+            const page = cp[activeIndex] || {
+                id: activeIndex + 1,
+                children: [],
+                background: "#ffffff",
+            };
+            page.children = page.children || [];
+            page.children.push({
+                id,
+                type: "image",
+                src,
+                x: x - w / 2,
+                y: y - h / 2,
+                width: w,
+                height: h,
+                rotation: 0,
+                opacity: 1,
+            });
+            cp[activeIndex] = page;
+            return cp;
+        });
+
+        setTimeout(() => {
+            dispatch(setSelectedUniqueId(id));
+        }, 10);
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        const stage = stageRef.current;
+        if (!stage) return;
+
+        const rect = stage.container().getBoundingClientRect();
+        const clientX = e.clientX;
+        const clientY = e.clientY;
+
+        const localX = clientX - rect.left;
+        const localY = clientY - rect.top;
+
+        // Transform relative to zoom and stage position (offset/pan)
+        const x = (localX - stagePos.x) / zoom;
+        const y = (localY - stagePos.y) / zoom;
+
+        // 1. Files dropped from local OS
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const files = Array.from(e.dataTransfer.files);
+            files.forEach((file) => {
+                if (file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const img = new window.Image();
+                        img.src = reader.result;
+                        img.onload = () => {
+                            const maxW = 400;
+                            const scale = maxW / img.width;
+                            const w = maxW;
+                            const h = img.height * scale;
+                            addNewImageElement(reader.result, x, y, w, h);
+                        };
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        } else {
+            // 2. Dragged image from sidebar (uploads/photos)
+            const draggedMetaStr = e.dataTransfer.getData("image-meta");
+            if (draggedMetaStr) {
+                try {
+                    const dragData = JSON.parse(draggedMetaStr);
+                    if (dragData && dragData.previewSrc) {
+                        const img = new window.Image();
+                        img.src = dragData.hdSrc || dragData.previewSrc;
+                        img.onload = () => {
+                            const w = dragData.w || 400;
+                            const h = dragData.h || 300;
+                            addNewImageElement(dragData.hdSrc || dragData.previewSrc, x, y, w, h);
+                        };
+                        img.onerror = () => {
+                            const w = dragData.w || 400;
+                            const h = dragData.h || 300;
+                            addNewImageElement(dragData.previewSrc, x, y, w, h);
+                        };
+                    }
+                } catch (err) {
+                    console.error("Error parsing drag-drop image meta:", err);
+                }
+            } else {
+                // 3. Fallback for raw text/plain (URI lists or direct link drag)
+                const textUri = e.dataTransfer.getData("text/plain");
+                if (textUri && (textUri.startsWith("http://") || textUri.startsWith("https://") || textUri.startsWith("data:image/"))) {
+                    const img = new window.Image();
+                    img.src = textUri;
+                    img.onload = () => {
+                        const maxW = 400;
+                        const scale = maxW / img.width;
+                        const w = maxW;
+                        const h = img.height * scale;
+                        addNewImageElement(textUri, x, y, w, h);
+                    };
+                }
+            }
+        }
+    };
+
     const setPagesWithHistory = (updaterOrPages) => {
         const next = typeof updaterOrPages === "function" ? updaterOrPages(editorPages) : updaterOrPages;
         setTimeout(() => setPushHistory(next), 0);
@@ -930,7 +1041,12 @@ export default function KanvaEditor() {
                 {/* Canvas Area Panel - wrapped in Wrapper */}
                 <Wrapper width="100%" height="100%" padding="0" hoverable={false}>
                     <div className={styles.canvasArea} style={{ height: '100%' }}>
-                        <div ref={containerRef} className={styles.stageViewport}>
+                        <div
+                            ref={containerRef}
+                            className={styles.stageViewport}
+                            onDragOver={handleDragOver}
+                            onDrop={handleDrop}
+                        >
                             <Stage
                                 ref={stageRef}
                                 key={`${canvasSize?.w}x${canvasSize?.h}`}

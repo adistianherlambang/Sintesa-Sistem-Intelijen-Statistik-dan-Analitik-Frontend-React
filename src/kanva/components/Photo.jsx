@@ -102,6 +102,33 @@ export default function Photo({ setPagesWithHistory }) {
         }
     };
 
+    const handleDragStart = (e, photo) => {
+        let dragData;
+        if (photo?.id) {
+            const aspect =
+                Number(photo?.width) && Number(photo?.height)
+                    ? Number(photo?.width) / Number(photo?.height)
+                    : 1.5;
+            const w = 800;
+            const h = Math.round(w / aspect);
+
+            // preview (tiny, shows instantly)
+            const previewSrc = `https://picsum.photos/id/${photo?.id}/200/140`;
+            // HD (loads later)
+            const hdSrc = `https://picsum.photos/id/${photo?.id}/${w}/${h}`;
+
+            dragData = { previewSrc, hdSrc, w, h };
+        } else {
+            dragData = {
+                previewSrc: photo,
+                hdSrc: photo,
+                w: 500,
+                h: 500,
+            };
+        }
+        e.dataTransfer.setData("image-meta", JSON.stringify(dragData));
+    };
+
     return (
         <>
             <div style={{ display: "grid", gap: 8 }}>
@@ -115,20 +142,26 @@ export default function Photo({ setPagesWithHistory }) {
                     {galleryPhotos && galleryPhotos?.map((p) => {
                         const thumb = p?.id ? `https://picsum.photos/id/${p?.id}/200/140` : p;
                         return (
-                            <img
+                            <div
                                 key={p?.id || thumb}
-                                src={thumb}
-                                alt={p?.author || ""}
-                                loading="lazy"
-                                style={{
-                                    width: "100%",
-                                    height: 80,
-                                    objectFit: "cover",
-                                    borderRadius: 6,
-                                    cursor: "pointer",
-                                }}
-                                onClick={() => handleAddGalleryImage(p, 800)}
-                            />
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, p)}
+                                style={{ width: "100%", height: 80, cursor: "grab" }}
+                            >
+                                <img
+                                    src={thumb}
+                                    alt={p?.author || ""}
+                                    loading="lazy"
+                                    style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "cover",
+                                        borderRadius: 6,
+                                        cursor: "pointer",
+                                    }}
+                                    onClick={() => handleAddGalleryImage(p, 800)}
+                                />
+                            </div>
                         );
                     })}
                 </div>

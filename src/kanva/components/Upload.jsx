@@ -92,8 +92,22 @@ export default function Upload({ setPagesWithHistory }) {
 
       <div style={{ height: "60vh", overflow: "auto" }}>
         {uploadsPhotos?.map((u) => (
-          <Flex align="center" justify="space-evenly" style={{ padding: 5 }} wrap>
-            <Image preview={false} alt={u?.name} src={u?.url} width={150} height={100} style={{ objectFit: "contain", cursor: "pointer" }} onClick={() => addImageToCanvas({ src: u?.url, w: 400, h: 300 })} />
+          <Flex align="center" justify="space-evenly" style={{ padding: 5 }} wrap key={u?.id}>
+            <div
+              draggable
+              onDragStart={(e) => {
+                const dragData = {
+                  previewSrc: u?.url,
+                  hdSrc: u?.url,
+                  w: 400,
+                  h: 300,
+                };
+                e.dataTransfer.setData("image-meta", JSON.stringify(dragData));
+              }}
+              style={{ cursor: "grab" }}
+            >
+              <Image preview={false} alt={u?.name} src={u?.url} width={150} height={100} style={{ objectFit: "contain", cursor: "pointer" }} onClick={() => addImageToCanvas({ src: u?.url, w: 400, h: 300 })} />
+            </div>
             <MdDeleteOutline key="delete" color="red" size={25} onClick={() => handleDelete(u?.id)} />
           </Flex>
         ))}
