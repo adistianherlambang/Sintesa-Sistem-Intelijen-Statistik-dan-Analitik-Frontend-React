@@ -12,9 +12,13 @@ import banner9 from "../assets/banner-9.png";
 import banner10 from "../assets/banner-10.png";
 import banner11 from "../assets/banner-11.png";
 
+const now = new Date();
+const year = now.getFullYear()
+const month = now.toLocaleString('default', { month: 'long' });
+
 const banners = [
     {
-        name: "Infografis Kota Metro Mei 2026",
+        name: `Infografis Kota Metro ${month.toUpperCase()} ${year}`,
         type: "banner",
         w: 300,
         h: 500,

@@ -111,7 +111,109 @@ export default function KanvaEditor() {
         }
     };
 
-    const pasteSelected = () => {
+    function processSvg(svgString) {
+        const trimmedText = svgString.trim();
+        try {
+            const base64Svg = window.btoa(unescape(encodeURIComponent(trimmedText)));
+            const src = `data:image/svg+xml;base64,${base64Svg}`;
+            
+            const img = new window.Image();
+            img.src = src;
+            img.onload = () => {
+                let w = img.width || 300;
+                let h = img.height || 300;
+                
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(trimmedText, "image/svg+xml");
+                const svgEl = doc.querySelector("svg");
+                if (svgEl) {
+                    const widthAttr = svgEl.getAttribute("width");
+                    const heightAttr = svgEl.getAttribute("height");
+                    const viewBoxAttr = svgEl.getAttribute("viewBox");
+                    
+                    if (widthAttr && heightAttr) {
+                        w = parseFloat(widthAttr) || w;
+                        h = parseFloat(heightAttr) || h;
+                    } else if (viewBoxAttr) {
+                        const parts = viewBoxAttr.split(/[\s,]+/);
+                        if (parts.length === 4) {
+                            const vbW = parseFloat(parts[2]);
+                            const vbH = parseFloat(parts[3]);
+                            if (vbW && vbH) {
+                                const maxDim = 300;
+                                const scale = maxDim / Math.max(vbW, vbH);
+                                w = vbW * scale;
+                                h = vbH * scale;
+                            }
+                        }
+                    }
+                }
+
+                // Scale if too large
+                const maxW = 400;
+                const maxH = 400;
+                if (w > maxW || h > maxH) {
+                    const scale = Math.min(maxW / w, maxH / h);
+                    w = w * scale;
+                    h = h * scale;
+                }
+
+                addNewImageElement(src, canvasSize?.w / 2, canvasSize?.h / 2, w, h);
+            };
+        } catch (err) {
+            console.error("Gagal memproses kode SVG yang di-paste:", err);
+        }
+    }
+
+    async function pasteSelected() {
+        let pastedExternal = false;
+        
+        if (navigator.clipboard && navigator.clipboard.read) {
+            try {
+                const items = await navigator.clipboard.read();
+                for (const item of items) {
+                    if (item.types.includes("image/svg+xml")) {
+                        const blob = await item.getType("image/svg+xml");
+                        const text = await blob.text();
+                        processSvg(text);
+                        pastedExternal = true;
+                        break;
+                    } else if (item.types.includes("text/plain")) {
+                        const blob = await item.getType("text/plain");
+                        const text = await blob.text();
+                        const trimmed = text.trim();
+                        if (trimmed.startsWith('<svg') || (trimmed.startsWith('<?xml') && trimmed.includes('<svg'))) {
+                            processSvg(trimmed);
+                            pastedExternal = true;
+                            break;
+                        }
+                    } else if (item.types.some(type => type.startsWith("image/"))) {
+                        const imgType = item.types.find(type => type.startsWith("image/"));
+                        const blob = await item.getType(imgType);
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            const img = new window.Image();
+                            img.src = reader.result;
+                            img.onload = () => {
+                                const maxW = 400;
+                                const scale = maxW / img.width;
+                                const w = maxW;
+                                const h = img.height * scale;
+                                addNewImageElement(reader.result, canvasSize?.w / 2, canvasSize?.h / 2, w, h);
+                            };
+                        };
+                        reader.readAsDataURL(blob);
+                        pastedExternal = true;
+                        break;
+                    }
+                }
+            } catch (err) {
+                console.warn("Navigator clipboard read failed, falling back to internal clipboard:", err);
+            }
+        }
+
+        if (pastedExternal) return;
+
         if (!clipboard) return;
 
         const clipboardArr = Array.isArray(clipboard) ? clipboard : [clipboard];
@@ -153,7 +255,7 @@ export default function KanvaEditor() {
         } else {
             dispatch(setSelectedUniqueId(newIds));
         }
-    };
+    }
 
     const selectAll = () => {
         const childrenIds = (activePage?.children || [])
@@ -177,7 +279,61 @@ export default function KanvaEditor() {
     const duplicateSelectedRef = useRef(null);
     const deleteSelectedRef = useRef(null);
 
+    const undoRef = useRef(null);
+    const redoRef = useRef(null);
+
     const [saving, setSaving] = useState(false);
+
+    // History stack for undo/redo
+    const historyRef = useRef([]);
+    const historyIndexRef = useRef(-1);
+    const suppressPushRef = useRef(false);
+    const [canUndo, setCanUndo] = useState(false);
+    const [canRedo, setCanRedo] = useState(false);
+
+    useEffect(() => {
+        if (suppressPushRef.current) return;
+        try {
+            const snap = JSON.parse(JSON.stringify(pushHistory));
+            const h = historyRef.current.slice(0, historyIndexRef.current + 1);
+            h.push(snap);
+            historyRef.current = h;
+            historyIndexRef.current = h.length - 1;
+            setCanUndo(historyIndexRef.current > 0);
+            setCanRedo(false);
+        } catch (err) { }
+    }, [pushHistory]);
+
+    const undo = () => {
+        if (historyIndexRef.current <= 0) return;
+        const newIndex = historyIndexRef.current - 1;
+        const snap = historyRef.current[newIndex];
+        historyIndexRef.current = newIndex;
+        suppressPushRef.current = true;
+        dispatch(setEditorPages(snap));
+        setCanUndo(newIndex > 0);
+        setCanRedo(true);
+        setTimeout(() => {
+            suppressPushRef.current = false;
+        }, 0);
+    };
+
+    const redo = () => {
+        if (historyIndexRef.current >= historyRef.current.length - 1) return;
+        const newIndex = historyIndexRef.current + 1;
+        const snap = historyRef.current[newIndex];
+        historyIndexRef.current = newIndex;
+        suppressPushRef.current = true;
+        dispatch(setEditorPages(snap));
+        setCanUndo(true);
+        setCanRedo(newIndex < historyRef.current.length - 1);
+        setTimeout(() => {
+            suppressPushRef.current = false;
+        }, 0);
+    };
+
+    undoRef.current = undo;
+    redoRef.current = redo;
 
     // Load template if ID provided
     useEffect(() => {
@@ -257,6 +413,18 @@ export default function KanvaEditor() {
             if (!isTyping) {
                 const isCtrlOrCmd = e.ctrlKey || e.metaKey;
                 const keyLower = e.key.toLowerCase();
+
+                // Ctrl/Cmd + Z (Undo)
+                if (isCtrlOrCmd && !e.shiftKey && keyLower === "z") {
+                    e.preventDefault();
+                    if (undoRef.current) undoRef.current();
+                }
+
+                // Ctrl/Cmd + Y or Ctrl/Cmd + Shift + Z (Redo)
+                if (isCtrlOrCmd && (keyLower === "y" || (e.shiftKey && keyLower === "z"))) {
+                    e.preventDefault();
+                    if (redoRef.current) redoRef.current();
+                }
 
                 // Ctrl/Cmd + C (Copy)
                 if (isCtrlOrCmd && keyLower === "c") {
@@ -533,7 +701,7 @@ export default function KanvaEditor() {
 
     const clearAnnotations = () => setLines([]);
 
-    const addNewImageElement = (src, x, y, w = 300, h = 200) => {
+    function addNewImageElement(src, x, y, w = 300, h = 200) {
         const id = `i${Date.now()}`;
         setPagesWithHistory((prev) => {
             const cp = JSON.parse(JSON.stringify(prev));
@@ -561,7 +729,7 @@ export default function KanvaEditor() {
         setTimeout(() => {
             dispatch(setSelectedUniqueId(id));
         }, 10);
-    };
+    }
 
     const handleDragOver = (e) => {
         e.preventDefault();
@@ -644,11 +812,11 @@ export default function KanvaEditor() {
         }
     };
 
-    const setPagesWithHistory = (updaterOrPages) => {
+    function setPagesWithHistory(updaterOrPages) {
         const next = typeof updaterOrPages === "function" ? updaterOrPages(editorPages) : updaterOrPages;
         setTimeout(() => setPushHistory(next), 0);
         dispatch(setEditorPages(next));
-    };
+    }
 
     const setElement = (id, updater) => {
         setPagesWithHistory((prev) => {
@@ -838,7 +1006,12 @@ export default function KanvaEditor() {
                     <div className={styles.toolbar} style={{ width: '100%', justifyContent: 'space-between' }}>
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <div className={styles.toolbarGroup}>
-                                <UndoRedo pushHistory={pushHistory} />
+                                <UndoRedo
+                                    undo={undo}
+                                    redo={redo}
+                                    canUndo={canUndo}
+                                    canRedo={canRedo}
+                                />
                             </div>
 
                             <div className={styles.toolbarGroup}>
