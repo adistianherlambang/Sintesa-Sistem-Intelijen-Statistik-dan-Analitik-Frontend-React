@@ -7,7 +7,6 @@ import editorReducer from './editorReducer';
 const persistConfig = {
     key: 'kanva-editor',
     storage,
-    blacklist: ['savedTemplates'],
 };
 
 const persistedReducer = persistReducer(persistConfig, editorReducer);

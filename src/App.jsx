@@ -54,7 +54,8 @@ export default function App() {
     const obsoleteKeys = [
       "documents-storage",
       "turnitin_auth_session",
-      "react-resizable-panels:layout"
+      "react-resizable-panels:layout",
+      "persist:root"
     ];
     obsoleteKeys.forEach((key) => {
       if (localStorage.getItem(key) !== null) {

@@ -14,7 +14,6 @@ const initialState = {
     popup: false,
     fontList: [],
     uploadsPhotos: [],
-    savedTemplates: [],
 };
 
 const editorSlice = createSlice({
@@ -53,25 +52,6 @@ const editorSlice = createSlice({
         setUploadsPhotos: (state, action) => {
             state.uploadsPhotos = action.payload;
         },
-        setSaveTemplate: (state, action) => {
-            state.savedTemplates.push(action.payload);
-        },
-        updateTemplate: (state, action) => {
-            // Perbarui template yang sudah ada berdasarkan id
-            const idx = state.savedTemplates.findIndex(
-                (tpl) => String(tpl?.id) === String(action.payload.id)
-            );
-            if (idx !== -1) {
-                state.savedTemplates[idx] = action.payload;
-            } else {
-                state.savedTemplates.push(action.payload);
-            }
-        },
-        deleteTemplate: (state, action) => {
-            state.savedTemplates = state.savedTemplates.filter(
-                (tpl) => String(tpl?.id) !== String(action.payload)
-            );
-        },
     }
 });
 
@@ -85,9 +65,6 @@ export const {
     setPopUp,
     setFontList,
     setCanvasSize,
-    setUploadsPhotos,
-    setSaveTemplate,
-    updateTemplate,
-    deleteTemplate
+    setUploadsPhotos
 } = editorSlice.actions;
 export default editorSlice.reducer;

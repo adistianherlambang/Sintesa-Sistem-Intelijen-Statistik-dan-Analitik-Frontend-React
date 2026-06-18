@@ -7,8 +7,6 @@ import axios from "axios";
 import {
     setEditorPages,
     setPopUp,
-    setSaveTemplate,
-    updateTemplate,
     setSelectedUniqueId,
     setZoom,
     setPath,
