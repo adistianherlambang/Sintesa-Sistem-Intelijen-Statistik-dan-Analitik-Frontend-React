@@ -32,6 +32,26 @@ export default function Overview() {
   const components = ["graph", "KPI Inflasi", "KPI IHK", "Komoditas Dominan"]
   const allLoad = components.every(id => load[id])
 
+  const data = {};
+
+  for (let i = 0; i < localStorage.length; i++) {
+
+    const key = localStorage.key(i);
+
+    const value = localStorage.getItem(key);
+
+    try {
+
+      data[key] = JSON.parse(value);
+
+    } catch {
+
+      data[key] = value;
+
+    }
+
+  }
+
   return (
     <>
       <div className={styles.container}>
@@ -88,6 +108,9 @@ export default function Overview() {
             <Wrapper><HistoriInfografis /></Wrapper>
           </div>
         </div>
+
+        <pre>{JSON.stringify(data, null, 2)}</pre>
+
 
       </div>
 

@@ -49,6 +49,20 @@ function AuthRoute({ children }) {
 export default function App() {
   const user = userStore((state) => state.user);
 
+  React.useEffect(() => {
+    // Clean up obsolete localStorage keys unused by this project
+    const obsoleteKeys = [
+      "documents-storage",
+      "turnitin_auth_session",
+      "react-resizable-panels:layout"
+    ];
+    obsoleteKeys.forEach((key) => {
+      if (localStorage.getItem(key) !== null) {
+        localStorage.removeItem(key);
+      }
+    });
+  }, []);
+
   return (
     <>
       <Shadow />
