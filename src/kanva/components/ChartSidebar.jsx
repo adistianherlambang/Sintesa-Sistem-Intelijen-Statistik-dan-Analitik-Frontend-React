@@ -25,8 +25,8 @@ export default function ChartSidebar({ setPagesWithHistory, openMiniFor }) {
                 chartType,
                 x: 50,
                 y: 100,
-                width: 200,
-                height: 150,
+                width: chartType === "pie" ? 180 : 200,
+                height: chartType === "pie" ? 180 : 150,
                 data: [
                     { label: "Kategori A", value: 30 },
                     { label: "Kategori B", value: 65 },

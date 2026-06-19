@@ -54,10 +54,17 @@ export default function ChartEdit({ selectedEl, setElement }) {
             <Select
                 style={{ width: "100%" }}
                 value={selectedEl.chartType || "bar"}
-                onChange={(value) => setElement(selectedEl.id, (el) => ({
-                    ...el,
-                    chartType: value,
-                }))}
+                onChange={(value) => setElement(selectedEl.id, (el) => {
+                    const newEl = { ...el, chartType: value };
+                    if (value === "pie") {
+                        const size = Math.min(el.width || 200, el.height || 180);
+                        newEl.width = size;
+                        newEl.height = size;
+                    } else if (el.chartType === "pie" && (value === "bar" || value === "line")) {
+                        newEl.height = Math.round(el.width * 0.75);
+                    }
+                    return newEl;
+                })}
                 options={[
                     { value: "bar", label: "Grafik Batang (Bar)" },
                     { value: "line", label: "Grafik Garis (Line)" },
@@ -66,19 +73,40 @@ export default function ChartEdit({ selectedEl, setElement }) {
             />
 
             {/* Styling */}
-            <p className={styles.sectionTitle}>Tampilan Label & Nilai</p>
+            <p className={styles.sectionTitle}>Tampilan Grafik</p>
             <div className={styles.row} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <span className={styles.label}>Tampilkan Label Sumbu</span>
+                <span className={styles.label}>Tampilkan Label</span>
                 <Switch
                     checked={selectedEl.showLabels !== false}
                     onChange={(checked) => setElement(selectedEl.id, (el) => ({ ...el, showLabels: checked }))}
                 />
             </div>
-            <div className={styles.row} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                <span className={styles.label}>Tampilkan Nilai Data</span>
+            <div className={styles.row} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <span className={styles.label}>Tampilkan Nilai</span>
                 <Switch
                     checked={selectedEl.showValues !== false}
                     onChange={(checked) => setElement(selectedEl.id, (el) => ({ ...el, showValues: checked }))}
+                />
+            </div>
+            {selectedEl.chartType !== "pie" && (
+                <div className={styles.row} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                    <span className={styles.label}>Tampilkan Sumbu (Line XY)</span>
+                    <Switch
+                        checked={selectedEl.showAxes !== false}
+                        onChange={(checked) => setElement(selectedEl.id, (el) => ({ ...el, showAxes: checked }))}
+                    />
+                </div>
+            )}
+
+            {/* Layout */}
+            <p className={styles.sectionTitle}>Tata Letak & Jarak</p>
+            <div className={styles.row} style={{ marginBottom: 12 }}>
+                <span className={styles.label}>Padding Sisi (px)</span>
+                <InputNumber
+                    min={0}
+                    max={100}
+                    value={selectedEl.chartPadding !== undefined ? selectedEl.chartPadding : 25}
+                    onChange={(val) => setElement(selectedEl.id, (el) => ({ ...el, chartPadding: val }))}
                 />
             </div>
 

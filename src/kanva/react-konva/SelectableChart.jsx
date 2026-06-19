@@ -43,11 +43,17 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
     const maxVal = Math.max(...data.map((d) => parseFloat(d.value) || 0), 1);
     const totalVal = data.reduce((sum, d) => sum + (parseFloat(d.value) || 0), 0) || 1;
 
-    // Margins for rendering axes
-    const marginY = 25; // bottom label area
-    const marginX = 25; // left axis area
-    const plotWidth = width - marginX - 10;
-    const plotHeight = height - marginY - 10;
+    const chartPadding = shape.chartPadding !== undefined ? shape.chartPadding : 25;
+    const showAxes = shape.showAxes !== false;
+
+    // Symmetrical and proportional margins for rendering axes
+    const paddingLeft = chartPadding;
+    const paddingBottom = chartPadding;
+    const paddingTop = Math.max(15, chartPadding * 0.6);
+    const paddingRight = Math.max(15, chartPadding * 0.6);
+
+    const plotWidth = Math.max(10, width - paddingLeft - paddingRight);
+    const plotHeight = Math.max(10, height - paddingBottom - paddingTop);
 
     const renderChartContent = () => {
         if (chartType === "bar") {
@@ -59,11 +65,11 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                 <Group>
                     {/* Y Axis Grid Lines */}
                     {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
-                        const y = 10 + plotHeight * (1 - ratio);
+                        const y = paddingTop + plotHeight * (1 - ratio);
                         return (
                             <Group key={`grid-${idx}`}>
                                 <Line
-                                    points={[marginX, y, width - 10, y]}
+                                    points={[paddingLeft, y, width - paddingRight, y]}
                                     stroke={gridColor}
                                     strokeWidth={0.5}
                                 />
@@ -72,7 +78,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                         text={Math.round(maxVal * ratio).toString()}
                                         x={0}
                                         y={y - fontSize / 2}
-                                        width={marginX - 4}
+                                        width={paddingLeft - 4}
                                         align="right"
                                         fontSize={fontSize}
                                         fill={textColor}
@@ -83,18 +89,20 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                     })}
 
                     {/* X & Y Axis Lines */}
-                    <Line
-                        points={[marginX, 10, marginX, 10 + plotHeight, width - 10, 10 + plotHeight]}
-                        stroke={textColor}
-                        strokeWidth={1}
-                    />
+                    {showAxes && (
+                        <Line
+                            points={[paddingLeft, paddingTop, paddingLeft, paddingTop + plotHeight, width - paddingRight, paddingTop + plotHeight]}
+                            stroke={textColor}
+                            strokeWidth={1}
+                        />
+                    )}
 
                     {/* Bars */}
                     {data.map((item, idx) => {
                         const val = parseFloat(item.value) || 0;
                         const h = (val / maxVal) * plotHeight;
-                        const x = marginX + idx * (barWidth + barGap) + barGap / 2;
-                        const y = 10 + plotHeight - h;
+                        const x = paddingLeft + idx * (barWidth + barGap) + barGap / 2;
+                        const y = paddingTop + plotHeight - h;
 
                         return (
                             <Group key={`bar-${idx}`}>
@@ -122,7 +130,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                     <Text
                                         text={item.label}
                                         x={x - 10}
-                                        y={10 + plotHeight + 4}
+                                        y={paddingTop + plotHeight + 4}
                                         width={barWidth + 20}
                                         align="center"
                                         fontSize={fontSize - 1}
@@ -144,8 +152,8 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
 
             data.forEach((item, idx) => {
                 const val = parseFloat(item.value) || 0;
-                const x = marginX + idx * stepX;
-                const y = 10 + plotHeight - (val / maxVal) * plotHeight;
+                const x = paddingLeft + idx * stepX;
+                const y = paddingTop + plotHeight - (val / maxVal) * plotHeight;
                 points.push(x, y);
             });
 
@@ -153,11 +161,11 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                 <Group>
                     {/* Y Axis Grid Lines */}
                     {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
-                        const y = 10 + plotHeight * (1 - ratio);
+                        const y = paddingTop + plotHeight * (1 - ratio);
                         return (
                             <Group key={`grid-${idx}`}>
                                 <Line
-                                    points={[marginX, y, width - 10, y]}
+                                    points={[paddingLeft, y, width - paddingRight, y]}
                                     stroke={gridColor}
                                     strokeWidth={0.5}
                                 />
@@ -166,7 +174,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                         text={Math.round(maxVal * ratio).toString()}
                                         x={0}
                                         y={y - fontSize / 2}
-                                        width={marginX - 4}
+                                        width={paddingLeft - 4}
                                         align="right"
                                         fontSize={fontSize}
                                         fill={textColor}
@@ -177,11 +185,13 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                     })}
 
                     {/* Axes */}
-                    <Line
-                        points={[marginX, 10, marginX, 10 + plotHeight, width - 10, 10 + plotHeight]}
-                        stroke={textColor}
-                        strokeWidth={1}
-                    />
+                    {showAxes && (
+                        <Line
+                            points={[paddingLeft, paddingTop, paddingLeft, paddingTop + plotHeight, width - paddingRight, paddingTop + plotHeight]}
+                            stroke={textColor}
+                            strokeWidth={1}
+                        />
+                    )}
 
                     {/* Line Path */}
                     {points.length > 0 && (
@@ -196,8 +206,8 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                     {/* Nodes & Labels */}
                     {data.map((item, idx) => {
                         const val = parseFloat(item.value) || 0;
-                        const x = marginX + idx * stepX;
-                        const y = 10 + plotHeight - (val / maxVal) * plotHeight;
+                        const x = paddingLeft + idx * stepX;
+                        const y = paddingTop + plotHeight - (val / maxVal) * plotHeight;
 
                         return (
                             <Group key={`node-${idx}`}>
@@ -225,7 +235,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                     <Text
                                         text={item.label}
                                         x={x - 25}
-                                        y={10 + plotHeight + 4}
+                                        y={paddingTop + plotHeight + 4}
                                         width={50}
                                         align="center"
                                         fontSize={fontSize - 1}
@@ -240,9 +250,10 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
         }
 
         if (chartType === "pie") {
+            const effectiveHeight = showLabels ? Math.max(50, height - 25) : height;
             const centerX = width / 2;
-            const centerY = height / 2;
-            const radius = Math.min(plotWidth, plotHeight) / 2 * 0.9;
+            const centerY = effectiveHeight / 2;
+            const radius = Math.max(10, (Math.min(width, effectiveHeight) - chartPadding * 2) / 2 * 0.9);
             let startAngle = 0;
 
             return (
@@ -290,7 +301,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
 
                     {/* Small Legend below/side of pie */}
                     {showLabels && (
-                        <Group x={10} y={height - 20}>
+                        <Group x={10} y={height - Math.max(15, chartPadding)}>
                             {data.slice(0, 4).map((item, idx) => {
                                 const xPos = idx * (width / Math.min(data.length, 4));
                                 return (
@@ -346,12 +357,22 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                     const scaleY = node.scaleY();
                     node.scaleX(1);
                     node.scaleY(1);
+                    
+                    let newWidth = Math.max(100, (shape.width || 250) * scaleX);
+                    let newHeight = Math.max(80, (shape.height || 180) * scaleY);
+                    
+                    if (chartType === "pie") {
+                        const size = Math.max(100, Math.round((newWidth + newHeight) / 2));
+                        newWidth = size;
+                        newHeight = size;
+                    }
+                    
                     onChange({
                         ...shape,
                         x: node.x(),
                         y: node.y(),
-                        width: Math.max(100, (shape.width || 250) * scaleX),
-                        height: Math.max(80, (shape.height || 180) * scaleY),
+                        width: newWidth,
+                        height: newHeight,
                     });
                 }}
             >
@@ -369,7 +390,18 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                 {/* Render the actual chart (bars/line/pie) */}
                 {renderChartContent()}
             </Group>
-            {selected && <Transformer ref={trRef} rotateEnabled={false} keepRatio={false} />}
+            {selected && (
+                <Transformer
+                    ref={trRef}
+                    rotateEnabled={false}
+                    keepRatio={chartType === "pie"}
+                    enabledAnchors={
+                        chartType === "pie"
+                            ? ["top-left", "top-right", "bottom-left", "bottom-right"]
+                            : ["top-left", "top-right", "bottom-left", "bottom-right", "top-center", "bottom-center", "left-center", "right-center"]
+                    }
+                />
+            )}
         </>
     );
 }
