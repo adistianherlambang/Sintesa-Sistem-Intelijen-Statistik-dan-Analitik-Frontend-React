@@ -11,6 +11,9 @@ import banner8 from "../assets/banner-8.png";
 import banner9 from "../assets/banner-9.png";
 import banner10 from "../assets/banner-10.png";
 import banner11 from "../assets/banner-11.png";
+// asset infografis bps
+import infografisFooter from "../assets/InfografisFooter.png"
+import infografisBackground from "../assets/infografisBackground.png"
 
 function capitalize(text) {
     return text.charAt(0).toUpperCase() + text.slice(1);
@@ -35,14 +38,22 @@ const banners = [
         y: 0,
         children: [
             {
-                id: `b${Date.now()}-bg`,
-                type: "rect",
+                id: `b${Date.now()}-photo`,
+                type: "image",
                 x: 0,
                 y: 0,
                 width: 300,
                 height: 500,
-                fill: "#fdfdfd",
-                cornerRadius: 20,
+                src: infografisBackground,
+            },
+            {
+                id: `b${Date.now()}-photo`,
+                type: "image",
+                x: 0,
+                y: 456,
+                width: 300,
+                height: 44.5,
+                src: infografisFooter,
             },
             {
                 id: `b${Date.now()}-by`,
@@ -94,15 +105,6 @@ const banners = [
                 fontStyle: "italic",
                 fontFamily: "Brush Script MT, cursive",
                 fill: "#111827",
-            },
-            {
-                id: `b${Date.now()}-photo`,
-                type: "image",
-                x: 350,
-                y: 90,
-                width: 300,
-                height: 400,
-                src: banner7,
             },
             {
                 id: `b${Date.now()}-desc`,
