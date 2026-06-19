@@ -33,7 +33,7 @@ const locationName =
 const getInflasi = async () => {
     try {
         const res = await axios.post(
-            `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi`,
+            `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi-infografis`,
             {
                 kota: locationName
             }
@@ -51,7 +51,7 @@ const inflasiData = await getInflasi()
 const getIHK = async () => {
     try {
         const res = await axios.post(
-            `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/ihk`,
+            `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/ihk-infografis`,
             {
                 kota: locationName
             }
@@ -69,7 +69,7 @@ const IHKData = await getIHK()
 const getKomoditas = async () => {
     try {
         const res = await axios.post(
-            `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/komoditas`,
+            `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/komoditas-infografis`,
             {
                 kota: locationName
             }
@@ -181,7 +181,9 @@ const banners = [
             {
                 id: `b${Date.now()}-boxDescMoM`,
                 type: "text",
-                text: `Inflasi XX`,
+                text: inflasiData?.dashboard?.now !== undefined
+                    ? `${String(inflasiData.dashboard.now).replace(".", ",")}`
+                    : `Inflasi XX`,
                 x: 15,
                 y: 102,
                 fontSize: 12,
@@ -215,7 +217,7 @@ const banners = [
             {
                 id: `b${Date.now()}-boxTitleYtD`,
                 type: "text",
-                text: `Month-to-Month (M-to-M)`,
+                text: `Year-to-Date (Y-to-D)`,
                 x: 109,
                 y: 94,
                 fontSize: 6,
@@ -227,7 +229,9 @@ const banners = [
             {
                 id: `b${Date.now()}-boxDescYtD`,
                 type: "text",
-                text: `Inflasi XX`,
+                text: inflasiData?.dashboard?.ytd !== undefined
+                    ? `${String(inflasiData.dashboard.ytd).replace(".", ",")}`
+                    : `Inflasi XX`,
                 x: 109,
                 y: 102,
                 fontSize: 12,
@@ -261,7 +265,7 @@ const banners = [
             {
                 id: `b${Date.now()}-boxTitleYoY`,
                 type: "text",
-                text: `Month-to-Month (M-to-M)`,
+                text: `Year-on-Year (Y-on-Y)`,
                 x: 203.77,
                 y: 94,
                 fontSize: 6,
@@ -273,7 +277,9 @@ const banners = [
             {
                 id: `b${Date.now()}-boxDescYoY`,
                 type: "text",
-                text: `Inflasi XX`,
+                text: inflasiData?.dashboard?.yoy !== undefined
+                    ? `${String(inflasiData.dashboard.yoy).replace(".", ",")}`
+                    : `Inflasi XX`,
                 x: 203.77,
                 y: 102,
                 fontSize: 12,
@@ -302,13 +308,15 @@ const banners = [
                 y: 150,
                 width: 150,
                 height: 60,
-                data: [
-                    { label: "Makanan", value: 3.2 },
-                    { label: "Transportasi", value: 1.8 },
-                    { label: "Kesehatan", value: 2.5 },
-                    { label: "Pendidikan", value: 1.2 },
-                    { label: "Rekreasi", value: 0.8 },
-                ],
+                data: komoditasData?.top5Mom && komoditasData.top5Mom.length > 0
+                    ? komoditasData.top5Mom
+                    : [
+                        { label: "Makanan", value: 3.2 },
+                        { label: "Transportasi", value: 1.8 },
+                        { label: "Kesehatan", value: 2.5 },
+                        { label: "Pendidikan", value: 1.2 },
+                        { label: "Rekreasi", value: 0.8 },
+                    ],
                 colors: ["#F69139"],
                 showLabels: true,
                 showValues: true,
@@ -339,13 +347,15 @@ const banners = [
                 y: 150,
                 width: 150,
                 height: 60,
-                data: [
-                    { label: "Makanan", value: 3.2 },
-                    { label: "Transportasi", value: 1.8 },
-                    { label: "Kesehatan", value: 2.5 },
-                    { label: "Pendidikan", value: 1.2 },
-                    { label: "Rekreasi", value: 0.8 },
-                ],
+                data: komoditasData?.top5Yoy && komoditasData.top5Yoy.length > 0
+                    ? komoditasData.top5Yoy
+                    : [
+                        { label: "Makanan", value: 3.2 },
+                        { label: "Transportasi", value: 1.8 },
+                        { label: "Kesehatan", value: 2.5 },
+                        { label: "Pendidikan", value: 1.2 },
+                        { label: "Rekreasi", value: 0.8 },
+                    ],
                 colors: ["#FEBD23"],
                 showLabels: true,
                 showValues: true,
@@ -388,21 +398,23 @@ const banners = [
                 y: 240,
                 width: 300,
                 height: 60,
-                data: [
-                    { label: "Jun 25", value: 3.2 },
-                    { label: "Jul 25", value: 1.8 },
-                    { label: "Agu 25", value: 2.5 },
-                    { label: "Sep 25", value: 1.2 },
-                    { label: "Okt 25", value: 0.8 },
-                    { label: "Nov 25", value: 3.2 },
-                    { label: "Des 25", value: 1.8 },
-                    { label: "Jan", value: 2.5 },
-                    { label: "Feb", value: 1.2 },
-                    { label: "Mar", value: 0.8 },
-                    { label: "Apr", value: 3.2 },
-                    { label: "Mei", value: 1.8 },
-                    { label: "Jun", value: 1.8 },
-                ],
+                data: inflasiData?.m2mLast13 && inflasiData.m2mLast13.length > 0
+                    ? inflasiData.m2mLast13
+                    : [
+                        { label: "Jun 25", value: 3.2 },
+                        { label: "Jul 25", value: 1.8 },
+                        { label: "Agu 25", value: 2.5 },
+                        { label: "Sep 25", value: 1.2 },
+                        { label: "Okt 25", value: 0.8 },
+                        { label: "Nov 25", value: 3.2 },
+                        { label: "Des 25", value: 1.8 },
+                        { label: "Jan", value: 2.5 },
+                        { label: "Feb", value: 1.2 },
+                        { label: "Mar", value: 0.8 },
+                        { label: "Apr", value: 3.2 },
+                        { label: "Mei", value: 1.8 },
+                        { label: "Jun", value: 1.8 },
+                    ],
                 colors: ["#F69139"],
                 showLabels: true,
                 showValues: true,

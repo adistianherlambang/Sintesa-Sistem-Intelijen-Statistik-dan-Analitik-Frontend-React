@@ -40,8 +40,15 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
     const fontSize = shape.fontSize || 8;
     const gridColor = shape.gridColor || "rgba(0,0,0,0.1)";
 
-    const maxVal = Math.max(...data.map((d) => parseFloat(d.value) || 0), 1);
-    const totalVal = data.reduce((sum, d) => sum + (parseFloat(d.value) || 0), 0) || 1;
+    const rawVals = data.map((d) => parseFloat(d.value) || 0);
+    const rawMax = Math.max(...rawVals);
+    const rawMin = Math.min(...rawVals);
+
+    const minVal = rawMin < 0 ? rawMin : 0;
+    const maxVal = rawMax > minVal ? rawMax : minVal + 1;
+    const valRange = maxVal - minVal;
+
+    const totalVal = data.reduce((sum, d) => sum + Math.abs(parseFloat(d.value) || 0), 0) || 1;
 
     const chartPadding = shape.chartPadding !== undefined ? shape.chartPadding : 25;
     const showAxes = shape.showAxes !== false;
@@ -49,8 +56,12 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
     const hasLabels = showLabels && chartType !== "pie";
     const hasValues = showValues && chartType !== "pie";
     const showYLabels = hasLabels && showAxes;
-    const maxValStr = Math.max(...data.map((d) => Math.round(parseFloat(d.value) || 0))).toString();
-    const paddingLeft = showYLabels ? Math.max(18, maxValStr.length * fontSize * 0.6) : 0;
+    
+    const maxLabelLen = Math.max(
+        Math.round(maxVal).toString().length,
+        Math.round(minVal).toString().length
+    );
+    const paddingLeft = showYLabels ? Math.max(18, maxLabelLen * fontSize * 0.6) : 0;
     const paddingBottom = hasLabels ? Math.max(18, fontSize * 2.2) : 0;
     const paddingTop = hasValues ? Math.max(10, fontSize * 1.2) : 2;
     const paddingRight = hasLabels ? 4 : 2;
@@ -70,6 +81,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                     {/* Y Axis Grid Lines */}
                     {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
                         const y = paddingTop + plotHeight * (1 - ratio);
+                        const gridVal = minVal + valRange * ratio;
                         return (
                             <Group key={`grid-${idx}`}>
                                 <Line
@@ -79,7 +91,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                 />
                                 {showYLabels && (
                                     <Text
-                                        text={Math.round(maxVal * ratio).toString()}
+                                        text={gridVal.toFixed(1).replace(/\.0$/, "")}
                                         x={0}
                                         y={y - fontSize / 2}
                                         width={paddingLeft - 4}
@@ -104,9 +116,10 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                     {/* Bars */}
                     {data.map((item, idx) => {
                         const val = parseFloat(item.value) || 0;
-                        const h = (val / maxVal) * plotHeight;
+                        const yVal = paddingTop + plotHeight * (1 - (val - minVal) / valRange);
+                        const h = (paddingTop + plotHeight) - yVal;
                         const x = paddingLeft + chartPadding + idx * (barWidth + barGap) + barGap / 2;
-                        const y = paddingTop + plotHeight - h;
+                        const y = yVal;
 
                         return (
                             <Group key={`bar-${idx}`}>
@@ -122,7 +135,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                     <Text
                                         text={val.toString()}
                                         x={x - 10}
-                                        y={y - fontSize - 2}
+                                        y={yVal - fontSize - 2}
                                         width={barWidth + 20}
                                         align="center"
                                         fontSize={fontSize}
@@ -157,7 +170,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
             data.forEach((item, idx) => {
                 const val = parseFloat(item.value) || 0;
                 const x = paddingLeft + chartPadding + idx * stepX;
-                const y = paddingTop + plotHeight - (val / maxVal) * plotHeight;
+                const y = paddingTop + plotHeight * (1 - (val - minVal) / valRange);
                 points.push(x, y);
             });
 
@@ -166,6 +179,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                     {/* Y Axis Grid Lines */}
                     {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
                         const y = paddingTop + plotHeight * (1 - ratio);
+                        const gridVal = minVal + valRange * ratio;
                         return (
                             <Group key={`grid-${idx}`}>
                                 <Line
@@ -175,7 +189,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                 />
                                 {showYLabels && (
                                     <Text
-                                        text={Math.round(maxVal * ratio).toString()}
+                                        text={gridVal.toFixed(1).replace(/\.0$/, "")}
                                         x={0}
                                         y={y - fontSize / 2}
                                         width={paddingLeft - 4}
@@ -211,7 +225,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                     {data.map((item, idx) => {
                         const val = parseFloat(item.value) || 0;
                         const x = paddingLeft + chartPadding + idx * stepX;
-                        const y = paddingTop + plotHeight - (val / maxVal) * plotHeight;
+                        const y = paddingTop + plotHeight * (1 - (val - minVal) / valRange);
                         const labelWidth = lineCount > 1 ? stepX : plotWidth;
 
                         return (
