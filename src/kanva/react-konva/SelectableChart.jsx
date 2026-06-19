@@ -46,11 +46,14 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
     const chartPadding = shape.chartPadding !== undefined ? shape.chartPadding : 25;
     const showAxes = shape.showAxes !== false;
 
-    // Sensible base margins that scale with font size to prevent label clipping
-    const paddingLeft = Math.max(35, fontSize * 4);
-    const paddingBottom = Math.max(25, fontSize * 2.5);
-    const paddingTop = Math.max(15, fontSize * 1.5);
-    const paddingRight = Math.max(15, fontSize * 1.5);
+    // Sensible base margins that scale with font size and adapt to visibility flags to fit the selection box closer to content
+    const hasLabels = showLabels && chartType !== "pie";
+    const hasValues = showValues && chartType !== "pie";
+
+    const paddingLeft = hasLabels ? Math.max(30, fontSize * 3.5) : 0;
+    const paddingBottom = hasLabels ? Math.max(20, fontSize * 2.2) : 0;
+    const paddingTop = hasValues ? Math.max(12, fontSize * 1.5) : 2;
+    const paddingRight = hasLabels ? 8 : 2;
 
     // chartPadding is the gap between the axes and the actual chart plot area
     const plotWidth = Math.max(10, width - paddingLeft - paddingRight - chartPadding * 2);
@@ -254,7 +257,8 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
             const effectiveHeight = showLabels ? Math.max(50, height - 25) : height;
             const centerX = width / 2;
             const centerY = effectiveHeight / 2;
-            const radius = Math.max(10, (Math.min(width, effectiveHeight) - chartPadding * 2) / 2 * 0.9);
+            const radiusFactor = chartPadding === 0 ? 1.0 : 0.95;
+            const radius = Math.max(10, (Math.min(width, effectiveHeight) - chartPadding * 2) / 2 * radiusFactor);
             let startAngle = 0;
 
             return (
@@ -362,6 +366,11 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                     let newWidth = Math.max(100, (shape.width || 250) * scaleX);
                     let newHeight = Math.max(80, (shape.height || 180) * scaleY);
                     
+                    // Scale the font size proportionally with the resize
+                    const scale = (scaleX + scaleY) / 2;
+                    const currentFontSize = shape.fontSize || 8;
+                    const newFontSize = Math.max(4, Math.min(24, Math.round(currentFontSize * scale)));
+                    
                     if (chartType === "pie") {
                         const size = Math.max(100, Math.round((newWidth + newHeight) / 2));
                         newWidth = size;
@@ -374,6 +383,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                         y: node.y(),
                         width: newWidth,
                         height: newHeight,
+                        fontSize: newFontSize,
                     });
                 }}
             >

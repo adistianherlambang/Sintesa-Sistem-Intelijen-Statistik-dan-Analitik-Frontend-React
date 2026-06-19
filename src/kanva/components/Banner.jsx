@@ -4,6 +4,7 @@ import { Row, Col, Image, Space, Skeleton } from "./UIControls";
 import { Stage, Layer, Rect, Text, Image as KonvaImage } from "react-konva";
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectedUniqueId, setPopUp, setCanvasSize } from "../store/editorReducer";
+import SelectableChart from "../react-konva/SelectableChart";
 
 import tea from "../assets/tea.png";
 import banner7 from "../assets/banner-7.png";
@@ -54,17 +55,6 @@ const banners = [
                 height: 44.5,
                 src: infografisFooter,
             },
-            // {
-            //     id: `b${Date.now()}-script-text`,
-            //     type: "text",
-            //     text: `Infografis ${locationName} ${month} ${year}`,
-            //     x: 0,
-            //     y: 0,
-            //     fontSize: 14,
-            //     fontStyle: "normal",
-            //     fontFamily: "Montserrat",
-            //     fill: "#111827",
-            // },
             {
                 id: `b${Date.now()}-title-text`,
                 type: "text",
@@ -247,6 +237,31 @@ const banners = [
                 fontFamily: "Montserrat",
                 fontStyle: "normal",
                 fill: "#ffffffff",
+            },
+            {
+                id: `b${Date.now()}-bar-chart`,
+                type: "chart",
+                chartType: "bar",
+                x: 10,
+                y: 135,
+                width: 280,
+                height: 230,
+                data: [
+                    { label: "Makanan", value: 3.2 },
+                    { label: "Transportasi", value: 1.8 },
+                    { label: "Kesehatan", value: 2.5 },
+                    { label: "Pendidikan", value: 1.2 },
+                    { label: "Rekreasi", value: 0.8 },
+                ],
+                colors: ["#AD6832", "#F4913E", "#FEBD23", "#34B34A", "#2da140"],
+                showLabels: true,
+                showValues: true,
+                textColor: "#111827",
+                fontSize: 8,
+                chartPadding: 20,
+                showAxes: true,
+                gridColor: "rgba(0,0,0,0.15)",
+                rotation: 0
             },
         ],
     },
@@ -1038,22 +1053,24 @@ export default function BannerList({ setPagesWithHistory }) {
                 {banners?.map((bnr, i) => (
                     <Stage
                         key={i}
-                        width={900}
-                        height={500}
+                        width={bnr.w || 900}
+                        height={bnr.h || 500}
                         ref={(el) => (stageRefs.current[i] = el)}
                     >
                         <Layer>
                             {bnr?.children.map((el) => {
                                 return (
-                                    <>
+                                    <React.Fragment key={el.id}>
                                         {el.type === "rect" ? (
-                                            <Rect key={el.id + el.type} {...el} />
+                                            <Rect {...el} />
                                         ) : el.type === "text" ? (
-                                            <Text key={el.id + el.type} {...el} />
+                                            <Text {...el} />
                                         ) : el.type === "image" ? (
-                                            <KonvaImg key={el.id + el.type} el={el} />
+                                            <KonvaImg el={el} />
+                                        ) : el.type === "chart" ? (
+                                            <SelectableChart shape={el} selected={false} />
                                         ) : null}
-                                    </>
+                                    </React.Fragment>
                                 )
                             }
 
