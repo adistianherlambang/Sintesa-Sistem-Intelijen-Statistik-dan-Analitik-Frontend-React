@@ -46,14 +46,15 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
     const chartPadding = shape.chartPadding !== undefined ? shape.chartPadding : 25;
     const showAxes = shape.showAxes !== false;
 
-    // Symmetrical and proportional margins for rendering axes
-    const paddingLeft = chartPadding;
-    const paddingBottom = chartPadding;
-    const paddingTop = Math.max(15, chartPadding * 0.6);
-    const paddingRight = Math.max(15, chartPadding * 0.6);
+    // Sensible base margins that scale with font size to prevent label clipping
+    const paddingLeft = Math.max(35, fontSize * 4);
+    const paddingBottom = Math.max(25, fontSize * 2.5);
+    const paddingTop = Math.max(15, fontSize * 1.5);
+    const paddingRight = Math.max(15, fontSize * 1.5);
 
-    const plotWidth = Math.max(10, width - paddingLeft - paddingRight);
-    const plotHeight = Math.max(10, height - paddingBottom - paddingTop);
+    // chartPadding is the gap between the axes and the actual chart plot area
+    const plotWidth = Math.max(10, width - paddingLeft - paddingRight - chartPadding * 2);
+    const plotHeight = Math.max(10, height - paddingBottom - paddingTop - chartPadding);
 
     const renderChartContent = () => {
         if (chartType === "bar") {
@@ -91,7 +92,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                     {/* X & Y Axis Lines */}
                     {showAxes && (
                         <Line
-                            points={[paddingLeft, paddingTop, paddingLeft, paddingTop + plotHeight, width - paddingRight, paddingTop + plotHeight]}
+                            points={[paddingLeft, paddingTop, paddingLeft, height - paddingBottom, width - paddingRight, height - paddingBottom]}
                             stroke={textColor}
                             strokeWidth={1}
                         />
@@ -101,7 +102,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                     {data.map((item, idx) => {
                         const val = parseFloat(item.value) || 0;
                         const h = (val / maxVal) * plotHeight;
-                        const x = paddingLeft + idx * (barWidth + barGap) + barGap / 2;
+                        const x = paddingLeft + chartPadding + idx * (barWidth + barGap) + barGap / 2;
                         const y = paddingTop + plotHeight - h;
 
                         return (
@@ -130,7 +131,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                     <Text
                                         text={item.label}
                                         x={x - 10}
-                                        y={paddingTop + plotHeight + 4}
+                                        y={height - paddingBottom + 4}
                                         width={barWidth + 20}
                                         align="center"
                                         fontSize={fontSize - 1}
@@ -152,7 +153,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
 
             data.forEach((item, idx) => {
                 const val = parseFloat(item.value) || 0;
-                const x = paddingLeft + idx * stepX;
+                const x = paddingLeft + chartPadding + idx * stepX;
                 const y = paddingTop + plotHeight - (val / maxVal) * plotHeight;
                 points.push(x, y);
             });
@@ -187,7 +188,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                     {/* Axes */}
                     {showAxes && (
                         <Line
-                            points={[paddingLeft, paddingTop, paddingLeft, paddingTop + plotHeight, width - paddingRight, paddingTop + plotHeight]}
+                            points={[paddingLeft, paddingTop, paddingLeft, height - paddingBottom, width - paddingRight, height - paddingBottom]}
                             stroke={textColor}
                             strokeWidth={1}
                         />
@@ -206,7 +207,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                     {/* Nodes & Labels */}
                     {data.map((item, idx) => {
                         const val = parseFloat(item.value) || 0;
-                        const x = paddingLeft + idx * stepX;
+                        const x = paddingLeft + chartPadding + idx * stepX;
                         const y = paddingTop + plotHeight - (val / maxVal) * plotHeight;
 
                         return (
@@ -235,7 +236,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                     <Text
                                         text={item.label}
                                         x={x - 25}
-                                        y={paddingTop + plotHeight + 4}
+                                        y={height - paddingBottom + 4}
                                         width={50}
                                         align="center"
                                         fontSize={fontSize - 1}
