@@ -242,10 +242,10 @@ const banners = [
                 id: `b${Date.now()}-bar-chart`,
                 type: "chart",
                 chartType: "bar",
-                x: 10,
+                x: 0,
                 y: 135,
-                width: 280,
-                height: 230,
+                width: 150,
+                height: 100,
                 data: [
                     { label: "Makanan", value: 3.2 },
                     { label: "Transportasi", value: 1.8 },

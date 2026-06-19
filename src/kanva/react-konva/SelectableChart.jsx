@@ -49,10 +49,11 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
     // Sensible base margins that scale with font size and adapt to visibility flags to fit the selection box closer to content
     const hasLabels = showLabels && chartType !== "pie";
     const hasValues = showValues && chartType !== "pie";
-    const paddingLeft = hasLabels ? Math.max(30, fontSize * 3.5) : 0;
-    const paddingBottom = hasLabels ? Math.max(30, fontSize * 3.5) : 0;
-    const paddingTop = hasValues ? Math.max(12, fontSize * 1.5) : 2;
-    const paddingRight = hasLabels ? 8 : 2;
+    const maxValStr = Math.max(...data.map((d) => Math.round(parseFloat(d.value) || 0))).toString();
+    const paddingLeft = hasLabels ? Math.max(18, maxValStr.length * fontSize * 0.6) : 0;
+    const paddingBottom = hasLabels ? Math.max(18, fontSize * 2.2) : 0;
+    const paddingTop = hasValues ? Math.max(10, fontSize * 1.2) : 2;
+    const paddingRight = hasLabels ? 4 : 2;
 
     // chartPadding is the gap between the axes and the actual chart plot area
     const plotWidth = Math.max(10, width - paddingLeft - paddingRight - chartPadding * 2);
