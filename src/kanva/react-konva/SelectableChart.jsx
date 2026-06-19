@@ -46,11 +46,11 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
     const chartPadding = shape.chartPadding !== undefined ? shape.chartPadding : 25;
     const showAxes = shape.showAxes !== false;
 
-    // Sensible base margins that scale with font size and adapt to visibility flags to fit the selection box closer to content
     const hasLabels = showLabels && chartType !== "pie";
     const hasValues = showValues && chartType !== "pie";
+    const showYLabels = hasLabels && showAxes;
     const maxValStr = Math.max(...data.map((d) => Math.round(parseFloat(d.value) || 0))).toString();
-    const paddingLeft = hasLabels ? Math.max(18, maxValStr.length * fontSize * 0.6) : 0;
+    const paddingLeft = showYLabels ? Math.max(18, maxValStr.length * fontSize * 0.6) : 0;
     const paddingBottom = hasLabels ? Math.max(18, fontSize * 2.2) : 0;
     const paddingTop = hasValues ? Math.max(10, fontSize * 1.2) : 2;
     const paddingRight = hasLabels ? 4 : 2;
@@ -77,7 +77,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                     stroke={gridColor}
                                     strokeWidth={0.5}
                                 />
-                                {showLabels && (
+                                {showYLabels && (
                                     <Text
                                         text={Math.round(maxVal * ratio).toString()}
                                         x={0}
@@ -173,7 +173,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                     stroke={gridColor}
                                     strokeWidth={0.5}
                                 />
-                                {showLabels && (
+                                {showYLabels && (
                                     <Text
                                         text={Math.round(maxVal * ratio).toString()}
                                         x={0}
