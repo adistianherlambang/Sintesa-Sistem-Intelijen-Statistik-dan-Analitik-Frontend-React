@@ -6,6 +6,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { setSelectedUniqueId, setPopUp, setCanvasSize } from "../store/editorReducer";
 import SelectableChart from "../react-konva/SelectableChart";
 
+import axios from 'axios'
+
 import tea from "../assets/tea.png";
 import banner7 from "../assets/banner-7.png";
 import banner8 from "../assets/banner-8.png";
@@ -27,6 +29,60 @@ const month = now.toLocaleString('id-ID', { month: 'long' });
 const locationName =
     JSON.parse(localStorage.getItem("user-storage"))
         ?.state?.user?.location?.name
+
+const getInflasi = async () => {
+    try {
+        const res = await axios.post(
+            `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi`,
+            {
+                kota: locationName
+            }
+        );
+
+        return res.data;
+    } catch (err) {
+        console.error(err.message);
+        return null;
+    }
+};
+
+const inflasiData = await getInflasi()
+
+const getIHK = async () => {
+    try {
+        const res = await axios.post(
+            `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/ihk`,
+            {
+                kota: locationName
+            }
+        );
+
+        return res.data;
+    } catch (err) {
+        console.error(err.message);
+        return null;
+    }
+};
+
+const IHKData = await getIHK()
+
+const getKomoditas = async () => {
+    try {
+        const res = await axios.post(
+            `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/komoditas`,
+            {
+                kota: locationName
+            }
+        );
+
+        return res.data;
+    } catch (err) {
+        console.error(err.message);
+        return null;
+    }
+};
+
+const komoditasData = await getKomoditas()
 
 const banners = [
     {
