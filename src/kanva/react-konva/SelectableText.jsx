@@ -228,7 +228,11 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
                     shape?.lineThrough ? "line-through" : "",
                 ].join(" ")}
 
-                fontStyle={`${shape?.bold ? "bold " : ""}${shape?.italic ? "italic" : ""}`}
+                fontStyle={
+                    (shape?.bold || shape?.italic)
+                        ? `${shape?.bold ? "bold " : ""}${shape?.italic ? "italic" : ""}`.trim()
+                        : (shape?.fontStyle || "normal")
+                }
                 text={draftText}
                 draggable={!isEditing && !shape?.locked}
                 visible={shape?.visible !== false && !isEditing}

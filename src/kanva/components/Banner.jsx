@@ -21,51 +21,72 @@ function capitalize(text) {
 
 const now = new Date();
 const year = now.getFullYear()
-const month = capitalize(now.toLocaleString('id-ID', { month: 'long' }));
+const month = now.toLocaleString('id-ID', { month: 'long' });
 
-const locationName = capitalize(
+const locationName =
     JSON.parse(localStorage.getItem("user-storage"))
         ?.state?.user?.location?.name
-)
 
 const banners = [
     {
         name: `Infografis ${locationName} ${month} ${year}`,
         type: "banner",
         w: 300,
-        h: 500,
+        h: 424.43,
         x: 0,
         y: 0,
         children: [
             {
-                id: `b${Date.now()}-photo`,
+                id: `b${Date.now()}-bg-photo`,
                 type: "image",
                 x: 0,
                 y: 0,
                 width: 300,
-                height: 500,
+                height: 424.43,
                 src: infografisBackground,
             },
             {
-                id: `b${Date.now()}-photo`,
+                id: `b${Date.now()}-footer-photo`,
                 type: "image",
                 x: 0,
-                y: 456,
+                y: 380,
                 width: 300,
                 height: 44.5,
                 src: infografisFooter,
             },
+            // {
+            //     id: `b${Date.now()}-script-text`,
+            //     type: "text",
+            //     text: `Infografis ${locationName} ${month} ${year}`,
+            //     x: 0,
+            //     y: 0,
+            //     fontSize: 14,
+            //     fontStyle: "normal",
+            //     fontFamily: "Montserrat",
+            //     fill: "#111827",
+            // },
             {
-                id: `b${Date.now()}-script-text`,
+                id: `b${Date.now()}-title-text`,
                 type: "text",
-                text: `Infografis ${locationName} ${month} ${year}`,
-                x: 0,
-                y: 0,
-                fontSize: 14,
-                fontStyle: "normal",
+                text: `PERKEMBANGAN\nINDEKS HARGA KONSUMEN\n${locationName.toUpperCase()} ${month.toUpperCase()} ${year}`,
+                x: 10,
+                y: 20,
+                fontSize: 15,
                 fontFamily: "Montserrat",
-                fill: "#111827",
+                fontStyle: "bold",
+                bold: true,
+                fill: "#AD6832",
             },
+            {
+                id: `b${Date.now()}-qr`,
+                type: "rect",
+                x: 240,
+                y: 20,
+                width: 50,
+                height: 50,
+                fill: "#fdfdfd",
+            },
+
         ],
     },
     // {
@@ -835,7 +856,10 @@ export default function BannerList({ setPagesWithHistory }) {
         if (!template) return;
         setPagesWithHistory((prev) => {
             const cp = JSON.parse(JSON.stringify(prev));
-            const children = (template?.children || []).map((el) => ({ ...el, id: `${el?.id}-${Date.now()}` }));
+            const children = (template?.children || []).map((el, idx) => ({
+                ...el,
+                id: `${el?.id}-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 7)}`
+            }));
             cp[activeIndex] = { ...(cp[activeIndex] || {}), children, background: template?.background };
             return cp;
         });
