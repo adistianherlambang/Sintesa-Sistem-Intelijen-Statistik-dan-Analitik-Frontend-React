@@ -13,6 +13,7 @@ import SelectableStar from '../react-konva/SelectableStar';
 import SelectableArrow from '../react-konva/SelectableArrow';
 import SelectableLine from '../react-konva/SelectableLine';
 import SelectablePolygon from '../react-konva/SelectablePolygon';
+import SelectableChart from '../react-konva/SelectableChart';
 
 const EditorLayer = ({ el, setElement, stageRef, isSpacePressed }) => {
     const dispatch = useDispatch();
@@ -124,6 +125,16 @@ const EditorLayer = ({ el, setElement, stageRef, isSpacePressed }) => {
     }
     if (el?.type === "image") {
         return <SelectableImage
+            key={el?.id}
+            shape={el}
+            selected={isSelected}
+            onSelect={(e) => handleOnes(el?.id, e)}
+            onChange={(next) => setElement(el?.id, () => next)}
+        />;
+    }
+
+    if (el?.type === "chart") {
+        return <SelectableChart
             key={el?.id}
             shape={el}
             selected={isSelected}

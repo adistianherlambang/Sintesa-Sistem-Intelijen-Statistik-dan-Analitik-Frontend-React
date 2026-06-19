@@ -20,6 +20,8 @@ import Banner from './Banner';
 import EditingPopup from './EditingPopup';
 import Layer from './Layer';
 import Shape from './Shape';
+import ChartSidebar from './ChartSidebar';
+import { IoBarChartOutline } from "react-icons/io5";
 
 import styles from './Sidebar.module.css';
 
@@ -43,6 +45,8 @@ const getIcon = (type) => {
             return <PiResizeThin style={{ fontSize: 18 }} />;
         case "rect":
             return <MdOutlineShapeLine style={{ fontSize: 18 }} />;
+        case "chart":
+            return <IoBarChartOutline style={{ fontSize: 18 }} />;
         default:
             return null;
     }
@@ -81,6 +85,12 @@ const Sidebar = ({ selectedEl, setElement, activePage, setPagesWithHistory, open
                             />
                         )}
                         {path === "photo" && <Photo setPagesWithHistory={setPagesWithHistory} />}
+                        {path === "chart" && (
+                            <ChartSidebar
+                                setPagesWithHistory={setPagesWithHistory}
+                                openMiniFor={openMiniFor}
+                            />
+                        )}
                         {path === "element" && <Element setPagesWithHistory={setPagesWithHistory} />}
                         {path === "shape" && <Shape setPagesWithHistory={setPagesWithHistory} />}
                         {path === "upload" && <Upload setPagesWithHistory={setPagesWithHistory} />}

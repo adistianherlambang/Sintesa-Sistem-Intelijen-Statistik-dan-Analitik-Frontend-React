@@ -13,7 +13,7 @@ import {
     setCanvasSize
 } from './store/editorReducer';
 
-import { IoDuplicateOutline, IoSaveOutline } from "react-icons/io5";
+import { IoDuplicateOutline, IoSaveOutline, IoBarChartOutline } from "react-icons/io5";
 import { HiOutlinePencil } from "react-icons/hi2";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { SlReload } from "react-icons/sl";
@@ -1051,6 +1051,7 @@ export default function KanvaEditor() {
         { name: "banner", label: "Template", icon: <GrTemplate /> },
         { name: "text", label: "Teks", icon: <PiTextAaLight /> },
         { name: "photo", label: "Foto", icon: <MdOutlinePhotoSizeSelectActual /> },
+        { name: "chart", label: "Grafik", icon: <IoBarChartOutline /> },
         { name: "element", label: "Elemen", icon: <IoShapesOutline /> },
         { name: "shape", label: "Bentuk", icon: <IoShapesOutline /> },
         { name: "upload", label: "Unggah", icon: <GrCloudUpload /> },

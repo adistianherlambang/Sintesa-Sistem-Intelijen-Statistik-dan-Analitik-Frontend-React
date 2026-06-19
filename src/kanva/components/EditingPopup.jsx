@@ -8,6 +8,7 @@ import StarEdit from '../editing/StarEdit';
 import ArrowEdit from '../editing/ArrowEdit';
 import LineEdit from '../editing/LineEdit';
 import PolygonEdit from '../editing/PolygonEdit';
+import ChartEdit from '../editing/ChartEdit';
 
 export default function EditingPopup({ selectedEl, setElement }) {
 
@@ -32,6 +33,7 @@ export default function EditingPopup({ selectedEl, setElement }) {
                     {selectedEl?.type === "arrow" && <ArrowEdit selectedEl={selectedEl} setElement={setElement} />}
                     {selectedEl?.type === "line" && <LineEdit selectedEl={selectedEl} setElement={setElement} />}
                     {selectedEl?.type === "polygon" && <PolygonEdit selectedEl={selectedEl} setElement={setElement} />}
+                    {selectedEl?.type === "chart" && <ChartEdit selectedEl={selectedEl} setElement={setElement} />}
                 </>
 
             )}
