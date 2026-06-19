@@ -49,9 +49,8 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
     // Sensible base margins that scale with font size and adapt to visibility flags to fit the selection box closer to content
     const hasLabels = showLabels && chartType !== "pie";
     const hasValues = showValues && chartType !== "pie";
-
     const paddingLeft = hasLabels ? Math.max(30, fontSize * 3.5) : 0;
-    const paddingBottom = hasLabels ? Math.max(20, fontSize * 2.2) : 0;
+    const paddingBottom = hasLabels ? Math.max(30, fontSize * 3.5) : 0;
     const paddingTop = hasValues ? Math.max(12, fontSize * 1.5) : 2;
     const paddingRight = hasLabels ? 8 : 2;
 
@@ -133,13 +132,13 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                 {showLabels && (
                                     <Text
                                         text={item.label}
-                                        x={x - 10}
+                                        x={paddingLeft + chartPadding + idx * (barWidth + barGap)}
                                         y={height - paddingBottom + 4}
-                                        width={barWidth + 20}
+                                        width={barWidth + barGap}
                                         align="center"
                                         fontSize={fontSize - 1}
                                         fill={textColor}
-                                        wrap="none"
+                                        wrap="word"
                                     />
                                 )}
                             </Group>
@@ -212,6 +211,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                         const val = parseFloat(item.value) || 0;
                         const x = paddingLeft + chartPadding + idx * stepX;
                         const y = paddingTop + plotHeight - (val / maxVal) * plotHeight;
+                        const labelWidth = lineCount > 1 ? stepX : plotWidth;
 
                         return (
                             <Group key={`node-${idx}`}>
@@ -238,12 +238,13 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                 {showLabels && (
                                     <Text
                                         text={item.label}
-                                        x={x - 25}
+                                        x={x - labelWidth / 2}
                                         y={height - paddingBottom + 4}
-                                        width={50}
+                                        width={labelWidth}
                                         align="center"
                                         fontSize={fontSize - 1}
                                         fill={textColor}
+                                        wrap="word"
                                     />
                                 )}
                             </Group>

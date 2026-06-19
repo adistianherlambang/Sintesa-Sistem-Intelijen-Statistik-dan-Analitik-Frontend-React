@@ -24,6 +24,8 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
     const onChangeRef = useRef(onChange);
     onChangeRef.current = onChange;
 
+    const textareaRef = useRef(null);
+
     // Sync draftText when shape.text changes externally
     useEffect(() => {
         if (shape?.text !== undefined) {
@@ -47,9 +49,6 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
         const stage = textNode.getStage();
         if (!stage) return;
 
-        const currentShape = shapeRef.current;
-        const currentOnChange = onChangeRef.current;
-
         const stageContainer = stage.container();
         const stageBox = stageContainer.getBoundingClientRect();
         
@@ -61,6 +60,7 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
 
         // Create HTML textarea
         const textarea = document.createElement("textarea");
+        textareaRef.current = textarea;
         document.body.appendChild(textarea);
 
         // Styling the textarea overlay to align perfectly with Konva Text
@@ -81,12 +81,13 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
         textarea.style.mozUserSelect = "text";
         textarea.style.msUserSelect = "text";
         
-        textarea.style.fontSize = (currentShape.fontSize || 16) * scaleY + "px";
-        textarea.style.fontFamily = currentShape.fontFamily || "sans-serif";
-        textarea.style.fontWeight = currentShape.bold ? "bold" : "normal";
-        textarea.style.fontStyle = currentShape.italic ? "italic" : "normal";
-        textarea.style.color = currentShape.fill || "#000000";
-        textarea.style.textAlign = currentShape.align || "left";
+        const latestShapeInitial = shapeRef.current || {};
+        textarea.style.fontSize = (latestShapeInitial.fontSize || 16) * scaleY + "px";
+        textarea.style.fontFamily = latestShapeInitial.fontFamily || "sans-serif";
+        textarea.style.fontWeight = latestShapeInitial.bold ? "bold" : "normal";
+        textarea.style.fontStyle = latestShapeInitial.italic ? "italic" : "normal";
+        textarea.style.color = latestShapeInitial.fill || "#000000";
+        textarea.style.textAlign = latestShapeInitial.align || "left";
         
         // Reset default styles
         textarea.style.border = "none";
@@ -142,8 +143,11 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
             const nextVal = textarea.value;
             setDraftText(nextVal);
             setIsEditing(false);
-            if (currentShape?.text !== nextVal) {
-                currentOnChange({ ...currentShape, text: nextVal });
+            
+            const latestShape = shapeRef.current;
+            const latestOnChange = onChangeRef.current;
+            if (latestShape && latestOnChange && latestShape.text !== nextVal) {
+                latestOnChange({ ...latestShape, text: nextVal });
             }
             
             if (textarea.parentNode) {
@@ -163,6 +167,9 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
         textarea.addEventListener("keydown", handleKeyDown);
 
         return () => {
+            if (!isSaved) {
+                saveAndClose();
+            }
             textarea.removeEventListener("input", autoResize);
             textarea.removeEventListener("blur", saveAndClose);
             textarea.removeEventListener("keydown", handleKeyDown);
@@ -173,11 +180,33 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
             textarea.removeEventListener("touchstart", stopPropagation);
             textarea.removeEventListener("touchend", stopPropagation);
             textarea.removeEventListener("keyup", stopPropagation);
+            textareaRef.current = null;
             if (textarea.parentNode) {
                 textarea.parentNode.removeChild(textarea);
             }
         };
     }, [isEditing]);
+
+    // Sync textarea styles in real-time if shape styling props change externally during editing
+    useEffect(() => {
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+
+        const textNode = ref.current;
+        if (!textNode) return;
+
+        const stage = textNode.getStage();
+        if (!stage) return;
+
+        const scaleY = stage.scaleY();
+
+        textarea.style.fontSize = (shape?.fontSize || 16) * scaleY + "px";
+        textarea.style.fontFamily = shape?.fontFamily || "sans-serif";
+        textarea.style.fontWeight = shape?.bold ? "bold" : "normal";
+        textarea.style.fontStyle = shape?.italic ? "italic" : "normal";
+        textarea.style.color = shape?.fill || "#000000";
+        textarea.style.textAlign = shape?.align || "left";
+    }, [shape?.fontSize, shape?.fontFamily, shape?.bold, shape?.italic, shape?.fill, shape?.align]);
 
     const commitEdit = () => {
         if (isEditing) {
