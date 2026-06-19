@@ -24,6 +24,24 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
+    <link rel="preload" href="%PUBLIC_URL%/font/Montserrat/Montserrat-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
+    <link rel="preload" href="%PUBLIC_URL%/font/Montserrat/Montserrat-Italic-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
+    <style>
+      @font-face {
+        font-family: 'Montserrat';
+        src: url('%PUBLIC_URL%/font/Montserrat/Montserrat-VariableFont_wght.ttf') format('truetype');
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Montserrat';
+        src: url('%PUBLIC_URL%/font/Montserrat/Montserrat-Italic-VariableFont_wght.ttf') format('truetype');
+        font-weight: 100 900;
+        font-style: italic;
+        font-display: swap;
+      }
+    </style>
     <title>React App</title>
   </head>
   <body>
