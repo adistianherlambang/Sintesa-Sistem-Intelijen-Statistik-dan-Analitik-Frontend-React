@@ -1,6 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function AILoader({ text = "Sedang diproses oleh AI Agent...", minHeight = "200px" }) {
+  const [displayedText, setDisplayedText] = useState("");
+
+  useEffect(() => {
+    let index = 0;
+    setDisplayedText(""); // Reset displayed text
+    const timer = setInterval(() => {
+      setDisplayedText((prev) => prev + text.charAt(index));
+      index++;
+      if (index >= text.length) {
+        clearInterval(timer);
+      }
+    }, 45); // Typing speed: 45ms per character
+    return () => clearInterval(timer);
+  }, [text]);
+
   return (
     <div style={{
       display: 'flex',
@@ -84,13 +99,24 @@ export default function AILoader({ text = "Sedang diproses oleh AI Agent...", mi
       }}>
         <p style={{
           margin: 0,
-          fontSize: '14px',
+          fontSize: '13px',
           fontWeight: '500',
-          letterSpacing: '1px',
-          color: 'rgba(255, 255, 255, 0.85)',
-          animation: 'shimmerText 2s ease-in-out infinite'
+          letterSpacing: '0.5px',
+          color: '#34B34A',
+          fontFamily: "Fira Code, Source Code Pro, Consolas, Monaco, 'Courier New', Courier, monospace",
+          textShadow: '0 0 8px rgba(52, 179, 74, 0.4)'
         }}>
-          {text}
+          {displayedText}
+          <span style={{
+            display: 'inline-block',
+            width: '8px',
+            height: '15px',
+            marginLeft: '4px',
+            backgroundColor: '#34B34A',
+            verticalAlign: 'middle',
+            animation: 'blinkCursor 0.8s step-end infinite',
+            boxShadow: '0 0 6px #34B34A'
+          }} />
         </p>
         <div style={{
           display: 'flex',
@@ -122,13 +148,13 @@ export default function AILoader({ text = "Sedang diproses oleh AI Agent...", mi
           60% { opacity: 1; }
           99% { transform: translateY(20px); opacity: 0; }
         }
-        @keyframes shimmerText {
-          0%, 100% { opacity: 0.7; }
-          50% { opacity: 1; }
-        }
         @keyframes dotPulse {
           0%, 100% { transform: scale(0.6); opacity: 0.4; }
           50% { transform: scale(1.2); opacity: 1; }
+        }
+        @keyframes blinkCursor {
+          from, to { opacity: 0; }
+          50% { opacity: 1; }
         }
       `}</style>
     </div>

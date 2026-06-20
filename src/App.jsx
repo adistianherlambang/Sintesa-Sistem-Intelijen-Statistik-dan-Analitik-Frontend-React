@@ -47,6 +47,22 @@ function AuthRoute({ children }) {
 }
 
 function RouteLoading() {
+  const [displayedText, setDisplayedText] = React.useState("");
+  const fullText = "Loading";
+
+  React.useEffect(() => {
+    let index = 0;
+    setDisplayedText("");
+    const timer = setInterval(() => {
+      setDisplayedText((prev) => prev + fullText.charAt(index));
+      index++;
+      if (index >= fullText.length) {
+        clearInterval(timer);
+      }
+    }, 60); // 60ms per character
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div style={{
       display: 'flex',
@@ -115,7 +131,7 @@ function RouteLoading() {
           boxShadow: '0 0 25px #34B34A, 0 0 50px rgba(52, 179, 74, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.8)',
           animation: 'pulseCore 1.5s ease-in-out infinite'
         }} />
-        
+
         {/* Scanning horizontal line effect across the core */}
         <div style={{
           position: 'absolute',
@@ -136,15 +152,25 @@ function RouteLoading() {
       }}>
         <p style={{
           margin: 0,
-          fontSize: '15px',
+          fontSize: '13px',
           fontWeight: '600',
-          letterSpacing: '2px',
+          letterSpacing: '1px',
           color: '#34B34A',
+          fontFamily: "Fira Code, Source Code Pro, Consolas, Monaco, 'Courier New', Courier, monospace",
           textShadow: '0 0 10px rgba(52, 179, 74, 0.5)',
           textTransform: 'uppercase',
-          animation: 'shimmerText 2s ease-in-out infinite'
         }}>
-          Memuat Sistem Agen
+          {displayedText}
+          <span style={{
+            display: 'inline-block',
+            width: '8px',
+            height: '15px',
+            marginLeft: '4px',
+            backgroundColor: '#34B34A',
+            verticalAlign: 'middle',
+            animation: 'blinkCursor 0.8s step-end infinite',
+            boxShadow: '0 0 6px #34B34A'
+          }} />
         </p>
         <div style={{
           display: 'flex',
@@ -184,6 +210,10 @@ function RouteLoading() {
           0%, 100% { transform: scale(0.6); opacity: 0.4; }
           50% { transform: scale(1.2); opacity: 1; }
         }
+        @keyframes blinkCursor {
+          from, to { opacity: 0; }
+          50% { opacity: 1; }
+        }
       `}</style>
     </div>
   );
@@ -212,28 +242,28 @@ export default function App() {
       <Shadow />
       <Suspense fallback={<RouteLoading />}>
         <Routes>
-          <Route 
-            path='/' 
-            element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} 
+          <Route
+            path='/'
+            element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />}
           />
-          <Route 
-            path='/login' 
+          <Route
+            path='/login'
             element={
               <AuthRoute>
                 <LogIn />
               </AuthRoute>
-            } 
+            }
           />
-          <Route 
-            path='/signup' 
+          <Route
+            path='/signup'
             element={
               <AuthRoute>
                 <SignUp />
               </AuthRoute>
-            } 
+            }
           />
-          <Route 
-            path='/dashboard' 
+          <Route
+            path='/dashboard'
             element={
               <ProtectedRoute>
                 <Dashboard />
