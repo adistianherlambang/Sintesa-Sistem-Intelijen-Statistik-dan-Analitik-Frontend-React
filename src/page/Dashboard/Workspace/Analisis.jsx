@@ -10,6 +10,7 @@ import Hierarchy from '../../../components/Hierarchy/Hierarchy'
 import MainButton from '../../../components/MainButton/MainButton'
 import Input from '../../../components/Input/Input'
 import Skeleton from '../../../components/Skeleton/Skeleton'
+import AILoader from '../../../components/AILoader/AILoader'
 
 export default function Analisis() {
   const [datasetSource, setDatasetSource] = useState("available") // "available" or "manual"
@@ -157,22 +158,7 @@ function StepTwoManual(props) {
     return (
       <div className={styles.container}>
         <Wrapper>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 0', gap: '16px' }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              border: '4px solid rgba(255, 255, 255, 0.1)',
-              borderTopColor: '#34B34A',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-            }} />
-            <p className={styles.loadingText}>Memverifikasi struktur dataset dengan AI...</p>
-            <style>{`
-              @keyframes spin {
-                to { transform: rotate(360deg); }
-              }
-            `}</style>
-          </div>
+          <AILoader text="Memverifikasi struktur dataset dengan AI..." minHeight="220px" />
         </Wrapper>
       </div>
     );
@@ -958,22 +944,7 @@ function StepThree(props) {
     <div className={styles.container}>
       {loadingSummary ? (
         <Wrapper>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 0', gap: '16px' }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              border: '4px solid rgba(255, 255, 255, 0.1)',
-              borderTopColor: '#34B34A',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-            }} />
-            <p className={styles.loadingText}>Menganalisis data & membuat ringkasan AI...</p>
-            <style>{`
-              @keyframes spin {
-                to { transform: rotate(360deg); }
-              }
-            `}</style>
-          </div>
+          <AILoader text="Menganalisis data & membuat ringkasan AI..." minHeight="220px" />
         </Wrapper>
       ) : (
         <>

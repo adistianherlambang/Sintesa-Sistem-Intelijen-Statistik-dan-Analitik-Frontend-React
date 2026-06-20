@@ -54,22 +54,135 @@ function RouteLoading() {
       justifyContent: 'center',
       alignItems: 'center',
       height: '100vh',
-      background: '#030D05',
+      background: 'radial-gradient(circle at center, #06190a 0%, #030d05 100%)',
       color: '#fff',
-      gap: '16px'
+      gap: '24px',
+      fontFamily: 'Inter, system-ui, sans-serif',
+      position: 'relative',
+      overflow: 'hidden'
     }}>
+      {/* Background Cyber Grid */}
       <div style={{
-        width: '40px',
-        height: '40px',
-        border: '4px solid rgba(255, 255, 255, 0.1)',
-        borderTopColor: '#34B34A',
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite'
-      }}></div>
-      <p style={{ margin: 0, fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>Memuat Halaman...</p>
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundImage: 'linear-gradient(rgba(52, 179, 74, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(52, 179, 74, 0.05) 1px, transparent 1px)',
+        backgroundSize: '20px 20px',
+        backgroundPosition: 'center',
+        pointerEvents: 'none'
+      }} />
+
+      {/* AI Agent Core Loader Wrapper */}
+      <div style={{
+        position: 'relative',
+        width: '100px',
+        height: '100px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}>
+        {/* Outer Scanner Ring */}
+        <div style={{
+          position: 'absolute',
+          width: '90px',
+          height: '90px',
+          border: '2px dashed rgba(52, 179, 74, 0.3)',
+          borderRadius: '50%',
+          animation: 'rotateCW 10s linear infinite'
+        }} />
+
+        {/* Inner Scanning Arc */}
+        <div style={{
+          position: 'absolute',
+          width: '70px',
+          height: '70px',
+          border: '3px solid transparent',
+          borderTopColor: '#34B34A',
+          borderBottomColor: '#34B34A',
+          borderRadius: '50%',
+          animation: 'rotateCCW 2.5s cubic-bezier(0.53, 0.21, 0.29, 0.67) infinite',
+          boxShadow: '0 0 15px rgba(52, 179, 74, 0.2)'
+        }} />
+
+        {/* Central Pulsing Core */}
+        <div style={{
+          width: '36px',
+          height: '36px',
+          background: 'radial-gradient(circle, #85e096 0%, #34B34A 70%, #1c6628 100%)',
+          borderRadius: '50%',
+          boxShadow: '0 0 25px #34B34A, 0 0 50px rgba(52, 179, 74, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.8)',
+          animation: 'pulseCore 1.5s ease-in-out infinite'
+        }} />
+        
+        {/* Scanning horizontal line effect across the core */}
+        <div style={{
+          position: 'absolute',
+          width: '50px',
+          height: '2px',
+          background: 'rgba(255, 255, 255, 0.8)',
+          boxShadow: '0 0 8px #fff, 0 0 15px #34B34A',
+          animation: 'scanLine 2s ease-in-out infinite'
+        }} />
+      </div>
+
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '6px',
+        zIndex: 2
+      }}>
+        <p style={{
+          margin: 0,
+          fontSize: '15px',
+          fontWeight: '600',
+          letterSpacing: '2px',
+          color: '#34B34A',
+          textShadow: '0 0 10px rgba(52, 179, 74, 0.5)',
+          textTransform: 'uppercase',
+          animation: 'shimmerText 2s ease-in-out infinite'
+        }}>
+          Memuat Sistem Agen
+        </p>
+        <div style={{
+          display: 'flex',
+          gap: '4px',
+          marginTop: '4px'
+        }}>
+          <span style={{ width: '6px', height: '6px', backgroundColor: '#34B34A', borderRadius: '50%', animation: 'dotPulse 1.2s infinite 0s' }} />
+          <span style={{ width: '6px', height: '6px', backgroundColor: '#34B34A', borderRadius: '50%', animation: 'dotPulse 1.2s infinite 0.2s' }} />
+          <span style={{ width: '6px', height: '6px', backgroundColor: '#34B34A', borderRadius: '50%', animation: 'dotPulse 1.2s infinite 0.4s' }} />
+        </div>
+      </div>
+
       <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
+        @keyframes rotateCW {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes rotateCCW {
+          0% { transform: rotate(360deg); }
+          100% { transform: rotate(0deg); }
+        }
+        @keyframes pulseCore {
+          0%, 100% { transform: scale(0.9); opacity: 0.8; box-shadow: 0 0 15px #34B34A, 0 0 30px rgba(52, 179, 74, 0.4); }
+          50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 30px #34B34A, 0 0 60px rgba(52, 179, 74, 0.8); }
+        }
+        @keyframes scanLine {
+          0%, 100% { transform: translateY(-25px); opacity: 0; }
+          50% { opacity: 1; }
+          60% { opacity: 1; }
+          99% { transform: translateY(25px); opacity: 0; }
+        }
+        @keyframes shimmerText {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 1; text-shadow: 0 0 15px rgba(52, 179, 74, 0.8); }
+        }
+        @keyframes dotPulse {
+          0%, 100% { transform: scale(0.6); opacity: 0.4; }
+          50% { transform: scale(1.2); opacity: 1; }
         }
       `}</style>
     </div>

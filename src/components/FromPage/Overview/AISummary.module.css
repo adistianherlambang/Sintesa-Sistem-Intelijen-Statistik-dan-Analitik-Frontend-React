@@ -1,0 +1,78 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(52, 179, 74, 0.15);
+  padding-bottom: 12px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.aiIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(52, 179, 74, 0.1);
+  border: 1px solid rgba(52, 179, 74, 0.3);
+  border-radius: 8px;
+  color: #34B34A;
+  box-shadow: 0 0 10px rgba(52, 179, 74, 0.2);
+  animation: pulseIcon 2s infinite ease-in-out;
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+.subtitle {
+  font-size: 11px;
+  color: #34B34A;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.body {
+  position: relative;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  min-height: 100px;
+}
+
+.summaryText {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: 'Inter', system-ui, sans-serif;
+  animation: fadeInText 0.8s ease-out forwards;
+}
+
+@keyframes pulseIcon {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 8px rgba(52, 179, 74, 0.2); }
+  50% { transform: scale(1.08); box-shadow: 0 0 16px rgba(52, 179, 74, 0.4); }
+}
+
+@keyframes fadeInText {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

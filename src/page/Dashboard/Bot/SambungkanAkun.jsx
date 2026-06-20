@@ -4,6 +4,7 @@ import styles from "./SambungkanAkun.module.css";
 import Wrapper from "../../../components/Wrapper/Wrapper";
 import MainButton from "../../../components/MainButton/MainButton";
 import SearchableSelect from "../../../components/SearchableSelect/SearchableSelect";
+import AILoader from "../../../components/AILoader/AILoader";
 
 export default function SambungkanAkun() {
   const [session, setSession] = useState(null);
@@ -140,7 +141,7 @@ export default function SambungkanAkun() {
     return (
       <div className={styles.container}>
         <p className={styles.tabTitle}>Sambungkan Akun WhatsApp</p>
-        <p className={styles.loadingText}>Memuat status WhatsApp Bot...</p>
+        <AILoader text="Memuat status WhatsApp Bot..." minHeight="300px" />
       </div>
     );
   }
@@ -189,11 +190,7 @@ export default function SambungkanAkun() {
                     <p className={styles.qrLabel}>Pindai kode QR di atas</p>
                   </div>
                 ) : isConnecting ? (
-                  <div className={styles.qrLoading}>
-                    <div className={styles.spinner}></div>
-                    <p>Menghasilkan QR Code...</p>
-                    <small>Proses ini memakan waktu beberapa detik</small>
-                  </div>
+                  <AILoader text="Menghasilkan QR Code..." minHeight="220px" />
                 ) : (
                   <div className={styles.qrPlaceholder}>
                     <p>WhatsApp Belum Terhubung</p>
