@@ -134,7 +134,6 @@ export default function Dashboard() {
           </div>
           <div className={styles.aiStatusBadge}>
             <span className={styles.pulseDot}></span>
-            <span>✦ AI Agent Active</span>
           </div>
         </div>
         <div className={styles.outlet}>

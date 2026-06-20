@@ -5,7 +5,18 @@
 }
 
 .svg {
-  mix-blend-mode: color-dodge;
   width: 900px;
   height: auto;
+  mix-blend-mode: screen;
+  position: absolute
+}
+
+.svg2 {
+  width: 900px;
+  height: auto;
+  top: 0;
+  position: absolute;
+  z-index: 2;
+  mix-blend-mode: screen;
+  opacity: 0.5;
 }
