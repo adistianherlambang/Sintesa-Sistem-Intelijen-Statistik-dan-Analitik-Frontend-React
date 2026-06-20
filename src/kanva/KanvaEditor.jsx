@@ -1215,7 +1215,7 @@ export default function KanvaEditor() {
                                 disabled={saving}
                             >
                                 <IoSaveOutline size={16} />
-                                <span>{saving ? "Menyimpan..." : "Simpan"}</span>
+                                <span className={styles.btnText}>{saving ? "Menyimpan..." : "Simpan"}</span>
                             </button>
                         </div>
                     </div>
@@ -1223,7 +1223,7 @@ export default function KanvaEditor() {
             </div>
 
             {/* Left Nav Menu and Canvas split */}
-            <div style={{ display: 'flex', gap: '16px', marginTop: '16px', height: 'calc(100vh - 200px)', position: 'relative' }}>
+            <div className={styles.mainContentArea}>
                 {/* Left side Nav Menu Panel - wrapped in Wrapper */}
                 <Wrapper width="auto" height="100%" padding="0" hoverable={false}>
                     {/* Left Side Icons Panel */}
@@ -1237,7 +1237,7 @@ export default function KanvaEditor() {
                                     onClick={() => handleNavClick(tab.name)}
                                 >
                                     <span className={styles.navItemIcon}>{tab.icon}</span>
-                                    <span>{tab.label}</span>
+                                    <span className={styles.navText}>{tab.label}</span>
                                 </div>
                             );
                         })}
@@ -1246,21 +1246,7 @@ export default function KanvaEditor() {
 
                 {/* Sub Panel Content Sidebar - Absolute Overlay */}
                 {(path !== undefined || selectedEl !== undefined) && (
-                    <div
-                        className={styles.sidebarContainer}
-                        style={{
-                            position: 'absolute',
-                            left: '72px',
-                            top: 0,
-                            bottom: 0,
-                            width: '340px',
-                            zIndex: 50,
-                            borderRadius: '8px',
-                            boxShadow: '10px 0 30px rgba(0, 0, 0, 0.5)',
-                            backgroundColor: 'rgba(255, 255, 255, 0.01)',
-                            border: "solid rgba(255, 255, 255, 0.2) 1px"
-                        }}
-                    >
+                    <div className={styles.sidebarContainer}>
                         <Sidebar
                             selectedEl={selectedEl}
                             setElement={setElement}

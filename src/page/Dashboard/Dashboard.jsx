@@ -26,8 +26,14 @@ export default function Dashboard() {
     langgananBilling: false
   })
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const location = useLocation()
   const slash = location.pathname.split("/")
+
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
 
   const capitalize = (str) => {
     return str
@@ -49,7 +55,26 @@ export default function Dashboard() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.left}>
+      {/* Mobile Header */}
+      <div className={styles.mobileHeader}>
+        <Logo />
+        <button className={styles.hamburgerBtn} onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      {/* Sidebar Overlay */}
+      <div 
+        className={`${styles.sidebarOverlay} ${isSidebarOpen ? styles.overlayVisible : ''}`} 
+        onClick={() => setIsSidebarOpen(false)}
+      ></div>
+
+      <div className={`${styles.left} ${isSidebarOpen ? styles.leftOpen : ''}`}>
+        <button className={styles.closeBtn} onClick={() => setIsSidebarOpen(false)}>×</button>
         <Logo/>
         <div className={styles.leftContainer}>
           <p>DASHBOARD</p>

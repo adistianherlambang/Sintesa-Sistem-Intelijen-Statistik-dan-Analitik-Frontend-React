@@ -83,3 +83,22 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+@media (max-width: 768px) {
+  .tabTitle {
+    font-size: 28px;
+  }
+  
+  .historiBtn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .iframeWrapper {
+    min-height: 480px;
+  }
+  
+  .iframe {
+    min-height: 480px;
+  }
+}

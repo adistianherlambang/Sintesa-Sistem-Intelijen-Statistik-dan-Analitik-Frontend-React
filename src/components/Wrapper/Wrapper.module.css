@@ -20,3 +20,10 @@
 .noHover {
   cursor: default;
 }
+
+@media (max-width: 768px) {
+  .container {
+    width: 100% !important;
+    height: auto !important;
+  }
+}
