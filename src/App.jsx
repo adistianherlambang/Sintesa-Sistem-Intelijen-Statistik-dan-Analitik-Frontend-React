@@ -48,7 +48,7 @@ function AuthRoute({ children }) {
 
 function RouteLoading() {
   const [displayedText, setDisplayedText] = React.useState("");
-  const fullText = "Loading";
+  const fullText = "Looading";
 
   React.useEffect(() => {
     let index = 0;
@@ -77,72 +77,6 @@ function RouteLoading() {
       position: 'relative',
       overflow: 'hidden'
     }}>
-      {/* Background Cyber Grid */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundImage: 'linear-gradient(rgba(52, 179, 74, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(52, 179, 74, 0.05) 1px, transparent 1px)',
-        backgroundSize: '20px 20px',
-        backgroundPosition: 'center',
-        pointerEvents: 'none'
-      }} />
-
-      {/* AI Agent Core Loader Wrapper */}
-      <div style={{
-        position: 'relative',
-        width: '100px',
-        height: '100px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
-        {/* Outer Scanner Ring */}
-        <div style={{
-          position: 'absolute',
-          width: '90px',
-          height: '90px',
-          border: '2px dashed rgba(52, 179, 74, 0.3)',
-          borderRadius: '50%',
-          animation: 'rotateCW 10s linear infinite'
-        }} />
-
-        {/* Inner Scanning Arc */}
-        <div style={{
-          position: 'absolute',
-          width: '70px',
-          height: '70px',
-          border: '3px solid transparent',
-          borderTopColor: '#34B34A',
-          borderBottomColor: '#34B34A',
-          borderRadius: '50%',
-          animation: 'rotateCCW 2.5s cubic-bezier(0.53, 0.21, 0.29, 0.67) infinite',
-          boxShadow: '0 0 15px rgba(52, 179, 74, 0.2)'
-        }} />
-
-        {/* Central Pulsing Core */}
-        <div style={{
-          width: '36px',
-          height: '36px',
-          background: 'radial-gradient(circle, #85e096 0%, #34B34A 70%, #1c6628 100%)',
-          borderRadius: '50%',
-          boxShadow: '0 0 25px #34B34A, 0 0 50px rgba(52, 179, 74, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.8)',
-          animation: 'pulseCore 1.5s ease-in-out infinite'
-        }} />
-
-        {/* Scanning horizontal line effect across the core */}
-        <div style={{
-          position: 'absolute',
-          width: '50px',
-          height: '2px',
-          background: 'rgba(255, 255, 255, 0.8)',
-          boxShadow: '0 0 8px #fff, 0 0 15px #34B34A',
-          animation: 'scanLine 2s ease-in-out infinite'
-        }} />
-      </div>
-
       <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -155,9 +89,8 @@ function RouteLoading() {
           fontSize: '13px',
           fontWeight: '600',
           letterSpacing: '1px',
-          color: '#34B34A',
+          color: '#ffffffff',
           fontFamily: "Fira Code, Source Code Pro, Consolas, Monaco, 'Courier New', Courier, monospace",
-          textShadow: '0 0 10px rgba(52, 179, 74, 0.5)',
           textTransform: 'uppercase',
         }}>
           {displayedText}
@@ -172,15 +105,6 @@ function RouteLoading() {
             boxShadow: '0 0 6px #34B34A'
           }} />
         </p>
-        <div style={{
-          display: 'flex',
-          gap: '4px',
-          marginTop: '4px'
-        }}>
-          <span style={{ width: '6px', height: '6px', backgroundColor: '#34B34A', borderRadius: '50%', animation: 'dotPulse 1.2s infinite 0s' }} />
-          <span style={{ width: '6px', height: '6px', backgroundColor: '#34B34A', borderRadius: '50%', animation: 'dotPulse 1.2s infinite 0.2s' }} />
-          <span style={{ width: '6px', height: '6px', backgroundColor: '#34B34A', borderRadius: '50%', animation: 'dotPulse 1.2s infinite 0.4s' }} />
-        </div>
       </div>
 
       <style>{`
