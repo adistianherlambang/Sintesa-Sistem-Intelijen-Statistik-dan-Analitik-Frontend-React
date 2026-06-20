@@ -67,8 +67,8 @@ export default function ChartSidebar({ setPagesWithHistory, openMiniFor }) {
                             alignItems: "center",
                             justifyContent: "center",
                             gap: "8px",
-                            backgroundColor: "#34B34A",
-                            borderColor: "#2da140",
+                            backgroundColor: "rgba(255,255,255,0.05)",
+                            borderColor: "rgba(255,255,255,0.1)",
                             color: "#fff"
                         }}
                         onClick={() => addChart("bar")}
