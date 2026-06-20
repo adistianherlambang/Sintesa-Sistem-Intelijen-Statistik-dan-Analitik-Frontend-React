@@ -1259,7 +1259,7 @@ export default function KanvaEditor() {
                 )}
 
                 {/* Canvas Area Panel - wrapped in Wrapper */}
-                <Wrapper width="100%" height="100%" padding="0" hoverable={false}>
+                <Wrapper width="100%" height="100%" padding="0" hoverable={false} style={{ flex: 1, minHeight: 0 }}>
                     <div className={styles.canvasArea} style={{ height: '100%' }}>
                         <div
                             ref={containerRef}
