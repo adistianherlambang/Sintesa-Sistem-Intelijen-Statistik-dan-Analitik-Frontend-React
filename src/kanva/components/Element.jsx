@@ -77,7 +77,7 @@ export default function Element({ setPagesWithHistory }) {
             <div
                 style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, 50px)",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(50px, 1fr))",
                     gap: 12,
                 }}
             >
@@ -87,12 +87,23 @@ export default function Element({ setPagesWithHistory }) {
                         onClick={() => addShape(IconComp, name)}
                         style={{
                             cursor: "pointer",
-                            border: "1px solid #ddd",
-                            borderRadius: 6,
+                            border: "1px solid rgba(255, 255, 255, 0.15)",
+                            borderRadius: 8,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             height: 50,
+                            background: "rgba(255, 255, 255, 0.03)",
+                            color: "#fff",
+                            transition: "all 0.2s ease",
+                        }}
+                        onMouseOver={(e) => {
+                            e.currentTarget.style.borderColor = "#34B34A";
+                            e.currentTarget.style.backgroundColor = "rgba(52, 179, 74, 0.08)";
+                        }}
+                        onMouseOut={(e) => {
+                            e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.15)";
+                            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.03)";
                         }}
                     >
                         <IconComp size={24} />

@@ -1,6 +1,4 @@
 import { useSelector } from "react-redux";
-import { Col, Row } from "./UIControls";
-
 import { GiSquare } from "react-icons/gi";
 import { LiaCircleSolid } from "react-icons/lia";
 import { PiTriangleThin } from "react-icons/pi";
@@ -140,15 +138,48 @@ export default function Shape({ setPagesWithHistory }) {
     ];
 
     return (
-        <>
-            <Row>
-                {shapes?.map((sh) => (
-                    <Col span={12} onClick={() => addShape(sh?.key)} title={sh?.label} key={sh?.key}
-                        style={{ fontSize: 80, color: "lightgray", cursor: "pointer" }}>
+        <div
+            style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))",
+                gap: 12,
+                padding: "16px 0px"
+            }}
+        >
+            {shapes?.map((sh) => (
+                <div
+                    key={sh?.key}
+                    onClick={() => addShape(sh?.key)}
+                    title={sh?.label}
+                    style={{
+                        cursor: "pointer",
+                        border: "1px solid rgba(255, 255, 255, 0.15)",
+                        borderRadius: 8,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        height: 80,
+                        background: "rgba(255, 255, 255, 0.03)",
+                        transition: "all 0.2s ease",
+                    }}
+                    onMouseOver={(e) => {
+                        e.currentTarget.style.borderColor = "#34B34A";
+                        e.currentTarget.style.backgroundColor = "rgba(52, 179, 74, 0.08)";
+                    }}
+                    onMouseOut={(e) => {
+                        e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.15)";
+                        e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.03)";
+                    }}
+                >
+                    <div style={{ fontSize: 28, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         {sh?.icon}
-                    </Col>
-                ))}
-            </Row>
-        </>
+                    </div>
+                    <span style={{ fontSize: 11, color: "rgba(255, 255, 255, 0.7)", marginTop: 6, fontWeight: 500 }}>
+                        {sh?.label}
+                    </span>
+                </div>
+            ))}
+        </div>
     );
 }

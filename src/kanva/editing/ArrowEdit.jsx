@@ -13,8 +13,19 @@ const ArrowEdit = ({ selectedEl, setElement }) => {
   if (!selectedEl) return null;
   const update = (k, v) => setElement(selectedEl?.id, (el) => ({ ...el, [k]: v }));
 
-  // helper for points editing
+  const isDashed = Array.isArray(selectedEl?.dash) && selectedEl?.dash?.length > 0;
+  const dashLength = isDashed ? (selectedEl?.dash?.[0] ?? 10) : 10;
+  const dashGap = isDashed ? (selectedEl?.dash?.[1] ?? 5) : 5;
+
   const p = selectedEl?.points || [0, 0, 150, 0];
+
+  const handleStrokeStyleChange = (value) => {
+    if (value === "solid") {
+      update("dash", []);
+    } else {
+      update("dash", [dashLength, dashGap]);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -144,22 +155,40 @@ const ArrowEdit = ({ selectedEl, setElement }) => {
         />
       </div>
 
-      {/* Dash */}
-      <p className={styles.sectionTitle}>Dash</p>
+      {/* Stroke Style */}
+      <p className={styles.sectionTitle}>Stroke Style</p>
       <div className={styles.row}>
-        <span className={styles.label}>Dash Length</span>
-        <InputNumber
-          value={selectedEl?.dash?.[0] || 0}
-          onChange={(v) => update("dash", [v, selectedEl?.dash?.[1] || 0])}
+        <span className={styles.label}>Type</span>
+        <Select
+          value={isDashed ? "dashed" : "solid"}
+          onChange={handleStrokeStyleChange}
+          options={[
+            { label: "Solid", value: "solid" },
+            { label: "Dashed", value: "dashed" },
+          ]}
+          style={{ width: 120 }}
         />
       </div>
-      <div className={styles.row}>
-        <span className={styles.label}>Dash Gap</span>
-        <InputNumber
-          value={selectedEl?.dash?.[1] || 0}
-          onChange={(v) => update("dash", [selectedEl?.dash?.[0] || 0, v])}
-        />
-      </div>
+      {isDashed && (
+        <>
+          <div className={styles.row}>
+            <span className={styles.label}>Dash Length</span>
+            <InputNumber
+              value={dashLength}
+              min={1}
+              onChange={(v) => update("dash", [v || 1, dashGap])}
+            />
+          </div>
+          <div className={styles.row}>
+            <span className={styles.label}>Dash Gap</span>
+            <InputNumber
+              value={dashGap}
+              min={1}
+              onChange={(v) => update("dash", [dashLength, v || 1])}
+            />
+          </div>
+        </>
+      )}
 
       {/* Opacity */}
       <p className={styles.sectionTitle}>Opacity</p>

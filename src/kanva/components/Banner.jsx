@@ -84,6 +84,24 @@ const getKomoditas = async () => {
 
 const komoditasData = await getKomoditas()
 
+const getSummary = async () => {
+    try {
+        const res = await axios.post(
+            `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/aisummary`,
+            {
+                kota: locationName
+            }
+        );
+
+        return res.data;
+    } catch (err) {
+        console.error(err.message);
+        return null;
+    }
+}
+
+const summary = await getSummary()
+
 const banners = [
     {
         name: `Infografis ${locationName} ${month} ${year}`,
@@ -110,6 +128,18 @@ const banners = [
                 width: 300,
                 height: 44.5,
                 src: infografisFooter,
+            },
+            {
+                id: `b${Date.now()}-footer-text`,
+                type: "text",
+                text: `BADAN PUSAT STATISTIK\n${locationName.toUpperCase()}\nhttps://website.bps.go.id`,
+                x: 239,
+                y: 405,
+                fontSize: 4.1,
+                fontFamily: "Montserrat",
+                italic: true,
+                bold: true,
+                fill: "#ffffffff",
             },
             {
                 id: `b${Date.now()}-title-text`,
@@ -383,7 +413,7 @@ const banners = [
                 type: "text",
                 text: `Tingkat Inflasi Month-to-Month (M-to-M) ${capitalize(locationName)} (2022=100), ${capitalize(month)} ${year - 1} - ${capitalize(month)} ${year}`,
                 x: 20,
-                y: 220,
+                y: 230,
                 fontSize: 6,
                 align: "center",
                 fontFamily: "Montserrat",
@@ -401,19 +431,19 @@ const banners = [
                 data: inflasiData?.m2mLast13 && inflasiData.m2mLast13.length > 0
                     ? inflasiData.m2mLast13
                     : [
-                        { label: "Jun 25", value: 3.2 },
-                        { label: "Jul 25", value: 1.8 },
-                        { label: "Agu 25", value: 2.5 },
-                        { label: "Sep 25", value: 1.2 },
-                        { label: "Okt 25", value: 0.8 },
-                        { label: "Nov 25", value: 3.2 },
-                        { label: "Des 25", value: 1.8 },
-                        { label: "Jan", value: 2.5 },
-                        { label: "Feb", value: 1.2 },
-                        { label: "Mar", value: 0.8 },
-                        { label: "Apr", value: 3.2 },
-                        { label: "Mei", value: 1.8 },
-                        { label: "Jun", value: 1.8 },
+                        { label: "Bln 1", value: 3.2 },
+                        { label: "Bln 2", value: 1.8 },
+                        { label: "Bln 3", value: 2.5 },
+                        { label: "Bln 4", value: 1.2 },
+                        { label: "Bln 5", value: 0.8 },
+                        { label: "Bln 6", value: 3.2 },
+                        { label: "Bln 7", value: 1.8 },
+                        { label: "Bln 8", value: 2.5 },
+                        { label: "Bln 9", value: 1.2 },
+                        { label: "Bln 10", value: 0.8 },
+                        { label: "Bln 11", value: 3.2 },
+                        { label: "Bln 12", value: 1.8 },
+                        { label: "Bln 13", value: 1.8 },
                     ],
                 colors: ["#F69139"],
                 showLabels: true,
@@ -424,6 +454,35 @@ const banners = [
                 showAxes: true,
                 gridColor: "rgba(0,0,0,0.15)",
                 rotation: 0
+            },
+            {
+                id: `b${Date.now()}-dashed-divider`,
+                type: "line",
+                points: [10, 220, 290, 220],
+                stroke: "#000000ff",
+                strokeWidth: 1.5,
+                dash: [6, 4],
+            },
+            {
+                id: `b${Date.now()}-dashed-divider2`,
+                type: "line",
+                points: [10, 303, 290, 303],
+                stroke: "#000000ff",
+                strokeWidth: 1.5,
+                dash: [6, 4],
+            },
+            {
+                id: `b${Date.now()}-summary`,
+                type: "text",
+                text: `${summary ? summary?.summary : "isi AI summary inflasi disini"}`,
+                x: 10,
+                y: 315,
+                width: 100,
+                fontSize: 6,
+                align: "left",
+                fontFamily: "Montserrat",
+                fontStyle: "normal",
+                fill: "#000000ff",
             },
         ],
     },
@@ -1244,14 +1303,13 @@ export default function BannerList({ setPagesWithHistory }) {
             {loading ? (
                 <Row gutter={[0, 20]}>
                     {thumbs.map((t, i) => (
-                        <Col key={i} onClick={() => applyTemplate(t.banner)}>
+                        <Col key={i} span={24} onClick={() => applyTemplate(t.banner)}>
                             <Image
                                 src={t.url}
                                 alt={t.banner.name}
                                 preview={false}
                                 width={"100%"}
-                                height={125}
-                                style={{ objectFit: "cover", cursor: "pointer" }}
+                                style={{ objectFit: "cover", cursor: "pointer", maxHeight: "150px" }}
                             />
                         </Col>
                     ))}
