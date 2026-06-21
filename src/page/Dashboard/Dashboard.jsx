@@ -74,7 +74,9 @@ export default function Dashboard() {
       ></div>
 
       <div className={`${styles.left} ${isSidebarOpen ? styles.leftOpen : ''}`}>
-        <Logo />
+        <div className={`${styles.leftLogo} ${isSidebarOpen ? styles.leftLogoOpen : ''}`}>
+          <Logo />
+        </div>
         <div className={styles.leftContainer}>
           <p>DASHBOARD</p>
           <div className={styles.leftWrapper}>

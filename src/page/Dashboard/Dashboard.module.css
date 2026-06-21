@@ -32,7 +32,7 @@
 .leftWrapper {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
 }
 
 .line {
@@ -214,16 +214,20 @@
     position: fixed;
     top: 0;
     left: -100%;
-    width: 280px;
+    width: 320px;
     height: 100vh;
     z-index: 100;
     background-color: #070d08;
     transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.6);
+    /* box-shadow: 10px 0 30px rgba(0, 0, 0, 0.6); */
   }
 
   .leftOpen {
     left: 0;
+  }
+
+  .leftLogoOpen {
+    margin-bottom: 32px;
   }
 
   .closeBtn {
