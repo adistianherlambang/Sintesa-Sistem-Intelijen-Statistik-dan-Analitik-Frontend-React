@@ -486,6 +486,16 @@ const banners = [
             },
         ],
     },
+    {
+        name: `blank`,
+        type: "banner",
+        w: 1200,
+        h: 1700,
+        x: 0,
+        y: 0,
+        background: "#ffffff",
+        children: []
+    }
 ]
 
 
@@ -562,6 +572,13 @@ export default function BannerList({ setPagesWithHistory }) {
                         ref={(el) => (stageRefs.current[i] = el)}
                     >
                         <Layer>
+                            <Rect
+                                x={0}
+                                y={0}
+                                width={bnr.w || 900}
+                                height={bnr.h || 500}
+                                fill={bnr.background || "#ffffff"}
+                            />
                             {bnr?.children.map((el) => {
                                 return (
                                     <React.Fragment key={el.id}>
