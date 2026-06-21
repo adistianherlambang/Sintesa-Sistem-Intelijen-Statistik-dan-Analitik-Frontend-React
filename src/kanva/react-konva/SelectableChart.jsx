@@ -227,6 +227,8 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                         const x = paddingLeft + chartPadding + idx * stepX;
                         const y = paddingTop + plotHeight * (1 - (val - minVal) / valRange);
                         const labelWidth = lineCount > 1 ? stepX : plotWidth;
+                        const valStr = val.toString();
+                        const valWidth = Math.max(40, valStr.length * fontSize * 0.7);
 
                         return (
                             <Group key={`node-${idx}`}>
@@ -240,10 +242,10 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                 />
                                 {showValues && (
                                     <Text
-                                        text={val.toString()}
-                                        x={x - 20}
+                                        text={valStr}
+                                        x={x - valWidth / 2}
                                         y={y - fontSize - 5}
-                                        width={40}
+                                        width={valWidth}
                                         align="center"
                                         fontSize={fontSize}
                                         bold
@@ -288,7 +290,9 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                         // Calculate label position at midpoint of arc
                         const midAngleRad = ((currentStart + angle / 2) * Math.PI) / 180;
                         const labelRadius = radius * 0.6;
-                        const labelX = centerX + Math.cos(midAngleRad) * labelRadius - 20;
+                        const pieValStr = `${Math.round((val / totalVal) * 100)}%`;
+                        const pieValWidth = Math.max(40, pieValStr.length * (fontSize - 1) * 0.7);
+                        const labelX = centerX + Math.cos(midAngleRad) * labelRadius - pieValWidth / 2;
                         const labelY = centerY + Math.sin(midAngleRad) * labelRadius - fontSize / 2;
 
                         return (
@@ -306,10 +310,10 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                 />
                                 {showValues && val > 0 && (
                                     <Text
-                                        text={`${Math.round((val / totalVal) * 100)}%`}
+                                        text={pieValStr}
                                         x={labelX}
                                         y={labelY}
-                                        width={40}
+                                        width={pieValWidth}
                                         align="center"
                                         fontSize={fontSize - 1}
                                         bold
