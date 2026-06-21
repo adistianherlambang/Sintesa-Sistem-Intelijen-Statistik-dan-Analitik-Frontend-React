@@ -759,7 +759,7 @@ function StepTwoAvailable(props) {
           {forecastingEnabled && (
             <div className={styles.forecastingNote}>
               <span className={styles.forecastingNoteIcon}>✦</span>
-              <p>Prediksi akan dijalankan setelah data disimpan. Hasilnya tersedia di tab <strong>StepThree</strong>.</p>
+              <p>Prediksi akan dijalankan setelah data disimpan. Hasilnya tersedia di tab <strong>Selanjutnya</strong>.</p>
             </div>
           )}
         </div>
@@ -950,10 +950,19 @@ function StepThree(props) {
         <>
           {aiSummary && (
             <Wrapper>
-              <p className={styles.sectionTitle}>Ringkasan AI (Laporan Manual)</p>
-              <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: 13, marginBottom: '16px' }}>
-                Berikut adalah butir-butir ringkasan kondisi perekonomian wilayah Anda yang dihasilkan oleh AI:
-              </p>
+              <div className={styles.sectionWrapper}>
+                <div className={styles.iconWrapper}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18.2778 0C17.3848 3.22733 16.2346 4.32988 13.0556 5.22222C16.2346 6.11457 17.3848 7.21711 18.2778 10.4444C19.1708 7.21711 20.321 6.11457 23.5 5.22222C20.321 4.32988 19.1708 3.22733 18.2778 0ZM9.13889 5.22222C7.57549 10.8694 5.56428 12.7997 0 14.3611C5.56428 15.9226 7.57549 17.8528 9.13889 23.5C10.7023 17.8528 12.7135 15.9226 18.2778 14.3611C12.7135 12.7997 10.7023 10.8694 9.13889 5.22222Z" fill="#34B34A" />
+                  </svg>
+                </div>
+                <div>
+                  <p className={styles.sectionTitle}>Ringkasan AI</p>
+                  <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: 13, marginBottom: '16px', fontStyle: "italic" }}>
+                    Berikut adalah butir-butir ringkasan kondisi perekonomian wilayah Anda yang dihasilkan oleh AI:
+                  </p>
+                </div>
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {aiSummary.sections?.map((section, idx) => (
                   <Wrapper key={idx}>

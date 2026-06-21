@@ -34,6 +34,22 @@
   flex: 1;
 }
 
+.sectionWrapper {
+  display: flex;
+  gap: 1rem;
+}
+
+.iconWrapper {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 100px;
+}
+
 .section {
   display: flex;
   gap: 1rem;
@@ -265,7 +281,7 @@
 
 .forecastingDesc {
   font-size: 14px;
-  color: #94A3B8;
+  color: #AAAAAA;
   margin: 4px 0 0;
   max-width: 480px;
 }
@@ -382,6 +398,7 @@
     opacity: 0;
     transform: translateY(-6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
