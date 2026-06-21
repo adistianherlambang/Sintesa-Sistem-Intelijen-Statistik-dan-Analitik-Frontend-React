@@ -13,6 +13,7 @@ import UserActivity from '../../../components/FromPage/Overview/UserActivity'
 import AISummary from '../../../components/FromPage/Overview/AISummary'
 import HitoriAnalisis from '../../../components/FromPage/Overview/HitoriAnalisis'
 import HistoriInfografis from '../../../components/FromPage/Overview/HistoriInfografis'
+import { BotStatusOverview, BotKnowledgeOverview } from '../../../components/FromPage/Overview/BotOverview'
 
 export default function Overview() {
   return (
@@ -34,8 +35,8 @@ export default function Overview() {
             <div className={styles.section}>
               <Wrapper width="50%" padding="0"><Graph onLoad={() => { }} /></Wrapper>
               <div className={styles.wrapper}>
-                <Wrapper>bot1</Wrapper>
-                <Wrapper>bot2</Wrapper>
+                <Wrapper><BotStatusOverview /></Wrapper>
+                <Wrapper><BotKnowledgeOverview /></Wrapper>
               </div>
             </div>
           </div>
