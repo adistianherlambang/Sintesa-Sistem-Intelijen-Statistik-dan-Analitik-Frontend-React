@@ -58,7 +58,7 @@ export default function UserActivity({ onLoad }) {
         <div className={styles.tableResponsive}>
           <table className={styles.activityTable}>
             <tbody>
-              {activityList.slice(0, 10).map((item, index) => (
+              {activityList.slice(0, 4).map((item, index) => (
                 <tr key={item._id || index}>
                   <td className={styles.dateCol}>{formatTanggal(item.createdAt)}</td>
                   <td>{item.activityName}</td>
