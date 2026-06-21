@@ -1,22 +1,68 @@
 .container {
   position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
   z-index: 9;
   pointer-events: none;
 }
 
+.saturationLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1200px;
+  height: 900px;
+  pointer-events: none;
+  backdrop-filter: saturate(2.2) brightness(1.2);
+  mask-image: radial-gradient(circle at 20% 20%, black 15%, transparent 65%);
+  -webkit-mask-image: radial-gradient(circle at 20% 20%, black 15%, transparent 65%);
+  z-index: 1;
+}
+
 .svg {
-  width: 900px;
+  width: 1000px;
   height: auto;
-  mix-blend-mode: screen;
-  position: absolute
+  position: absolute;
+  top: 0;
+  left: 0;
+  mix-blend-mode: overlay;
+  opacity: 0.3;
+  filter: blur(25px);
 }
 
 .svg2 {
   width: 900px;
   height: auto;
   top: 0;
+  left: 0;
   position: absolute;
   z-index: 2;
   mix-blend-mode: screen;
   opacity: 0.5;
+  filter: blur(12px);
+}
+
+.svg3 {
+  width: 800px;
+  height: auto;
+  top: 0;
+  left: 0;
+  position: absolute;
+  z-index: 3;
+  mix-blend-mode: color-dodge;
+  opacity: 0.35;
+  filter: blur(35px);
+}
+
+.svg4 {
+  width: 700px;
+  height: auto;
+  top: 0;
+  left: 0;
+  position: absolute;
+  z-index: 4;
+  mix-blend-mode: overlay;
+  opacity: 0.35;
 }
