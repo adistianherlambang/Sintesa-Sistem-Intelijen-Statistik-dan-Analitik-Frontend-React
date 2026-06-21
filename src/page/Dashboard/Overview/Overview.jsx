@@ -44,7 +44,7 @@ export default function Overview() {
         <div className={styles.containerr}>
           <div className={styles.section}>
             <Wrapper><UserActivity /></Wrapper>
-            <Wrapper><AISummary /></Wrapper>
+            <Wrapper padding="0"><AISummary /></Wrapper>
           </div>
         </div>
 
