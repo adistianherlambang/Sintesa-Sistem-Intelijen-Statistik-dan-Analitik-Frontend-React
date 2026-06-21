@@ -4,6 +4,8 @@ import axios from 'axios'
 import styles from './HistoriInfografisPage.module.css'
 import Skeleton from '../../../components/Skeleton/Skeleton'
 
+import MainButton from '../../../components/MainButton/MainButton'
+
 function formatDate(id, createdAt) {
   try {
     const parseTarget = isNaN(Number(id)) ? createdAt : Number(id);
@@ -108,13 +110,6 @@ export default function HistoriInfografisPage() {
       ) : (
         <div className={styles.grid}>
           {/* New project card */}
-          <button className={styles.addCard} onClick={handleNew}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            <span>Proyek Baru</span>
-          </button>
-
           {projects.map((project) => (
             <div key={project.id} className={styles.card}>
               {/* Delete confirm overlay */}
