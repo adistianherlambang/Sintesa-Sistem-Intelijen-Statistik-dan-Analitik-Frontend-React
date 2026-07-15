@@ -48,7 +48,20 @@ export default function HitoriAnalisis({ onLoad }) {
       link.click();
     } catch (err) {
       console.error("Gagal mengunduh IDML:", err.message);
-      alert("Gagal mengunduh file IDML.");
+      if (err.response && err.response.data instanceof Blob) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const errorObj = JSON.parse(reader.result);
+            alert(`Gagal mengunduh file IDML: ${errorObj.message || "Terjadi kesalahan"}`);
+          } catch (e) {
+            alert("Gagal mengunduh file IDML.");
+          }
+        };
+        reader.readAsText(err.response.data);
+      } else {
+        alert("Gagal mengunduh file IDML.");
+      }
     }
   };
 

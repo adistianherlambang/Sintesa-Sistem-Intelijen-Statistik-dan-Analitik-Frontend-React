@@ -898,7 +898,20 @@ function StepThree(props) {
       link.click();
     } catch (err) {
       console.error("Gagal mengunduh IDML:", err.message);
-      setError("Gagal mengunduh file IDML.");
+      if (err.response && err.response.data instanceof Blob) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const errorObj = JSON.parse(reader.result);
+            setError(`Gagal mengunduh file IDML: ${errorObj.message || "Terjadi kesalahan"}`);
+          } catch (e) {
+            setError("Gagal mengunduh file IDML.");
+          }
+        };
+        reader.readAsText(err.response.data);
+      } else {
+        setError("Gagal mengunduh file IDML.");
+      }
     }
   };
   // Unified AI summary and BRS report generation flow for both sources
