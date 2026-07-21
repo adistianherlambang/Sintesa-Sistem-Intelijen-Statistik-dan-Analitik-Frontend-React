@@ -40,9 +40,16 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
     const fontSize = shape.fontSize || 8;
     const gridColor = shape.gridColor || "rgba(0,0,0,0.1)";
 
-    const rawVals = data.map((d) => parseFloat(d.value) || 0);
-    const rawMax = Math.max(...rawVals);
-    const rawMin = Math.min(...rawVals);
+    const seriesNames = shape.seriesNames || ["Seri 1", "Seri 2"];
+
+    const rawVals = data.flatMap((d) => {
+        if (Array.isArray(d.values)) {
+            return d.values.map((v) => parseFloat(v) || 0);
+        }
+        return [parseFloat(d.value) || 0];
+    });
+    const rawMax = Math.max(...(rawVals.length > 0 ? rawVals : [0]));
+    const rawMin = Math.min(...(rawVals.length > 0 ? rawVals : [0]));
 
     const minVal = rawMin < 0 ? rawMin : 0;
     const maxVal = rawMax > minVal ? rawMax : minVal + 1;
@@ -71,6 +78,153 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
     const plotHeight = Math.max(10, height - paddingBottom - paddingTop - chartPadding);
 
     const renderChartContent = () => {
+        if (chartType === "groupedBar") {
+            const groupCount = data.length || 1;
+            const maxSeriesCount = Math.max(
+                1,
+                ...data.map((item) =>
+                    Array.isArray(item.values) ? item.values.length : 1
+                )
+            );
+            const groupSlotWidth = plotWidth / groupCount;
+            const groupWidth = groupSlotWidth * 0.8;
+            const innerGap = Math.min(2, (groupWidth / maxSeriesCount) * 0.1);
+            const barWidth = Math.max(
+                2,
+                (groupWidth - (maxSeriesCount - 1) * innerGap) / maxSeriesCount
+            );
+
+            return (
+                <Group>
+                    {/* Y Axis Grid Lines */}
+                    {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
+                        const y = paddingTop + plotHeight * (1 - ratio);
+                        const gridVal = minVal + valRange * ratio;
+                        return (
+                            <Group key={`grid-${idx}`}>
+                                <Line
+                                    points={[paddingLeft, y, width - paddingRight, y]}
+                                    stroke={gridColor}
+                                    strokeWidth={0.5}
+                                />
+                                {showYLabels && (
+                                    <Text
+                                        text={gridVal.toFixed(1).replace(/\.0$/, "")}
+                                        x={0}
+                                        y={y - fontSize / 2}
+                                        width={paddingLeft - 4}
+                                        align="right"
+                                        fontSize={fontSize}
+                                        fill={textColor}
+                                    />
+                                )}
+                            </Group>
+                        );
+                    })}
+
+                    {/* Axes */}
+                    {showAxes && (
+                        <Line
+                            points={[
+                                paddingLeft, paddingTop,
+                                paddingLeft, height - paddingBottom,
+                                width - paddingRight, height - paddingBottom
+                            ]}
+                            stroke={textColor}
+                            strokeWidth={1}
+                        />
+                    )}
+
+                    {/* Groups and Bars */}
+                    {data.map((item, groupIdx) => {
+                        const itemValues = Array.isArray(item.values)
+                            ? item.values
+                            : [item.value !== undefined ? item.value : 0];
+                        const groupX =
+                            paddingLeft +
+                            chartPadding +
+                            groupIdx * groupSlotWidth +
+                            (groupSlotWidth - (itemValues.length * barWidth + (itemValues.length - 1) * innerGap)) / 2;
+
+                        return (
+                            <Group key={`group-${groupIdx}`}>
+                                {itemValues.map((valRaw, subIdx) => {
+                                    const val = parseFloat(valRaw) || 0;
+                                    const yVal = paddingTop + plotHeight * (1 - (val - minVal) / valRange);
+                                    const h = (paddingTop + plotHeight) - yVal;
+                                    const barX = groupX + subIdx * (barWidth + innerGap);
+
+                                    return (
+                                        <Group key={`subbar-${groupIdx}-${subIdx}`}>
+                                            <Rect
+                                                x={barX}
+                                                y={yVal}
+                                                width={barWidth}
+                                                height={h}
+                                                fill={colors[subIdx % colors.length]}
+                                                cornerRadius={[1.5, 1.5, 0, 0]}
+                                            />
+                                            {showValues && (
+                                                <Text
+                                                    text={val.toString()}
+                                                    x={barX - 10}
+                                                    y={yVal - fontSize - 2}
+                                                    width={barWidth + 20}
+                                                    align="center"
+                                                    fontSize={fontSize}
+                                                    bold
+                                                    fill={textColor}
+                                                />
+                                            )}
+                                        </Group>
+                                    );
+                                })}
+
+                                {showLabels && (
+                                    <Text
+                                        text={item.label}
+                                        x={paddingLeft + chartPadding + groupIdx * groupSlotWidth}
+                                        y={height - paddingBottom + 4}
+                                        width={groupSlotWidth}
+                                        align="center"
+                                        fontSize={fontSize - 1}
+                                        fill={textColor}
+                                        wrap="word"
+                                    />
+                                )}
+                            </Group>
+                        );
+                    })}
+
+                    {/* Legend for Series */}
+                    {showLabels && seriesNames && seriesNames.length > 0 && (
+                        <Group x={paddingLeft + chartPadding} y={2}>
+                            {seriesNames.slice(0, maxSeriesCount).map((sName, idx) => {
+                                const legendStep = Math.min(80, (width - paddingLeft) / maxSeriesCount);
+                                return (
+                                    <Group key={`legend-${idx}`} x={idx * legendStep}>
+                                        <Rect
+                                            width={6}
+                                            height={6}
+                                            fill={colors[idx % colors.length]}
+                                            y={1}
+                                        />
+                                        <Text
+                                            text={sName}
+                                            x={9}
+                                            y={0}
+                                            fontSize={Math.max(6, fontSize - 2)}
+                                            fill={textColor}
+                                        />
+                                    </Group>
+                                );
+                            })}
+                        </Group>
+                    )}
+                </Group>
+            );
+        }
+
         if (chartType === "bar") {
             const barCount = data.length;
             const barWidth = (plotWidth / barCount) * 0.7;

@@ -25,13 +25,18 @@ export default function ChartSidebar({ setPagesWithHistory, openMiniFor }) {
                 chartType,
                 x: 50,
                 y: 100,
-                width: chartType === "pie" ? 180 : 200,
+                width: chartType === "pie" ? 180 : (chartType === "groupedBar" ? 240 : 200),
                 height: chartType === "pie" ? 180 : 150,
-                data: [
+                data: chartType === "groupedBar" ? [
+                    { label: "Kategori A", values: [30, 45] },
+                    { label: "Kategori B", values: [65, 50] },
+                    { label: "Kategori C", values: [45, 80] },
+                ] : [
                     { label: "Kategori A", value: 30 },
                     { label: "Kategori B", value: 65 },
                     { label: "Kategori C", value: 45 },
                 ],
+                seriesNames: chartType === "groupedBar" ? ["Seri 1", "Seri 2"] : undefined,
                 colors: ["#AD6832", "#F4913E", "#FEBD23"],
                 showLabels: true,
                 showValues: true,
@@ -74,6 +79,27 @@ export default function ChartSidebar({ setPagesWithHistory, openMiniFor }) {
                         onClick={() => addChart("bar")}
                     >
                         Grafik Batang (Bar)
+                    </Button>
+                </Col>
+                <Col span={24}>
+                    <Button
+                        block
+                        icon={<FaChartBar size={20} style={{ transform: "rotate(90deg)" }} />}
+                        style={{
+                            height: 55,
+                            fontSize: 15,
+                            fontWeight: "600",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "8px",
+                            backgroundColor: "rgba(255,255,255,0.05)",
+                            borderColor: "rgba(255,255,255,0.1)",
+                            color: "#fff"
+                        }}
+                        onClick={() => addChart("groupedBar")}
+                    >
+                        Grafik Batang Terkelompok (Grouped Bar)
                     </Button>
                 </Col>
                 <Col span={24}>

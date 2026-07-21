@@ -8,6 +8,8 @@ export default function ChartEdit({ selectedEl, setElement }) {
 
     const data = selectedEl.data || [];
     const colors = selectedEl.colors || ["#AD6832", "#F4913E", "#FEBD23"];
+    const seriesNames = selectedEl.seriesNames || ["Seri 1", "Seri 2"];
+    const isGrouped = selectedEl.chartType === "groupedBar";
 
     const handleDataChange = (index, key, val) => {
         const newData = data.map((item, idx) => {
@@ -19,8 +21,28 @@ export default function ChartEdit({ selectedEl, setElement }) {
         setElement(selectedEl.id, (el) => ({ ...el, data: newData }));
     };
 
+    const handleGroupedValueChange = (rowIndex, subIndex, val) => {
+        const newData = data.map((item, rIdx) => {
+            if (rIdx === rowIndex) {
+                const existingValues = Array.isArray(item.values)
+                    ? [...item.values]
+                    : [item.value !== undefined ? item.value : 0];
+                existingValues[subIndex] = val;
+                return { ...item, values: existingValues };
+            }
+            return item;
+        });
+        setElement(selectedEl.id, (el) => ({ ...el, data: newData }));
+    };
+
     const addDataItem = () => {
-        const newData = [...data, { label: `Data ${data.length + 1}`, value: 10 }];
+        let newItem;
+        if (isGrouped) {
+            newItem = { label: `Data ${data.length + 1}`, values: Array(seriesNames.length).fill(10) };
+        } else {
+            newItem = { label: `Data ${data.length + 1}`, value: 10 };
+        }
+        const newData = [...data, newItem];
         setElement(selectedEl.id, (el) => ({ ...el, data: newData }));
     };
 
@@ -28,6 +50,49 @@ export default function ChartEdit({ selectedEl, setElement }) {
         if (data.length <= 1) return;
         const newData = data.filter((_, idx) => idx !== index);
         setElement(selectedEl.id, (el) => ({ ...el, data: newData }));
+    };
+
+    const addSeries = () => {
+        const newSeriesNames = [...seriesNames, `Seri ${seriesNames.length + 1}`];
+        const newData = data.map((item) => {
+            const existingValues = Array.isArray(item.values)
+                ? item.values
+                : [item.value !== undefined ? item.value : 0];
+            return { ...item, values: [...existingValues, 10] };
+        });
+        let newColors = [...colors];
+        if (newColors.length < newSeriesNames.length) {
+            newColors.push("#34B34A");
+        }
+        setElement(selectedEl.id, (el) => ({
+            ...el,
+            seriesNames: newSeriesNames,
+            colors: newColors,
+            data: newData,
+        }));
+    };
+
+    const removeSeries = (sIdx) => {
+        if (seriesNames.length <= 1) return;
+        const newSeriesNames = seriesNames.filter((_, idx) => idx !== sIdx);
+        const newData = data.map((item) => {
+            const existingValues = Array.isArray(item.values)
+                ? item.values
+                : [item.value !== undefined ? item.value : 0];
+            const newValues = existingValues.filter((_, idx) => idx !== sIdx);
+            return { ...item, values: newValues };
+        });
+        setElement(selectedEl.id, (el) => ({
+            ...el,
+            seriesNames: newSeriesNames,
+            data: newData,
+        }));
+    };
+
+    const handleSeriesNameChange = (sIdx, name) => {
+        const newSeriesNames = [...seriesNames];
+        newSeriesNames[sIdx] = name;
+        setElement(selectedEl.id, (el) => ({ ...el, seriesNames: newSeriesNames }));
     };
 
     const handleColorChange = (colorIndex, hexColor) => {
@@ -56,17 +121,32 @@ export default function ChartEdit({ selectedEl, setElement }) {
                 value={selectedEl.chartType || "bar"}
                 onChange={(value) => setElement(selectedEl.id, (el) => {
                     const newEl = { ...el, chartType: value };
+                    if (value === "groupedBar") {
+                        newEl.seriesNames = el.seriesNames || ["Seri 1", "Seri 2"];
+                        newEl.data = (el.data || []).map((item) => {
+                            if (Array.isArray(item.values) && item.values.length > 0) return item;
+                            const val = parseFloat(item.value) || 0;
+                            return { ...item, values: [val, Math.round(val * 0.7)] };
+                        });
+                    } else if (el.chartType === "groupedBar") {
+                        newEl.data = (el.data || []).map((item) => {
+                            if (item.value !== undefined) return item;
+                            const firstVal = Array.isArray(item.values) ? item.values[0] : 0;
+                            return { ...item, value: parseFloat(firstVal) || 0 };
+                        });
+                    }
                     if (value === "pie") {
                         const size = Math.min(el.width || 200, el.height || 180);
                         newEl.width = size;
                         newEl.height = size;
-                    } else if (el.chartType === "pie" && (value === "bar" || value === "line")) {
+                    } else if (el.chartType === "pie" && (value === "bar" || value === "line" || value === "groupedBar")) {
                         newEl.height = Math.round(el.width * 0.75);
                     }
                     return newEl;
                 })}
                 options={[
                     { value: "bar", label: "Grafik Batang (Bar)" },
+                    { value: "groupedBar", label: "Grafik Batang Terkelompok (Grouped Bar)" },
                     { value: "line", label: "Grafik Garis (Line)" },
                     { value: "pie", label: "Grafik Lingkaran (Pie)" },
                 ]}
@@ -96,6 +176,63 @@ export default function ChartEdit({ selectedEl, setElement }) {
                         onChange={(checked) => setElement(selectedEl.id, (el) => ({ ...el, showAxes: checked }))}
                     />
                 </div>
+            )}
+
+            {/* Grouped Bar Series Manager */}
+            {isGrouped && (
+                <>
+                    <p className={styles.sectionTitle} style={{ marginTop: 12 }}>Seri Grafik (Grouped Series)</p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
+                        {seriesNames.map((sName, sIdx) => (
+                            <div key={`series-${sIdx}`} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", minWidth: 45 }}>Seri {sIdx + 1}:</span>
+                                <input
+                                    type="text"
+                                    value={sName}
+                                    onChange={(e) => handleSeriesNameChange(sIdx, e.target.value)}
+                                    placeholder="Nama Seri"
+                                    style={{
+                                        flex: 1,
+                                        background: "rgba(255,255,255,0.03)",
+                                        border: "1px solid rgba(255,255,255,0.1)",
+                                        color: "#fff",
+                                        padding: "4px 8px",
+                                        borderRadius: "4px",
+                                        fontSize: 12
+                                    }}
+                                />
+                                {seriesNames.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => removeSeries(sIdx)}
+                                        style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", padding: 4 }}
+                                    >
+                                        <FaTrash size={12} />
+                                    </button>
+                                )}
+                            </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={addSeries}
+                            style={{
+                                background: "rgba(255,255,255,0.05)",
+                                border: "1px dashed rgba(255,255,255,0.2)",
+                                color: "#fff",
+                                padding: "6px",
+                                borderRadius: "4px",
+                                fontSize: 11,
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: 4
+                            }}
+                        >
+                            <FaPlus size={10} /> Tambah Seri
+                        </button>
+                    </div>
+                </>
             )}
 
             {/* Layout */}
@@ -138,7 +275,9 @@ export default function ChartEdit({ selectedEl, setElement }) {
                             value={color}
                             onChange={(c) => handleColorChange(idx, c.toHexString())}
                         />
-                        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>Warna {idx + 1}</span>
+                        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>
+                            {isGrouped ? `Warna Seri ${idx + 1}` : `Warna ${idx + 1}`}
+                        </span>
                         {colors.length > 1 && (
                             <button
                                 type="button"
@@ -185,50 +324,84 @@ export default function ChartEdit({ selectedEl, setElement }) {
             {/* Data Editor Table */}
             <p className={styles.sectionTitle} style={{ marginTop: 16 }}>Data Grafik</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {data.map((item, idx) => (
-                    <div key={`data-item-${idx}`} style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                        <input
-                            type="text"
-                            value={item.label}
-                            onChange={(e) => handleDataChange(idx, "label", e.target.value)}
-                            placeholder="Label"
-                            style={{
-                                flex: 2,
-                                background: "rgba(255,255,255,0.03)",
-                                border: "1px solid rgba(255,255,255,0.1)",
-                                color: "#fff",
-                                padding: "4px 8px",
-                                borderRadius: "4px",
-                                fontSize: 12
-                            }}
-                        />
-                        <input
-                            type="number"
-                            value={item.value}
-                            onChange={(e) => handleDataChange(idx, "value", parseFloat(e.target.value) || 0)}
-                            placeholder="Nilai"
-                            style={{
-                                flex: 1,
-                                background: "rgba(255,255,255,0.03)",
-                                border: "1px solid rgba(255,255,255,0.1)",
-                                color: "#fff",
-                                padding: "4px 8px",
-                                borderRadius: "4px",
-                                fontSize: 12,
-                                width: 60
-                            }}
-                        />
-                        {data.length > 1 && (
-                            <button
-                                type="button"
-                                onClick={() => removeDataItem(idx)}
-                                style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", padding: 4 }}
-                            >
-                                <FaTrash size={12} />
-                            </button>
-                        )}
-                    </div>
-                ))}
+                {data.map((item, idx) => {
+                    const itemValues = Array.isArray(item.values)
+                        ? item.values
+                        : [item.value !== undefined ? item.value : 0];
+
+                    return (
+                        <div key={`data-item-${idx}`} style={{ display: "flex", flexDirection: "column", gap: 4, background: "rgba(255,255,255,0.02)", padding: 6, borderRadius: 4, border: "1px solid rgba(255,255,255,0.05)" }}>
+                            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                                <input
+                                    type="text"
+                                    value={item.label}
+                                    onChange={(e) => handleDataChange(idx, "label", e.target.value)}
+                                    placeholder="Label Kategori"
+                                    style={{
+                                        flex: 1,
+                                        background: "rgba(255,255,255,0.03)",
+                                        border: "1px solid rgba(255,255,255,0.1)",
+                                        color: "#fff",
+                                        padding: "4px 8px",
+                                        borderRadius: "4px",
+                                        fontSize: 12
+                                    }}
+                                />
+                                {!isGrouped && (
+                                    <input
+                                        type="number"
+                                        value={item.value}
+                                        onChange={(e) => handleDataChange(idx, "value", parseFloat(e.target.value) || 0)}
+                                        placeholder="Nilai"
+                                        style={{
+                                            width: 65,
+                                            background: "rgba(255,255,255,0.03)",
+                                            border: "1px solid rgba(255,255,255,0.1)",
+                                            color: "#fff",
+                                            padding: "4px 8px",
+                                            borderRadius: "4px",
+                                            fontSize: 12
+                                        }}
+                                    />
+                                )}
+                                {data.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => removeDataItem(idx)}
+                                        style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", padding: 4 }}
+                                    >
+                                        <FaTrash size={12} />
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Multi-series input values for Grouped Bar */}
+                            {isGrouped && (
+                                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 2 }}>
+                                    {seriesNames.map((sName, sIdx) => (
+                                        <div key={`val-${idx}-${sIdx}`} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                                            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.5)" }}>{sName}:</span>
+                                            <input
+                                                type="number"
+                                                value={itemValues[sIdx] !== undefined ? itemValues[sIdx] : 0}
+                                                onChange={(e) => handleGroupedValueChange(idx, sIdx, parseFloat(e.target.value) || 0)}
+                                                style={{
+                                                    width: 55,
+                                                    background: "rgba(255,255,255,0.03)",
+                                                    border: "1px solid rgba(255,255,255,0.1)",
+                                                    color: "#fff",
+                                                    padding: "3px 6px",
+                                                    borderRadius: "4px",
+                                                    fontSize: 11
+                                                }}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
                 <button
                     type="button"
                     onClick={addDataItem}
