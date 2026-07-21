@@ -109,12 +109,6 @@ const TextEdite = ({ selectedEl, setElement, toggle }) => {
                 onChange={(val) => setElement(selectedEl?.id, (el) => ({ ...el, lineHeight: val }))}
             />
 
-            {/* Letter Spacing */}
-            <p className={styles.sectionTitle}>Letter Spacing</p>
-            <Slider min={-5} max={20} step={0.5} value={selectedEl?.letterSpacing || 0}
-                onChange={(val) => setElement(selectedEl?.id, (el) => ({ ...el, letterSpacing: val }))}
-            />
-
             {/* Padding */}
             <div className={styles.row}>
                 <span className={styles.label}>Padding</span>

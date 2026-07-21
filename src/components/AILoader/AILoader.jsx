@@ -48,7 +48,6 @@ export default function AILoader({ text = "Sedang diproses oleh AI Agent...", mi
           margin: 0,
           fontSize: '13px',
           fontWeight: '500',
-          letterSpacing: '0.5px',
           color: '#34B34A',
           fontFamily: "Fira Code, Source Code Pro, Consolas, Monaco, 'Courier New', Courier, monospace",
           textShadow: '0 0 8px rgba(52, 179, 74, 0.4)'

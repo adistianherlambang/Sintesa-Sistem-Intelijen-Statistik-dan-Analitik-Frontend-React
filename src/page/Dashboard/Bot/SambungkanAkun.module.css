@@ -160,8 +160,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Alerts */
@@ -232,7 +237,7 @@
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 100px;
-  text-transform: uppercase;
+
 }
 
 .codeText {
@@ -343,7 +348,7 @@
   color: #aaaaaa;
   font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
+
 }
 
 .subtext {

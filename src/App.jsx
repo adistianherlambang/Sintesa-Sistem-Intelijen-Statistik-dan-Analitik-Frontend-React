@@ -88,10 +88,8 @@ function RouteLoading() {
           margin: 0,
           fontSize: '13px',
           fontWeight: '600',
-          letterSpacing: '1px',
           color: '#ffffffff',
           fontFamily: "Fira Code, Source Code Pro, Consolas, Monaco, 'Courier New', Courier, monospace",
-          textTransform: 'uppercase',
         }}>
           {displayedText}
           <span style={{

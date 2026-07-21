@@ -102,6 +102,17 @@ const getSummary = async () => {
 
 const summary = await getSummary()
 
+const dummy = [
+    {
+        "label": "ya",
+        "value": [50, 10, 60]
+    },
+    {
+        "label": "tidak",
+        "value": [90, 30, 20]
+    }
+]
+
 const banners = [
     {
         name: `Infografis ${locationName} ${month} ${year}`,
@@ -495,6 +506,41 @@ const banners = [
         y: 0,
         background: "#ffffff",
         children: []
+    },
+    {
+        name: `Grouped Chart Banner`,
+        type: "banner",
+        w: 1200,
+        h: 1700,
+        x: 0,
+        y: 0,
+        background: "#ffffff",
+        children: [
+            {
+                id: `b${Date.now()}-grouped-chart`,
+                type: "chart",
+                chartType: "groupedBar",
+                x: 265,
+                y: 665,
+                width: 669,
+                height: 370,
+                data: [
+                    { label: "Kategori A", values: [30, 45] },
+                    { label: "Kategori B", values: [65, 50] },
+                    { label: "Kategori C", values: [45, 80] },
+                ],
+                seriesNames: ["Seri 1", "Seri 2"],
+                colors: ["#AD6832", "#F4913E", "#FEBD23"],
+                showLabels: true,
+                showValues: true,
+                textColor: "#111827",
+                fontSize: 14,
+                chartPadding: 20,
+                showAxes: true,
+                gridColor: "rgba(0,0,0,0.15)",
+                rotation: 0
+            }
+        ]
     }
 ]
 

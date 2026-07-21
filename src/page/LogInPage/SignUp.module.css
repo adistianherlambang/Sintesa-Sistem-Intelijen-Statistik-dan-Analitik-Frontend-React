@@ -62,7 +62,6 @@
   font-weight: 800;
   color: #ffffff;
   margin: 0;
-  letter-spacing: -0.02em;
   background: linear-gradient(to right, #ffffff, #8be29b);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -181,8 +180,7 @@
   font-size: 12px;
   font-weight: 600;
   color: #aaaaaa;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+
 }
 
 .customSelectContainer {
