@@ -82,10 +82,15 @@ Typography.Title = ({ children, level = 1, style, className = '' }) => {
 export const Title = Typography.Title;
 export const Text = Typography.Text;
 
-// InputNumber
 export const InputNumber = ({ value, onChange, min, max, style, className = '', addonBefore }) => {
   const handleChange = (e) => {
-    let val = Number(e.target.value);
+    const str = e.target.value;
+    if (str === '') {
+      onChange(undefined);
+      return;
+    }
+    let val = Number(str);
+    if (isNaN(val)) return;
     if (min !== undefined && val < min) val = min;
     if (max !== undefined && val > max) val = max;
     onChange(val);

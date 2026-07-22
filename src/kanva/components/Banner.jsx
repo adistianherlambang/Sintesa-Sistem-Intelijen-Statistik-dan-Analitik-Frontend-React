@@ -102,16 +102,55 @@ const getSummary = async () => {
 
 const summary = await getSummary()
 
-const dummy = [
-    {
-        "label": "ya",
-        "value": [50, 10, 60]
-    },
-    {
-        "label": "tidak",
-        "value": [90, 30, 20]
-    }
-]
+const listMonth = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "Mei",
+    "Jun",
+    "Jul",
+    "Agu",
+    "Sep",
+    "Okt",
+    "Nov",
+    "Des",
+];
+
+const dummy = listMonth.map((month, i) => ({
+    month,
+    now: inflasiData?.data?.[i]?.value ?? 0,
+    yoy: inflasiData?.yoy?.[i]?.value ?? 0,
+    yoy2: inflasiData?.yoy2?.[i]?.value ?? 0
+}))
+
+// const dummy = [
+//     {
+//         tahun: 2022,
+//         nilaiPertama: 20,
+//         nilaiKedua: 50
+//     },
+//     {
+//         tahun: 2023,
+//         nilaiPertama: 20,
+//         nilaiKedua: 50
+//     },
+//     {
+//         tahun: 2024,
+//         nilaiPertama: 20,
+//         nilaiKedua: 50
+//     },
+//     {
+//         tahun: 2025,
+//         nilaiPertama: 20,
+//         nilaiKedua: 50
+//     },
+//     {
+//         tahun: 2026,
+//         nilaiPertama: 20,
+//         nilaiKedua: 50
+//     }
+// ]
 
 const banners = [
     {
@@ -435,9 +474,9 @@ const banners = [
                 id: `b${Date.now()}-bar-chart`,
                 type: "chart",
                 chartType: "line",
-                x: -12,
+                x: 40,
                 y: 960,
-                width: 1200,
+                width: 1130,
                 height: 240,
                 data: inflasiData?.m2mLast13 && inflasiData.m2mLast13.length > 0
                     ? inflasiData.m2mLast13
@@ -462,7 +501,7 @@ const banners = [
                 textColor: "#111827",
                 fontSize: 24,
                 chartPadding: 32,
-                showAxes: true,
+                showAxes: false,
                 gridColor: "rgba(0,0,0,0.15)",
                 rotation: 0
             },
@@ -510,8 +549,8 @@ const banners = [
     {
         name: `Grouped Chart Banner`,
         type: "banner",
-        w: 1200,
-        h: 1700,
+        w: 669,
+        h: 370,
         x: 0,
         y: 0,
         background: "#ffffff",
@@ -520,23 +559,22 @@ const banners = [
                 id: `b${Date.now()}-grouped-chart`,
                 type: "chart",
                 chartType: "groupedBar",
-                x: 265,
-                y: 665,
+                x: 0,
+                y: 0,
                 width: 669,
                 height: 370,
-                data: [
-                    { label: "Kategori A", values: [30, 45] },
-                    { label: "Kategori B", values: [65, 50] },
-                    { label: "Kategori C", values: [45, 80] },
-                ],
-                seriesNames: ["Seri 1", "Seri 2"],
-                colors: ["#AD6832", "#F4913E", "#FEBD23"],
+                data: dummy.map((item) => ({
+                    label: String(item.month),
+                    values: [item.now, item.yoy, item.yoy2]
+                })),
+                seriesNames: ["Nilai Pertama", "Nilai Kedua", "nilai 3"],
+                colors: ["#AD6832", "#F4913E"],
                 showLabels: true,
                 showValues: true,
                 textColor: "#111827",
                 fontSize: 14,
                 chartPadding: 20,
-                showAxes: true,
+                showAxes: false,
                 gridColor: "rgba(0,0,0,0.15)",
                 rotation: 0
             }

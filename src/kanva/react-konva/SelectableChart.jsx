@@ -37,7 +37,8 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
     const showLabels = shape.showLabels !== false;
     const showValues = shape.showValues !== false;
     const textColor = shape.textColor || "#111827";
-    const fontSize = shape.fontSize || 8;
+    const fontSize = shape.fontSize !== undefined ? shape.fontSize : 12;
+    const valueFontSize = shape.valueFontSize !== undefined ? shape.valueFontSize : fontSize;
     const gridColor = shape.gridColor || "rgba(0,0,0,0.1)";
 
     const seriesNames = shape.seriesNames || ["Seri 1", "Seri 2"];
@@ -51,8 +52,19 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
     const rawMax = Math.max(...(rawVals.length > 0 ? rawVals : [0]));
     const rawMin = Math.min(...(rawVals.length > 0 ? rawVals : [0]));
 
-    const minVal = rawMin < 0 ? rawMin : 0;
-    const maxVal = rawMax > minVal ? rawMax : minVal + 1;
+    // Dynamic minVal & maxVal based on actual values (allowing negative numbers to start dynamically)
+    let minVal, maxVal;
+    if (rawMin < 0 && rawMax <= 0) {
+        minVal = Math.floor(rawMin * 1.15);
+        maxVal = 0;
+    } else if (rawMin < 0 && rawMax > 0) {
+        minVal = Math.floor(rawMin * 1.15);
+        maxVal = Math.ceil(rawMax * 1.15);
+    } else {
+        minVal = 0;
+        maxVal = rawMax > 0 ? Math.ceil(rawMax * 1.15) : 1;
+    }
+    if (maxVal <= minVal) maxVal = minVal + 1;
     const valRange = maxVal - minVal;
 
     const totalVal = data.reduce((sum, d) => sum + Math.abs(parseFloat(d.value) || 0), 0) || 1;
@@ -68,14 +80,18 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
         Math.round(maxVal).toString().length,
         Math.round(minVal).toString().length
     );
-    const paddingLeft = showYLabels ? Math.max(18, maxLabelLen * fontSize * 0.6) : 0;
-    const paddingBottom = hasLabels ? Math.max(18, fontSize * 2.2) : 0;
-    const paddingTop = hasValues ? Math.max(10, fontSize * 1.2) : 2;
+    const paddingLeft = showYLabels ? Math.max(18, maxLabelLen * valueFontSize * 0.6) : 0;
+    const paddingBottom = hasLabels ? (chartType === "groupedBar" ? Math.max(52, fontSize * 3.6) : Math.max(18, fontSize * 2.2)) : 0;
+    const paddingTop = hasValues ? Math.max(10, valueFontSize * 1.3) : 2;
     const paddingRight = hasLabels ? 4 : 2;
 
     // chartPadding is the gap between the axes and the actual chart plot area
     const plotWidth = Math.max(10, width - paddingLeft - paddingRight - chartPadding * 2);
     const plotHeight = Math.max(10, height - paddingBottom - paddingTop - chartPadding);
+
+    const zeroRatio = (0 - minVal) / (valRange || 1);
+    const clampedZeroRatio = Math.max(0, Math.min(1, zeroRatio));
+    const yZero = paddingTop + plotHeight * (1 - clampedZeroRatio);
 
     const renderChartContent = () => {
         if (chartType === "groupedBar") {
@@ -111,10 +127,10 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                     <Text
                                         text={gridVal.toFixed(1).replace(/\.0$/, "")}
                                         x={0}
-                                        y={y - fontSize / 2}
+                                        y={y - valueFontSize / 2}
                                         width={paddingLeft - 4}
                                         align="right"
-                                        fontSize={fontSize}
+                                        fontSize={valueFontSize}
                                         fill={textColor}
                                     />
                                 )}
@@ -151,28 +167,40 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                 {itemValues.map((valRaw, subIdx) => {
                                     const val = parseFloat(valRaw) || 0;
                                     const yVal = paddingTop + plotHeight * (1 - (val - minVal) / valRange);
-                                    const h = (paddingTop + plotHeight) - yVal;
                                     const barX = groupX + subIdx * (barWidth + innerGap);
+
+                                    let barY, barH, valTextY, cornerRadius;
+                                    if (val >= 0) {
+                                        barY = yVal;
+                                        barH = Math.max(1, yZero - yVal);
+                                        valTextY = barY - valueFontSize - 2;
+                                        cornerRadius = [1.5, 1.5, 0, 0];
+                                    } else {
+                                        barY = yZero;
+                                        barH = Math.max(1, yVal - yZero);
+                                        valTextY = barY + barH + 2;
+                                        cornerRadius = [0, 0, 1.5, 1.5];
+                                    }
 
                                     return (
                                         <Group key={`subbar-${groupIdx}-${subIdx}`}>
                                             <Rect
                                                 x={barX}
-                                                y={yVal}
+                                                y={barY}
                                                 width={barWidth}
-                                                height={h}
+                                                height={barH}
                                                 fill={colors[subIdx % colors.length]}
-                                                cornerRadius={[1.5, 1.5, 0, 0]}
+                                                cornerRadius={cornerRadius}
                                             />
                                             {showValues && (
                                                 <Text
                                                     text={val.toString()}
                                                     x={barX - 10}
-                                                    y={yVal - fontSize - 2}
+                                                    y={valTextY}
                                                     width={barWidth + 20}
                                                     align="center"
-                                                    fontSize={fontSize}
-                                                    bold
+                                                    fontSize={valueFontSize}
+                                                    fontStyle="bold"
                                                     fill={textColor}
                                                 />
                                             )}
@@ -197,30 +225,47 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                     })}
 
                     {/* Legend for Series */}
-                    {showLabels && seriesNames && seriesNames.length > 0 && (
-                        <Group x={paddingLeft + chartPadding} y={2}>
-                            {seriesNames.slice(0, maxSeriesCount).map((sName, idx) => {
-                                const legendStep = Math.min(80, (width - paddingLeft) / maxSeriesCount);
-                                return (
-                                    <Group key={`legend-${idx}`} x={idx * legendStep}>
-                                        <Rect
-                                            width={6}
-                                            height={6}
-                                            fill={colors[idx % colors.length]}
-                                            y={1}
-                                        />
-                                        <Text
-                                            text={sName}
-                                            x={9}
-                                            y={0}
-                                            fontSize={Math.max(6, fontSize - 2)}
-                                            fill={textColor}
-                                        />
-                                    </Group>
-                                );
-                            })}
-                        </Group>
-                    )}
+                    {showLabels && seriesNames && seriesNames.length > 0 && (() => {
+                        const activeSeries = seriesNames.slice(0, maxSeriesCount);
+                        const legendFontSize = Math.max(8, Math.round(fontSize * 0.85));
+                        const boxSize = Math.max(6, Math.round(legendFontSize * 0.75));
+                        const gapBoxText = Math.max(3, Math.round(legendFontSize * 0.35));
+                        const itemGap = Math.max(12, Math.round(legendFontSize * 1.5));
+
+                        const itemWidths = activeSeries.map((sName) => boxSize + gapBoxText + (String(sName).length * legendFontSize * 0.6));
+                        const totalWidth = itemWidths.reduce((a, b) => a + b, 0) + (activeSeries.length - 1) * itemGap;
+                        const startX = Math.max(0, (width - totalWidth) / 2);
+                        const legendY = height - paddingBottom + fontSize + Math.round(legendFontSize * 0.4);
+
+                        let currentX = startX;
+
+                        return (
+                            <Group y={legendY}>
+                                {activeSeries.map((sName, idx) => {
+                                    const itemX = currentX;
+                                    currentX += itemWidths[idx] + itemGap;
+                                    return (
+                                        <Group key={`legend-${idx}`} x={itemX}>
+                                            <Rect
+                                                width={boxSize}
+                                                height={boxSize}
+                                                fill={colors[idx % colors.length]}
+                                                y={Math.round((legendFontSize - boxSize) / 2)}
+                                                cornerRadius={Math.max(1, boxSize * 0.15)}
+                                            />
+                                            <Text
+                                                text={String(sName)}
+                                                x={boxSize + gapBoxText}
+                                                y={0}
+                                                fontSize={legendFontSize}
+                                                fill={textColor}
+                                            />
+                                        </Group>
+                                    );
+                                })}
+                            </Group>
+                        );
+                    })()}
                 </Group>
             );
         }
@@ -247,10 +292,10 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                     <Text
                                         text={gridVal.toFixed(1).replace(/\.0$/, "")}
                                         x={0}
-                                        y={y - fontSize / 2}
+                                        y={y - valueFontSize / 2}
                                         width={paddingLeft - 4}
                                         align="right"
-                                        fontSize={fontSize}
+                                        fontSize={valueFontSize}
                                         fill={textColor}
                                     />
                                 )}
@@ -271,29 +316,40 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                     {data.map((item, idx) => {
                         const val = parseFloat(item.value) || 0;
                         const yVal = paddingTop + plotHeight * (1 - (val - minVal) / valRange);
-                        const h = (paddingTop + plotHeight) - yVal;
                         const x = paddingLeft + chartPadding + idx * (barWidth + barGap) + barGap / 2;
-                        const y = yVal;
+
+                        let barY, barH, valTextY, cornerRadius;
+                        if (val >= 0) {
+                            barY = yVal;
+                            barH = Math.max(1, yZero - yVal);
+                            valTextY = barY - valueFontSize - 2;
+                            cornerRadius = [1.5, 1.5, 0, 0];
+                        } else {
+                            barY = yZero;
+                            barH = Math.max(1, yVal - yZero);
+                            valTextY = barY + barH + 2;
+                            cornerRadius = [0, 0, 1.5, 1.5];
+                        }
 
                         return (
                             <Group key={`bar-${idx}`}>
                                 <Rect
                                     x={x}
-                                    y={y}
+                                    y={barY}
                                     width={barWidth}
-                                    height={h}
+                                    height={barH}
                                     fill={colors[idx % colors.length]}
-                                    cornerRadius={[1.5, 1.5, 0, 0]}
+                                    cornerRadius={cornerRadius}
                                 />
                                 {showValues && (
                                     <Text
                                         text={val.toString()}
                                         x={x - 10}
-                                        y={yVal - fontSize - 2}
+                                        y={valTextY}
                                         width={barWidth + 20}
                                         align="center"
-                                        fontSize={fontSize}
-                                        bold
+                                        fontSize={valueFontSize}
+                                        fontStyle="bold"
                                         fill={textColor}
                                     />
                                 )}
@@ -345,10 +401,10 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                     <Text
                                         text={gridVal.toFixed(1).replace(/\.0$/, "")}
                                         x={0}
-                                        y={y - fontSize / 2}
+                                        y={y - valueFontSize / 2}
                                         width={paddingLeft - 4}
                                         align="right"
-                                        fontSize={fontSize}
+                                        fontSize={valueFontSize}
                                         fill={textColor}
                                     />
                                 )}
@@ -382,7 +438,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                         const y = paddingTop + plotHeight * (1 - (val - minVal) / valRange);
                         const labelWidth = lineCount > 1 ? stepX : plotWidth;
                         const valStr = val.toString();
-                        const valWidth = Math.max(40, valStr.length * fontSize * 0.7);
+                        const valWidth = Math.max(40, valStr.length * valueFontSize * 0.7);
 
                         return (
                             <Group key={`node-${idx}`}>
@@ -398,11 +454,11 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                     <Text
                                         text={valStr}
                                         x={x - valWidth / 2}
-                                        y={y - fontSize - 5}
+                                        y={val >= 0 ? y - valueFontSize - 5 : y + 6}
                                         width={valWidth}
                                         align="center"
-                                        fontSize={fontSize}
-                                        bold
+                                        fontSize={valueFontSize}
+                                        fontStyle="bold"
                                         fill={textColor}
                                     />
                                 )}
@@ -445,9 +501,9 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                         const midAngleRad = ((currentStart + angle / 2) * Math.PI) / 180;
                         const labelRadius = radius * 0.6;
                         const pieValStr = `${Math.round((val / totalVal) * 100)}%`;
-                        const pieValWidth = Math.max(40, pieValStr.length * (fontSize - 1) * 0.7);
+                        const pieValWidth = Math.max(40, pieValStr.length * valueFontSize * 0.7);
                         const labelX = centerX + Math.cos(midAngleRad) * labelRadius - pieValWidth / 2;
-                        const labelY = centerY + Math.sin(midAngleRad) * labelRadius - fontSize / 2;
+                        const labelY = centerY + Math.sin(midAngleRad) * labelRadius - valueFontSize / 2;
 
                         return (
                             <Group key={`pie-${idx}`}>
@@ -469,8 +525,8 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                         y={labelY}
                                         width={pieValWidth}
                                         align="center"
-                                        fontSize={fontSize - 1}
-                                        bold
+                                        fontSize={valueFontSize}
+                                        fontStyle="bold"
                                         fill="#ffffff"
                                     />
                                 )}
@@ -542,8 +598,10 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                     
                     // Scale the font size proportionally with the resize
                     const scale = (scaleX + scaleY) / 2;
-                    const currentFontSize = shape.fontSize || 8;
-                    const newFontSize = Math.max(4, Math.min(24, Math.round(currentFontSize * scale)));
+                    const currentFontSize = shape.fontSize !== undefined ? shape.fontSize : 12;
+                    const newFontSize = Math.max(4, Math.min(100, Math.round(currentFontSize * scale)));
+                    const currentValFontSize = shape.valueFontSize !== undefined ? shape.valueFontSize : currentFontSize;
+                    const newValFontSize = Math.max(4, Math.min(100, Math.round(currentValFontSize * scale)));
                     
                     if (chartType === "pie") {
                         const size = Math.max(100, Math.round((newWidth + newHeight) / 2));
@@ -558,6 +616,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                         width: newWidth,
                         height: newHeight,
                         fontSize: newFontSize,
+                        valueFontSize: shape.valueFontSize !== undefined ? newValFontSize : undefined,
                     });
                 }}
             >

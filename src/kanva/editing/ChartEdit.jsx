@@ -250,12 +250,21 @@ export default function ChartEdit({ selectedEl, setElement }) {
             {/* Typography */}
             <p className={styles.sectionTitle}>Gaya Teks</p>
             <div className={styles.row}>
-                <span className={styles.label}>Ukuran Font</span>
+                <span className={styles.label}>Ukuran Font (Label)</span>
                 <InputNumber
                     min={4}
-                    max={24}
-                    value={selectedEl.fontSize || 8}
-                    onChange={(val) => setElement(selectedEl.id, (el) => ({ ...el, fontSize: val || 8 }))}
+                    max={100}
+                    value={selectedEl.fontSize}
+                    onChange={(val) => setElement(selectedEl.id, (el) => ({ ...el, fontSize: val }))}
+                />
+            </div>
+            <div className={styles.row}>
+                <span className={styles.label}>Ukuran Font (Nilai)</span>
+                <InputNumber
+                    min={4}
+                    max={100}
+                    value={selectedEl.valueFontSize !== undefined ? selectedEl.valueFontSize : selectedEl.fontSize}
+                    onChange={(val) => setElement(selectedEl.id, (el) => ({ ...el, valueFontSize: val }))}
                 />
             </div>
             <div className={styles.colorRow}>
