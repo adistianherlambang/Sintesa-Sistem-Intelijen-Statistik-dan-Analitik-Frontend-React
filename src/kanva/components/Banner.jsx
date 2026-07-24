@@ -124,34 +124,6 @@ const dummy = listMonth.map((month, i) => ({
     yoy2: inflasiData?.yoy2?.[i]?.value ?? 0
 }))
 
-// const dummy = [
-//     {
-//         tahun: 2022,
-//         nilaiPertama: 20,
-//         nilaiKedua: 50
-//     },
-//     {
-//         tahun: 2023,
-//         nilaiPertama: 20,
-//         nilaiKedua: 50
-//     },
-//     {
-//         tahun: 2024,
-//         nilaiPertama: 20,
-//         nilaiKedua: 50
-//     },
-//     {
-//         tahun: 2025,
-//         nilaiPertama: 20,
-//         nilaiKedua: 50
-//     },
-//     {
-//         tahun: 2026,
-//         nilaiPertama: 20,
-//         nilaiKedua: 50
-//     }
-// ]
-
 const banners = [
     {
         name: `Infografis ${locationName} ${month} ${year}`,
