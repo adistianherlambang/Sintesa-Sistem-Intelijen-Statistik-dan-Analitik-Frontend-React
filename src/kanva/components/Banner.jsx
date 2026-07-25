@@ -135,20 +135,24 @@ const listMonth = [
     "Des",
 ];
 
+const isValValid = (v) => v !== undefined && v !== null && v !== "" && !Number.isNaN(Number(v));
+
 const dummy = listMonth
     .map((month, i) => {
-        const nowItem = inflasiYoyData?.data?.[i];
-        if (!nowItem || nowItem.value === undefined || nowItem.value === null) {
-            return null;
-        }
-        const prevYearItem = inflasiYoyData?.prevYear?.[i];
-        const prev2YearItem = inflasiYoyData?.prev2Year?.[i];
+        const yoy2Val = inflasiYoyData?.prev2Year?.[i]?.value;
+        const yoyVal = inflasiYoyData?.prevYear?.[i]?.value;
+        const nowVal = inflasiYoyData?.data?.[i]?.value;
+
+        const values = [];
+        if (isValValid(yoy2Val)) values.push(Number(yoy2Val));
+        if (isValValid(yoyVal)) values.push(Number(yoyVal));
+        if (isValValid(nowVal)) values.push(Number(nowVal));
+
+        if (values.length === 0) return null;
 
         return {
-            month,
-            now: nowItem.value ?? 0,
-            yoy: prevYearItem?.value ?? 0,
-            yoy2: prev2YearItem?.value ?? 0,
+            label: String(month),
+            values,
         };
     })
     .filter(Boolean);
@@ -572,10 +576,7 @@ const banners = [
                 y: 0,
                 width: 669,
                 height: 370,
-                data: dummy.map((item) => ({
-                    label: String(item.month),
-                    values: [item.yoy2, item.yoy, item.now]
-                })),
+                data: dummy,
                 seriesNames: [String(year - 2), String(year - 1), String(year)],
                 colors: ["#AD6832", "#F4913E", "#FEBD23"],
                 showLabels: true,

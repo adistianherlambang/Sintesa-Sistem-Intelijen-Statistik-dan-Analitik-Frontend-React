@@ -83,22 +83,29 @@ export default function KanvaEditor() {
     const [showPenDropdown, setShowPenDropdown] = useState(false);
 
     // Zoom/Pan states
-    const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
+    const [stagePos, setStagePosState] = useState({ x: 0, y: 0 });
     const [isSpacePressed, setIsSpacePressed] = useState(false);
     const [isAltPressed, setIsAltPressed] = useState(false);
     const [isMouseDown, setIsMouseDown] = useState(false);
 
-    const stagePosRef = useRef(stagePos);
-    stagePosRef.current = stagePos;
+    const stagePosRef = useRef({ x: 0, y: 0 });
+    const setStagePos = useCallback((newPos) => {
+        const resolved = typeof newPos === 'function' ? newPos(stagePosRef.current) : newPos;
+        stagePosRef.current = resolved;
+        setStagePosState(resolved);
+    }, []);
 
     const isAltPressedRef = useRef(isAltPressed);
     isAltPressedRef.current = isAltPressed;
 
     const zoomRef = useRef(zoom);
-    zoomRef.current = zoom;
+    useEffect(() => {
+        zoomRef.current = zoom;
+    }, [zoom]);
 
     // rAF Refs for smooth 60fps throttled zoom and pan updates
     const wheelRafRef = useRef(null);
+    const dragRafRef = useRef(null);
     const pendingZoomRef = useRef(null);
     const pendingStagePosRef = useRef(null);
 
@@ -653,10 +660,16 @@ export default function KanvaEditor() {
 
     const handleStageDrag = useCallback((e) => {
         if (e.target === e.target.getStage()) {
-            stagePosRef.current = {
-                x: e.target.x(),
-                y: e.target.y()
-            };
+            const newX = e.target.x();
+            const newY = e.target.y();
+            stagePosRef.current = { x: newX, y: newY };
+
+            if (!dragRafRef.current) {
+                dragRafRef.current = requestAnimationFrame(() => {
+                    dragRafRef.current = null;
+                    setStagePos({ x: newX, y: newY });
+                });
+            }
         }
     }, []);
 
@@ -716,10 +729,16 @@ export default function KanvaEditor() {
 
     const handleStageDragEnd = useCallback((e) => {
         if (e.target === e.target.getStage()) {
-            setStagePos({
+            if (dragRafRef.current) {
+                cancelAnimationFrame(dragRafRef.current);
+                dragRafRef.current = null;
+            }
+            const finalPos = {
                 x: e.target.x(),
                 y: e.target.y()
-            });
+            };
+            stagePosRef.current = finalPos;
+            setStagePos(finalPos);
             return;
         }
         dragStartPositionsRef.current = null;
@@ -1313,9 +1332,9 @@ export default function KanvaEditor() {
                                 key={`${canvasSize?.w}x${canvasSize?.h}`}
                                 width={containerSize?.w}
                                 height={containerSize?.h}
-                                scale={{ x: zoom, y: zoom }}
-                                x={stagePos.x}
-                                y={stagePos.y}
+                                scale={{ x: zoomRef.current || zoom, y: zoomRef.current || zoom }}
+                                x={stagePosRef.current.x}
+                                y={stagePosRef.current.y}
                                 draggable={isSpacePressed}
                                 onDragStart={handleStageDragStart}
                                 onDragMove={handleStageDragMove}
