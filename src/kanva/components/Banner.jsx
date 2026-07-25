@@ -102,6 +102,24 @@ const getSummary = async () => {
 
 const summary = await getSummary()
 
+const getInflasiYoy = async () => {
+    try {
+        const res = await axios.post(
+            `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi/yoy`,
+            {
+                kota: locationName
+            }
+        );
+
+        return res.data;
+    } catch (err) {
+        console.error(err.message);
+        return null;
+    }
+};
+
+const inflasiYoyData = await getInflasiYoy();
+
 const listMonth = [
     "Jan",
     "Feb",
@@ -117,12 +135,23 @@ const listMonth = [
     "Des",
 ];
 
-const dummy = listMonth.map((month, i) => ({
-    month,
-    now: inflasiData?.data?.[i]?.value ?? 0,
-    yoy: inflasiData?.yoy?.[i]?.value ?? 0,
-    yoy2: inflasiData?.yoy2?.[i]?.value ?? 0
-}))
+const dummy = listMonth
+    .map((month, i) => {
+        const nowItem = inflasiYoyData?.data?.[i];
+        if (!nowItem || nowItem.value === undefined || nowItem.value === null) {
+            return null;
+        }
+        const prevYearItem = inflasiYoyData?.prevYear?.[i];
+        const prev2YearItem = inflasiYoyData?.prev2Year?.[i];
+
+        return {
+            month,
+            now: nowItem.value ?? 0,
+            yoy: prevYearItem?.value ?? 0,
+            yoy2: prev2YearItem?.value ?? 0,
+        };
+    })
+    .filter(Boolean);
 
 const banners = [
     {
@@ -329,8 +358,8 @@ const banners = [
             {
                 id: `b${Date.now()}-boxDescYoY`,
                 type: "text",
-                text: inflasiData?.dashboard?.yoy !== undefined
-                    ? `${String(inflasiData.dashboard.yoy).replace(".", ",")}`
+                text: (inflasiData?.dashboard?.yoy ?? inflasiData?.dashboard?.prevYear) !== undefined
+                    ? `${String(inflasiData?.dashboard?.yoy ?? inflasiData?.dashboard?.prevYear).replace(".", ",")}`
                     : `Inflasi XX`,
                 x: 815.08,
                 y: 408,
@@ -356,9 +385,9 @@ const banners = [
                 id: `b${Date.now()}-bar-chart`,
                 type: "chart",
                 chartType: "bar",
-                x: 0,
+                x: 10,
                 y: 600,
-                width: 600,
+                width: 590,
                 height: 240,
                 data: (komoditasData?.topSubMom && komoditasData.topSubMom.length > 0)
                     ? komoditasData.topSubMom
@@ -377,7 +406,7 @@ const banners = [
                 showLabels: true,
                 showValues: true,
                 textColor: "#111827",
-                fontSize: 16,
+                fontSize: 14,
                 chartPadding: 0,
                 showAxes: false,
                 gridColor: "rgba(0,0,0,0.15)",
@@ -401,7 +430,7 @@ const banners = [
                 chartType: "bar",
                 x: 600,
                 y: 600,
-                width: 600,
+                width: 590,
                 height: 240,
                 data: (komoditasData?.topSubYoy && komoditasData.topSubYoy.length > 0)
                     ? komoditasData.topSubYoy
@@ -420,7 +449,7 @@ const banners = [
                 showLabels: true,
                 showValues: true,
                 textColor: "#111827",
-                fontSize: 24,
+                fontSize: 14,
                 chartPadding: 0,
                 showAxes: false,
                 gridColor: "rgba(0,0,0,0.15)",
@@ -443,7 +472,7 @@ const banners = [
                 type: "text",
                 text: `Tingkat Inflasi Month-to-Month (M-to-M) ${capitalize(locationName)} (2022=100), ${capitalize(month)} ${year - 1} - ${capitalize(month)} ${year}`,
                 x: 80,
-                y: 920,
+                y: 940,
                 fontSize: 24,
                 align: "center",
                 fontFamily: "Montserrat",
@@ -488,7 +517,7 @@ const banners = [
             {
                 id: `b${Date.now()}-dashed-divider`,
                 type: "line",
-                points: [40, 880, 1160, 880],
+                points: [40, 900, 1160, 900],
                 stroke: "#000000ff",
                 strokeWidth: 2,
                 dash: [4, 8],
@@ -545,10 +574,10 @@ const banners = [
                 height: 370,
                 data: dummy.map((item) => ({
                     label: String(item.month),
-                    values: [item.now, item.yoy, item.yoy2]
+                    values: [item.yoy2, item.yoy, item.now]
                 })),
-                seriesNames: ["Nilai Pertama", "Nilai Kedua", "nilai 3"],
-                colors: ["#AD6832", "#F4913E"],
+                seriesNames: [String(year - 2), String(year - 1), String(year)],
+                colors: ["#AD6832", "#F4913E", "#FEBD23"],
                 showLabels: true,
                 showValues: true,
                 textColor: "#111827",
