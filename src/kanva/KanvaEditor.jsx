@@ -97,6 +97,11 @@ export default function KanvaEditor() {
     const zoomRef = useRef(zoom);
     zoomRef.current = zoom;
 
+    // rAF Refs for smooth 60fps throttled zoom and pan updates
+    const wheelRafRef = useRef(null);
+    const pendingZoomRef = useRef(null);
+    const pendingStagePosRef = useRef(null);
+
     // Clipboard state for copy/paste
     const [clipboard, setClipboard] = useState(null);
 
@@ -508,7 +513,7 @@ export default function KanvaEditor() {
         };
     }, []);
 
-    // Set up native wheel event listener on stage container for non-passive prevention
+    // Set up native wheel event listener on stage container for non-passive prevention with rAF batching
     useEffect(() => {
         const stage = stageRef.current;
         if (!stage) return;
@@ -528,6 +533,9 @@ export default function KanvaEditor() {
             const currentStagePos = stagePosRef.current;
             const currentIsAltPressed = isAltPressedRef.current;
 
+            let nextZoom = oldScale;
+            let nextPos = currentStagePos;
+
             if (e.ctrlKey || e.altKey || currentIsAltPressed) {
                 const scaleBy = 1.05;
                 const mousePointTo = {
@@ -544,24 +552,54 @@ export default function KanvaEditor() {
                 }
 
                 const clampedScale = Math.min(3, Math.max(0.1, newScale));
-                dispatch(setZoom(clampedScale));
-                setStagePos({
+                nextZoom = clampedScale;
+                nextPos = {
                     x: pointer.x - mousePointTo.x * clampedScale,
                     y: pointer.y - mousePointTo.y * clampedScale,
-                });
+                };
             } else {
-                setStagePos((pos) => ({
-                    x: pos.x - e.deltaX,
-                    y: pos.y - e.deltaY,
-                }));
+                nextPos = {
+                    x: currentStagePos.x - e.deltaX,
+                    y: currentStagePos.y - e.deltaY,
+                };
+            }
+
+            zoomRef.current = nextZoom;
+            stagePosRef.current = nextPos;
+
+            // Apply direct transform to Konva stage for instantaneous visual feedback
+            stage.scale({ x: nextZoom, y: nextZoom });
+            stage.position(nextPos);
+            stage.batchDraw();
+
+            pendingZoomRef.current = nextZoom;
+            pendingStagePosRef.current = nextPos;
+
+            // Throttled React state update via rAF (at most once per frame)
+            if (!wheelRafRef.current) {
+                wheelRafRef.current = requestAnimationFrame(() => {
+                    wheelRafRef.current = null;
+                    if (pendingZoomRef.current !== null) {
+                        dispatch(setZoom(pendingZoomRef.current));
+                        pendingZoomRef.current = null;
+                    }
+                    if (pendingStagePosRef.current !== null) {
+                        setStagePos(pendingStagePosRef.current);
+                        pendingStagePosRef.current = null;
+                    }
+                });
             }
         };
 
         container.addEventListener('wheel', handleWheelRaw, { passive: false });
         return () => {
             container.removeEventListener('wheel', handleWheelRaw);
+            if (wheelRafRef.current) {
+                cancelAnimationFrame(wheelRafRef.current);
+                wheelRafRef.current = null;
+            }
         };
-    }, [dispatch, canvasSize?.w, canvasSize?.h]);
+    }, [dispatch]);
 
     const zoomToCenter = (newZoom) => {
         if (!canvasSize?.w || !containerSize?.w) return;
@@ -615,10 +653,10 @@ export default function KanvaEditor() {
 
     const handleStageDrag = useCallback((e) => {
         if (e.target === e.target.getStage()) {
-            setStagePos({
+            stagePosRef.current = {
                 x: e.target.x(),
                 y: e.target.y()
-            });
+            };
         }
     }, []);
 
@@ -678,11 +716,14 @@ export default function KanvaEditor() {
 
     const handleStageDragEnd = useCallback((e) => {
         if (e.target === e.target.getStage()) {
-            handleStageDrag(e);
+            setStagePos({
+                x: e.target.x(),
+                y: e.target.y()
+            });
             return;
         }
         dragStartPositionsRef.current = null;
-    }, [handleStageDrag]);
+    }, []);
 
     // Pen drawings logic
     const handleMouseDown = useCallback((e) => {
@@ -1335,18 +1376,16 @@ export default function KanvaEditor() {
 
                                     {(activePage?.children || []).map((el) => {
                                         if (!el) return null;
-                                        let element = { ...el };
-
-                                        if (isPenTool || isSpacePressed) {
-                                            element['locked'] = true;
-                                        } else {
-                                            element['locked'] = el?.locked || false;
-                                        }
+                                        const shouldBeLocked = isPenTool || isSpacePressed;
+                                        const isCurrentlyLocked = Boolean(el?.locked);
+                                        const elementToRender = (shouldBeLocked !== isCurrentlyLocked)
+                                            ? { ...el, locked: shouldBeLocked || isCurrentlyLocked }
+                                            : el;
 
                                         return (
                                             <EditorLayer
-                                                key={element.id}
-                                                el={element}
+                                                key={el.id}
+                                                el={elementToRender}
                                                 setElement={setElement}
                                                 stageRef={stageRef}
                                                 isSpacePressed={isSpacePressed}

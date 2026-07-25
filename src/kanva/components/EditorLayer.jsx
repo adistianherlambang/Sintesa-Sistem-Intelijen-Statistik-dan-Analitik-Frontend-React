@@ -1,3 +1,4 @@
+import React from "react";
 import { Group } from "react-konva";
 import { useKonvaSnapping } from 'use-konva-snapping';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,7 +16,7 @@ import SelectableLine from '../react-konva/SelectableLine';
 import SelectablePolygon from '../react-konva/SelectablePolygon';
 import SelectableChart from '../react-konva/SelectableChart';
 
-const EditorLayer = ({ el, setElement, stageRef, isSpacePressed }) => {
+const EditorLayer = React.memo(({ el, setElement, stageRef, isSpacePressed }) => {
     const dispatch = useDispatch();
     const { selectedUniqueId } = useSelector((state) => state?.editor ?? {});
 
@@ -209,6 +210,6 @@ const EditorLayer = ({ el, setElement, stageRef, isSpacePressed }) => {
     }
 
     return null;
-}
+});
 
 export default EditorLayer; 
