@@ -606,7 +606,7 @@ export default function KanvaEditor() {
                 wheelRafRef.current = null;
             }
         };
-    }, [dispatch]);
+    }, [dispatch, canvasSize, activePage]);
 
     const zoomToCenter = (newZoom) => {
         if (!canvasSize?.w || !containerSize?.w) return;
