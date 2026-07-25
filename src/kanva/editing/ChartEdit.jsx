@@ -246,6 +246,24 @@ export default function ChartEdit({ selectedEl, setElement }) {
                     onChange={(val) => setElement(selectedEl.id, (el) => ({ ...el, chartPadding: val }))}
                 />
             </div>
+            <div className={styles.row} style={{ marginBottom: 12 }}>
+                <span className={styles.label}>Jarak Label ke Chart (px)</span>
+                <InputNumber
+                    min={0}
+                    max={100}
+                    value={selectedEl.labelGap !== undefined ? selectedEl.labelGap : 4}
+                    onChange={(val) => setElement(selectedEl.id, (el) => ({ ...el, labelGap: val }))}
+                />
+            </div>
+            <div className={styles.row} style={{ marginBottom: 12 }}>
+                <span className={styles.label}>Jarak Legend (px)</span>
+                <InputNumber
+                    min={0}
+                    max={200}
+                    value={selectedEl.legendGap !== undefined ? selectedEl.legendGap : 16}
+                    onChange={(val) => setElement(selectedEl.id, (el) => ({ ...el, legendGap: val }))}
+                />
+            </div>
 
             {/* Typography */}
             <p className={styles.sectionTitle}>Gaya Teks</p>

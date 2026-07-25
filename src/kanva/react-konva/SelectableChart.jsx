@@ -70,6 +70,8 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
     const totalVal = data.reduce((sum, d) => sum + Math.abs(parseFloat(d.value) || 0), 0) || 1;
 
     const chartPadding = shape.chartPadding !== undefined ? shape.chartPadding : 25;
+    const legendGap = shape.legendGap !== undefined ? shape.legendGap : 16;
+    const labelGap = shape.labelGap !== undefined ? shape.labelGap : 4;
     const showAxes = shape.showAxes !== false;
 
     const hasLabels = showLabels && chartType !== "pie";
@@ -81,7 +83,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
         Math.round(minVal).toString().length
     );
     const paddingLeft = showYLabels ? Math.max(18, maxLabelLen * valueFontSize * 0.6) : 0;
-    const paddingBottom = hasLabels ? (chartType === "groupedBar" ? Math.max(52, fontSize * 3.6) : Math.max(18, fontSize * 2.2)) : 0;
+    const paddingBottom = hasLabels ? (chartType === "groupedBar" ? Math.max(34 + legendGap + labelGap, fontSize * 3 + legendGap + labelGap) : Math.max(14 + labelGap, fontSize * 2 + labelGap)) : 0;
     const paddingTop = hasValues ? Math.max(10, valueFontSize * 1.3) : 2;
     const paddingRight = hasLabels ? 4 : 2;
 
@@ -212,7 +214,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                     <Text
                                         text={item.label}
                                         x={paddingLeft + chartPadding + groupIdx * groupSlotWidth}
-                                        y={height - paddingBottom + 4}
+                                        y={height - paddingBottom + labelGap}
                                         width={groupSlotWidth}
                                         align="center"
                                         fontSize={fontSize - 1}
@@ -235,7 +237,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                         const itemWidths = activeSeries.map((sName) => boxSize + gapBoxText + (String(sName).length * legendFontSize * 0.6));
                         const totalWidth = itemWidths.reduce((a, b) => a + b, 0) + (activeSeries.length - 1) * itemGap;
                         const startX = Math.max(0, (width - totalWidth) / 2);
-                        const legendY = height - paddingBottom + fontSize + Math.round(legendFontSize * 0.4);
+                        const legendY = height - paddingBottom + fontSize + Math.round(legendFontSize * 0.4) + legendGap;
 
                         let currentX = startX;
 
@@ -357,7 +359,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                     <Text
                                         text={item.label}
                                         x={paddingLeft + chartPadding + idx * (barWidth + barGap)}
-                                        y={height - paddingBottom + 4}
+                                        y={height - paddingBottom + labelGap}
                                         width={barWidth + barGap}
                                         align="center"
                                         fontSize={fontSize - 1}
@@ -466,7 +468,7 @@ export default function SelectableChart({ shape, selected, onSelect, onChange })
                                     <Text
                                         text={item.label}
                                         x={x - labelWidth / 2}
-                                        y={height - paddingBottom + 4}
+                                        y={height - paddingBottom + labelGap}
                                         width={labelWidth}
                                         align="center"
                                         fontSize={fontSize - 1}
