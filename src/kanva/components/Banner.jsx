@@ -360,15 +360,19 @@ const banners = [
                 y: 600,
                 width: 600,
                 height: 240,
-                data: komoditasData?.top5Mom && komoditasData.top5Mom.length > 0
-                    ? komoditasData.top5Mom
-                    : [
-                        { label: "Makanan", value: 3.2 },
-                        { label: "Transportasi", value: 1.8 },
-                        { label: "Kesehatan", value: 2.5 },
-                        { label: "Pendidikan", value: 1.2 },
-                        { label: "Rekreasi", value: 0.8 },
-                    ],
+                data: (komoditasData?.topSubMom && komoditasData.topSubMom.length > 0)
+                    ? komoditasData.topSubMom
+                    : (komoditasData?.topsubmom && komoditasData.topsubmom.length > 0)
+                        ? komoditasData.topsubmom
+                        : (komoditasData?.top5Mom && komoditasData.top5Mom.length > 0)
+                            ? komoditasData.top5Mom
+                            : [
+                                { label: "Makanan", value: 3.2 },
+                                { label: "Transportasi", value: 1.8 },
+                                { label: "Kesehatan", value: 2.5 },
+                                { label: "Pendidikan", value: 1.2 },
+                                { label: "Rekreasi", value: 0.8 },
+                            ],
                 colors: ["#F69139"],
                 showLabels: true,
                 showValues: true,
@@ -399,15 +403,19 @@ const banners = [
                 y: 600,
                 width: 600,
                 height: 240,
-                data: komoditasData?.top5Yoy && komoditasData.top5Yoy.length > 0
-                    ? komoditasData.top5Yoy
-                    : [
-                        { label: "Makanan", value: 3.2 },
-                        { label: "Transportasi", value: 1.8 },
-                        { label: "Kesehatan", value: 2.5 },
-                        { label: "Pendidikan", value: 1.2 },
-                        { label: "Rekreasi", value: 0.8 },
-                    ],
+                data: (komoditasData?.topSubYoy && komoditasData.topSubYoy.length > 0)
+                    ? komoditasData.topSubYoy
+                    : (komoditasData?.topsubyoy && komoditasData.topsubyoy.length > 0)
+                        ? komoditasData.topsubyoy
+                        : (komoditasData?.top5Yoy && komoditasData.top5Yoy.length > 0)
+                            ? komoditasData.top5Yoy
+                            : [
+                                { label: "Makanan", value: 3.2 },
+                                { label: "Transportasi", value: 1.8 },
+                                { label: "Kesehatan", value: 2.5 },
+                                { label: "Pendidikan", value: 1.2 },
+                                { label: "Rekreasi", value: 0.8 },
+                            ],
                 colors: ["#FEBD23"],
                 showLabels: true,
                 showValues: true,
@@ -482,16 +490,16 @@ const banners = [
                 type: "line",
                 points: [40, 880, 1160, 880],
                 stroke: "#000000ff",
-                strokeWidth: 6,
-                dash: [24, 16],
+                strokeWidth: 2,
+                dash: [4, 8],
             },
             {
                 id: `b${Date.now()}-dashed-divider2`,
                 type: "line",
                 points: [40, 1212, 1160, 1212],
                 stroke: "#000000ff",
-                strokeWidth: 6,
-                dash: [24, 16],
+                strokeWidth: 2,
+                dash: [4, 8],
             },
             {
                 id: `b${Date.now()}-summary`,
