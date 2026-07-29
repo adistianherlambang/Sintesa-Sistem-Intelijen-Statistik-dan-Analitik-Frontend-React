@@ -307,29 +307,61 @@ function StepTwoAvailable(props) {
   const { setStep, setUploadedDataset } = props
   const user = userStore((state) => state.user)
 
+  const [inflasiData, setInflasiData] = useState({ mom: null, yoy: null, ytd: null })
+  const [ihkData, setIhkData] = useState(null)
+  const [komoditasData, setKomoditasData] = useState({ mom: null, yoy: null, ytd: null })
+
+  const [metricType, setMetricType] = useState("mom") // "mom", "yoy", "ytd"
+  const [activeYear, setActiveYear] = useState("now") // "now", "prev", "prev2"
+  const [activeSheet, setActiveSheet] = useState("main") // "main" or commodity index string ("0", "1", ...)
+  const [forecastingEnabled, setForecastingEnabled] = useState(false)
+
+  const currentYear = new Date().getFullYear()
+  const prevYear = currentYear - 1
+  const prev2Year = currentYear - 2
+
+  const activeInflasiObj = inflasiData[metricType]
+  const activeDataInflasi = useMemo(() => {
+    if (!activeInflasiObj) return []
+    if (activeYear === "now") return activeInflasiObj.data || []
+    if (activeYear === "prev") return activeInflasiObj.prevYear || []
+    return activeInflasiObj.prev2Year || []
+  }, [activeInflasiObj, activeYear])
+
+  const activeDataIhk = useMemo(() => {
+    if (!ihkData) return []
+    if (activeYear === "now") return ihkData.data || []
+    if (activeYear === "prev") return ihkData.prevYear || []
+    return ihkData.prev2Year || []
+  }, [ihkData, activeYear])
+
+  const activeKomoditasObj = komoditasData[metricType]
+  const komoditasList = useMemo(() => {
+    if (!activeKomoditasObj) return []
+    if (activeYear === "now") return activeKomoditasObj.hierarki || []
+    if (activeYear === "prev") return activeKomoditasObj.prevYear || activeKomoditasObj.prevYearList || []
+    return activeKomoditasObj.prev2Year || activeKomoditasObj.prev2YearList || []
+  }, [activeKomoditasObj, activeYear])
+
+  const userCityName = useMemo(() => {
+    return activeInflasiObj?.kota || user?.location?.name || ""
+  }, [activeInflasiObj, user])
+
   const handleSave = () => {
-    // Find latest month index that has a value in inflasi.data
     let monthIndex = 0;
-    const inflasiData = inflasi?.data || [];
     for (let i = 11; i >= 0; i--) {
-      if (inflasiData[i] && inflasiData[i].value !== undefined && inflasiData[i].value !== "") {
+      if (activeDataInflasi[i] && activeDataInflasi[i].value !== undefined && activeDataInflasi[i].value !== "") {
         monthIndex = i;
         break;
       }
     }
 
-    const userCity = inflasi?.kota || user?.location?.name || "KOTA METRO";
-    const currentYear = new Date().getFullYear();
     const periodText = `${monthNames[monthIndex]} ${currentYear}`;
+    const infValue = activeDataInflasi?.[monthIndex]?.value || "0.00";
+    const yValue = inflasiData.yoy?.data?.[monthIndex]?.value || "0.00";
+    const iValue = activeDataIhk?.[monthIndex]?.value || "100.00";
 
-    const infValue = inflasi?.data?.[monthIndex]?.value || "0.00";
-    const yValue = inflasi?.yoy?.[monthIndex]?.value || "0.00";
-    const iValue = ihk?.data?.[monthIndex]?.value || "100.00";
-
-    const commodityList = komoditas?.hierarki || [];
-
-    // Construct divisionData from komoditas.hierarki
-    const divisions = commodityList.map(c => {
+    const divisions = komoditasList.map(c => {
       const dataKeys = Object.keys(c.data || {});
       const targetKey = dataKeys[monthIndex];
       return {
@@ -340,13 +372,12 @@ function StepTwoAvailable(props) {
 
     const parsedData = [
       ["Tahun", "Bulan", "Kode Kota", "Nama Kota", "Kode Komoditas", "Nama Komoditas", "Timbangan", "IHK Lalu", "IHK", "Inflasi", "Inflasi YtD", "Inflasi YoY", "Andil"],
-      // Umum row (Kode Komoditas "0" represents UMUM)
-      [currentYear, monthIndex + 1, "1872", userCity, "0", "UMUM", "100", "100", iValue, infValue, "0", yValue, "0"],
+      [currentYear, monthIndex + 1, "1872", userCityName, "0", "UMUM", "100", "100", iValue, infValue, "0", yValue, "0"],
     ];
 
     divisions.forEach((div, idx) => {
       const code = String(idx + 1).padStart(2, "0");
-      parsedData.push([currentYear, monthIndex + 1, "1872", userCity, code, div.name, "10", "10", "100", String(div.inflasi), "0", "0", String(div.inflasi)]);
+      parsedData.push([currentYear, monthIndex + 1, "1872", userCityName, code, div.name, "10", "10", "100", String(div.inflasi), "0", "0", String(div.inflasi)]);
     });
 
     setUploadedDataset({
@@ -359,7 +390,7 @@ function StepTwoAvailable(props) {
         sheet: "Sheet Utama"
       },
       context: {
-        city: userCity,
+        city: userCityName,
         period: periodText,
         monthIndex: monthIndex,
         year: currentYear
@@ -371,17 +402,6 @@ function StepTwoAvailable(props) {
 
     setStep(2);
   };
-
-  const [inflasi, setInflasi] = useState()
-  const [ihk, setIhk] = useState()
-  const [komoditas, setKomoditas] = useState()
-  const [activeYear, setActiveYear] = useState("now") // "now" or "prev"
-  const [activeSheet, setActiveSheet] = useState("main") // "main" or commodity index string ("0", "1", ...)
-  const [forecastingEnabled, setForecastingEnabled] = useState(false)
-
-  const komoditasList = useMemo(() => {
-    return activeYear === "now" ? (komoditas?.hierarki || []) : (komoditas?.yoy || [])
-  }, [komoditas, activeYear])
 
   const komoditasLabelsKey = useMemo(() => {
     if (!komoditasList) return "";
@@ -396,23 +416,19 @@ function StepTwoAvailable(props) {
   }
 
   const hierarchyData = useMemo(() => {
-    if (!inflasi || !ihk || !komoditas) return {}
+    if (!inflasiData.mom || !ihkData || !komoditasData.mom) return {}
 
     const rootLabel = "Umum"
     const rootChildren = {}
 
     komoditasList.forEach(c => {
       const cLabel = c.label
-
       const cChildren = {}
       if (c.sub && Array.isArray(c.sub)) {
         c.sub.forEach(subItem => {
-          const subLabel = subItem.label
-
-          cChildren[subLabel] = {}
+          cChildren[subItem.label] = {}
         })
       }
-
       rootChildren[cLabel] = cChildren
     })
 
@@ -425,20 +441,36 @@ function StepTwoAvailable(props) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userCity = user?.location?.name || "KOTA METRO"
-        const resInflasi = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi`,
-          { kota: userCity }
-        )
-        const resIhk = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/ihk`,
-          { kota: userCity }
-        )
-        const resKomoditas = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/komoditas`,
-          { kota: userCity }
-        )
+        const userCity = user?.location?.name || ""
+        const [
+          resInflasiMom,
+          resInflasiYoy,
+          resInflasiYtd,
+          resIhk,
+          resKomoditasMom,
+          resKomoditasYoy,
+          resKomoditasYtd,
+        ] = await Promise.all([
+          axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi`, { kota: userCity }).catch(() => ({ data: null })),
+          axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi/yoy`, { kota: userCity }).catch(() => ({ data: null })),
+          axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi/ytd`, { kota: userCity }).catch(() => ({ data: null })),
+          axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/ihk`, { kota: userCity }).catch(() => ({ data: null })),
+          axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/komoditas`, { kota: userCity }).catch(() => ({ data: null })),
+          axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/komoditas/yoy`, { kota: userCity }).catch(() => ({ data: null })),
+          axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/komoditas/ytd`, { kota: userCity }).catch(() => ({ data: null })),
+        ])
 
-        setInflasi(resInflasi.data)
-        setIhk(resIhk.data)
-        setKomoditas(resKomoditas.data)
+        setInflasiData({
+          mom: resInflasiMom.data,
+          yoy: resInflasiYoy.data,
+          ytd: resInflasiYtd.data,
+        })
+        setIhkData(resIhk.data)
+        setKomoditasData({
+          mom: resKomoditasMom.data,
+          yoy: resKomoditasYoy.data,
+          ytd: resKomoditasYtd.data,
+        })
       } catch (err) {
         console.error(err.message)
       }
@@ -447,40 +479,41 @@ function StepTwoAvailable(props) {
   }, [user])
 
   const handleInflasiChange = (index, val) => {
-    setInflasi(prev => {
-      if (!prev) return prev
-      if (activeYear === "now") {
-        const newData = [...prev.data]
-        newData[index] = { ...newData[index], value: val }
-        return { ...prev, data: newData }
-      } else {
-        const newYoy = [...prev.yoy]
-        newYoy[index] = { ...newYoy[index], value: val }
-        return { ...prev, yoy: newYoy }
+    setInflasiData(prev => {
+      const targetObj = prev[metricType]
+      if (!targetObj) return prev
+      const targetField = activeYear === "now" ? "data" : activeYear === "prev" ? "prevYear" : "prev2Year"
+      const newList = [...(targetObj[targetField] || [])]
+      newList[index] = { ...newList[index], value: val }
+      return {
+        ...prev,
+        [metricType]: {
+          ...targetObj,
+          [targetField]: newList,
+        }
       }
     })
   }
 
   const handleIhkChange = (index, val) => {
-    setIhk(prev => {
+    setIhkData(prev => {
       if (!prev) return prev
-      if (activeYear === "now") {
-        const newData = [...prev.data]
-        newData[index] = { ...newData[index], value: val }
-        return { ...prev, data: newData }
-      } else {
-        const newYoy = [...prev.yoy]
-        newYoy[index] = { ...newYoy[index], value: val }
-        return { ...prev, yoy: newYoy }
+      const targetField = activeYear === "now" ? "data" : activeYear === "prev" ? "prevYear" : "prev2Year"
+      const newList = [...(prev[targetField] || [])]
+      newList[index] = { ...newList[index], value: val }
+      return {
+        ...prev,
+        [targetField]: newList,
       }
     })
   }
 
   const handleKomoditasChange = (commodityIndex, monthIndex, val) => {
-    setKomoditas(prev => {
-      if (!prev) return prev
-      const field = activeYear === "now" ? "hierarki" : "yoy"
-      const newList = [...prev[field]]
+    setKomoditasData(prev => {
+      const targetObj = prev[metricType]
+      if (!targetObj) return prev
+      const targetField = activeYear === "now" ? "hierarki" : activeYear === "prev" ? (targetObj.prevYear ? "prevYear" : "prevYearList") : (targetObj.prev2Year ? "prev2Year" : "prev2YearList")
+      const newList = [...(targetObj[targetField] || [])]
       const targetCommodity = { ...newList[commodityIndex] }
 
       const dataKeys = Object.keys(targetCommodity.data || {})
@@ -492,15 +525,22 @@ function StepTwoAvailable(props) {
       }
 
       newList[commodityIndex] = targetCommodity
-      return { ...prev, [field]: newList }
+      return {
+        ...prev,
+        [metricType]: {
+          ...targetObj,
+          [targetField]: newList,
+        }
+      }
     })
   }
 
   const handleSubKomoditasChange = (commodityIndex, subIndex, monthIndex, val) => {
-    setKomoditas(prev => {
-      if (!prev) return prev
-      const field = activeYear === "now" ? "hierarki" : "yoy"
-      const newList = [...prev[field]]
+    setKomoditasData(prev => {
+      const targetObj = prev[metricType]
+      if (!targetObj) return prev
+      const targetField = activeYear === "now" ? "hierarki" : activeYear === "prev" ? (targetObj.prevYear ? "prevYear" : "prevYearList") : (targetObj.prev2Year ? "prev2Year" : "prev2YearList")
+      const newList = [...(targetObj[targetField] || [])]
       const targetCommodity = { ...newList[commodityIndex] }
 
       const newSubs = [...(targetCommodity.sub || [])]
@@ -518,7 +558,13 @@ function StepTwoAvailable(props) {
       targetCommodity.sub = newSubs
       newList[commodityIndex] = targetCommodity
 
-      return { ...prev, [field]: newList }
+      return {
+        ...prev,
+        [metricType]: {
+          ...targetObj,
+          [targetField]: newList,
+        }
+      }
     })
   }
 
@@ -527,7 +573,7 @@ function StepTwoAvailable(props) {
     "Juli", "Agustus", "September", "Oktober", "November", "Desember"
   ]
 
-  if (!inflasi || !ihk || !komoditas) {
+  if (!inflasiData.mom || !ihkData || !komoditasData.mom) {
     return (
       <div className={styles.container}>
         <Wrapper>
@@ -541,12 +587,6 @@ function StepTwoAvailable(props) {
     )
   }
 
-  const currentYear = new Date().getFullYear()
-  const prevYear = currentYear - 1
-
-  const activeDataInflasi = activeYear === "now" ? inflasi.data : inflasi.yoy
-  const activeDataIhk = activeYear === "now" ? ihk.data : ihk.yoy
-
   const activeCommodityIndex = activeSheet !== "main" ? Number(activeSheet) : null
   const activeCommodity = activeCommodityIndex !== null ? komoditasList[activeCommodityIndex] : null
   const subList = activeCommodity?.sub || []
@@ -554,6 +594,7 @@ function StepTwoAvailable(props) {
   const treeHeight = Math.max(600, countTreeLeaves(hierarchyData) * 90 + 100)
 
   function capitalize(str) {
+    if (!str) return ""
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   }
 
@@ -563,25 +604,60 @@ function StepTwoAvailable(props) {
         <div className={styles.editHeader}>
           <p className={styles.sectionTitle}>
             {activeSheet === "main"
-              ? `Edit Data BPS ${capitalize(inflasi.kota)}`
+              ? `Edit Data BPS ${capitalize(userCityName)}`
               : `Edit Sub Komoditas (${capitalize(activeCommodity?.label)})`
             }
           </p>
-          <div className={styles.yearSelector}>
-            <button
-              type="button"
-              onClick={() => setActiveYear("now")}
-              className={`${styles.yearBtn} ${activeYear === "now" ? styles.yearBtnActive : ""}`}
-            >
-              Tahun {currentYear}
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveYear("prev")}
-              className={`${styles.yearBtn} ${activeYear === "prev" ? styles.yearBtnActive : ""}`}
-            >
-              Tahun {prevYear} (YoY)
-            </button>
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+            {/* Metric Type Selector (MoM, YoY, YtD) */}
+            <div className={styles.yearSelector}>
+              <button
+                type="button"
+                onClick={() => setMetricType("mom")}
+                className={`${styles.yearBtn} ${metricType === "mom" ? styles.yearBtnActive : ""}`}
+              >
+                MoM
+              </button>
+              <button
+                type="button"
+                onClick={() => setMetricType("yoy")}
+                className={`${styles.yearBtn} ${metricType === "yoy" ? styles.yearBtnActive : ""}`}
+              >
+                YoY
+              </button>
+              <button
+                type="button"
+                onClick={() => setMetricType("ytd")}
+                className={`${styles.yearBtn} ${metricType === "ytd" ? styles.yearBtnActive : ""}`}
+              >
+                YtD
+              </button>
+            </div>
+
+            {/* Year Selector (year.now, year - 1, year - 2) */}
+            <div className={styles.yearSelector}>
+              <button
+                type="button"
+                onClick={() => setActiveYear("now")}
+                className={`${styles.yearBtn} ${activeYear === "now" ? styles.yearBtnActive : ""}`}
+              >
+                Tahun {currentYear} (year.now)
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveYear("prev")}
+                className={`${styles.yearBtn} ${activeYear === "prev" ? styles.yearBtnActive : ""}`}
+              >
+                Tahun {prevYear} (year - 1)
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveYear("prev2")}
+                className={`${styles.yearBtn} ${activeYear === "prev2" ? styles.yearBtnActive : ""}`}
+              >
+                Tahun {prev2Year} (year - 2)
+              </button>
+            </div>
           </div>
         </div>
 
@@ -592,7 +668,7 @@ function StepTwoAvailable(props) {
                 <thead>
                   <tr>
                     <th>Bulan</th>
-                    <th>Inflasi (%)</th>
+                    <th>Inflasi {metricType.toUpperCase()} (%)</th>
                     <th>IHK</th>
                     {komoditasList.map((item, cIndex) => (
                       <th key={cIndex}>{item.label}</th>
@@ -683,7 +759,7 @@ function StepTwoAvailable(props) {
           >
             Sheet Utama
           </button>
-          {komoditas.hierarki.map((item, index) => (
+          {komoditasList.map((item, index) => (
             <button
               key={index}
               type="button"
