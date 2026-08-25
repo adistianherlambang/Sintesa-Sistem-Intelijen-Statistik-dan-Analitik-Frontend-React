@@ -10,6 +10,7 @@
   min-height: 0;
   padding: 3rem 2rem;
   padding-bottom: 4rem;
+  background-color: #0A180B;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -57,21 +58,7 @@
   gap: 0.5rem;
 }
 
-.aiStatusBadge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(52, 179, 74, 0.05);
-  color: #34B34A;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 5px;
-  border-radius: 100px;
-  text-shadow: 0 0 8px rgba(52, 179, 74, 0.3);
-  box-shadow: 0 0 10px rgba(52, 179, 74, 0.05);
-  white-space: nowrap;
-}
-
+/* 
 .pulseDot {
   width: 6px;
   height: 6px;
@@ -79,7 +66,7 @@
   border-radius: 50%;
   box-shadow: 0 0 8px #34B34A;
   animation: badgeDotPulse 1.5s infinite;
-}
+} */
 
 @keyframes badgeDotPulse {
   0% {
@@ -173,6 +160,10 @@
 .overlayVisible {
   opacity: 1;
   pointer-events: auto;
+}
+
+.leftLogo {
+  margin-bottom: 2rem;
 }
 
 @media (max-width: 768px) {

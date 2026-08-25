@@ -1,9 +1,9 @@
 import React from 'react'
 import styles from "./Logo.module.css"
 
-export default function Logo() {
+export default function Logo({ width }) {
   return (
-    <div>
+    <div style={{ width: width || "100%" }}>
       <svg className={styles.svg} viewBox="0 0 180 38" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g clip-path="url(#clip0_1159_449)">
           <path d="M33.0922 0V8.32719H24.4747L21.318 13.0323L16.1613 20.7281L13.0461 25.3641H0V17.0461H8.60369L20.0461 0H33.0922Z" fill="#41B855" />
