@@ -397,7 +397,8 @@ function StepTwoAvailable(props) {
       },
       structure: "BPS Inflasi / IHK",
       columns: parsedData[0],
-      parsedData: parsedData
+      parsedData: parsedData,
+      editedData: { inflasiData, ihkData, komoditasData }
     });
 
     setStep(2);
@@ -910,7 +911,9 @@ function StepThree(props) {
             inflasiYoY: yoyValue,
             ihkNow: ihkValue,
             komoditasPendorong: pendorong,
-            divisionData: divisionData
+            divisionData: divisionData,
+            editedData: uploadedDataset?.editedData,
+            parsedData: uploadedDataset?.parsedData
           });
           setAiSummary(res.data);
         } catch (err) {
@@ -941,7 +944,9 @@ function StepThree(props) {
           ihkNow: ihkValue,
           komoditasPendorong: pendorong,
           aiSummary: aiSummary.sections,
-          divisionData: divisionData
+          divisionData: divisionData,
+          editedData: uploadedDataset?.editedData,
+          parsedData: uploadedDataset?.parsedData
         },
         {
           headers: { Authorization: `Bearer ${token}` }
