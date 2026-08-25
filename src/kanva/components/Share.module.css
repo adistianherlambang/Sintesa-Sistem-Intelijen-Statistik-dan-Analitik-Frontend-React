@@ -7,7 +7,6 @@
 
 .triggerBtn {
   background: transparent;
-  border: 1px solid transparent;
   color: rgba(255, 255, 255, 0.65);
   cursor: pointer;
   padding: 6px;
@@ -35,7 +34,6 @@
 
 .dropdown {
   background: #18222c;
-  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   padding: 8px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
@@ -59,7 +57,6 @@
   align-items: center;
   gap: 8px;
   background: transparent;
-  border: none;
   color: rgba(255, 255, 255, 0.8);
   padding: 8px 12px;
   font-size: 13px;

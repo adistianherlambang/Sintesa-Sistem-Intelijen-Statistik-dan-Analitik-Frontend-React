@@ -7,14 +7,15 @@
 
 .title {
   font-size: 14px;
-  color: #AAAAAA;
+  color: inherit;
+  opacity: 0.7;
   margin: 0;
 }
 
 .value {
   font-size: 32px;
   font-weight: bold;
-  color: #FFFFFF;
+  color: inherit;
   margin: 0;
 }
 
@@ -23,7 +24,8 @@
   gap: 8px;
   align-items: center;
   font-size: 14px;
-  color: #D5D5D5;
+  color: inherit;
+  opacity: 0.85;
 }
 
 .trendUp {

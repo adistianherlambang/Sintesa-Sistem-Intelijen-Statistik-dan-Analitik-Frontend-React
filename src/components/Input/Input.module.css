@@ -1,6 +1,5 @@
 .input {
   background-color: rgba(0, 0, 0, 0.302);
-  border: solid rgba(255, 255, 255, 0.2) 1px;
   padding: 12px 16px;
   width: 100%;
   box-sizing: border-box;
@@ -15,12 +14,10 @@
 
 .input:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .input:disabled {
   background-color: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.08);
   color: #666666;
   cursor: not-allowed;
 }

@@ -16,7 +16,6 @@
 
 .pageBtn {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.65);
   border-radius: 6px;
   width: 36px;
@@ -33,13 +32,11 @@
 .pageBtn:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .pageBtnActive {
   background: #34B34A !important;
   color: #fff !important;
-  border-color: #2da140 !important;
   box-shadow: 0 4px 12px rgba(52, 179, 74, 0.3);
 }
 
@@ -58,7 +55,6 @@
   bottom: 46px;
   left: 0;
   background: #18222c;
-  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   padding: 6px;
   box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5);
@@ -74,7 +70,6 @@
   align-items: center;
   gap: 8px;
   background: transparent;
-  border: none;
   color: rgba(255, 255, 255, 0.8);
   padding: 6px 10px;
   font-size: 13px;
@@ -106,7 +101,6 @@
 
 .addBtn {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px dashed rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.5);
   border-radius: 6px;
   width: 36px;
@@ -120,6 +114,5 @@
 
 .addBtn:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: #34B34A;
   color: #34B34A;
 }

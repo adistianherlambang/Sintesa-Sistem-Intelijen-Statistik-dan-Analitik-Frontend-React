@@ -153,7 +153,7 @@ export default function Shape({ setPagesWithHistory }) {
                     title={sh?.label}
                     style={{
                         cursor: "pointer",
-                        border: "1px solid rgba(255, 255, 255, 0.15)",
+                        
                         borderRadius: 8,
                         display: "flex",
                         flexDirection: "column",

@@ -73,7 +73,7 @@ export default function ChartSidebar({ setPagesWithHistory, openMiniFor }) {
                             justifyContent: "center",
                             gap: "8px",
                             backgroundColor: "rgba(255,255,255,0.05)",
-                            borderColor: "rgba(255,255,255,0.1)",
+                            
                             color: "#fff"
                         }}
                         onClick={() => addChart("bar")}
@@ -94,7 +94,7 @@ export default function ChartSidebar({ setPagesWithHistory, openMiniFor }) {
                             justifyContent: "center",
                             gap: "8px",
                             backgroundColor: "rgba(255,255,255,0.05)",
-                            borderColor: "rgba(255,255,255,0.1)",
+                            
                             color: "#fff"
                         }}
                         onClick={() => addChart("groupedBar")}
@@ -115,7 +115,7 @@ export default function ChartSidebar({ setPagesWithHistory, openMiniFor }) {
                             justifyContent: "center",
                             gap: "8px",
                             backgroundColor: "rgba(255,255,255,0.05)",
-                            borderColor: "rgba(255,255,255,0.1)",
+                            
                             color: "#fff"
                         }}
                         onClick={() => addChart("line")}
@@ -136,7 +136,7 @@ export default function ChartSidebar({ setPagesWithHistory, openMiniFor }) {
                             justifyContent: "center",
                             gap: "8px",
                             backgroundColor: "rgba(255,255,255,0.05)",
-                            borderColor: "rgba(255,255,255,0.1)",
+                            
                             color: "#fff"
                         }}
                         onClick={() => addChart("pie")}

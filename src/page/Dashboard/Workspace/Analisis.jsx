@@ -229,35 +229,35 @@ function StepTwoManual(props) {
               gap: '12px',
               marginTop: '16px'
             }}>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px',  }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Nama File</span>
                 <span style={{ fontSize: 14, color: '#fff', fontWeight: 500, wordBreak: 'break-all' }}>{uploadedDataset.fileInfo.name}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px',  }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Ukuran</span>
                 <span style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>{uploadedDataset.fileInfo.size}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px',  }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Dimensi (Rows x Cols)</span>
                 <span style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>{uploadedDataset.fileInfo.rows} x {uploadedDataset.fileInfo.cols}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px',  }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Sheet Terdeteksi</span>
                 <span style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>{uploadedDataset.fileInfo.sheet}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px',  }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Wilayah (Konteks)</span>
                 <span style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>{uploadedDataset.context.city}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px',  }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Periode</span>
                 <span style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>{uploadedDataset.context.period}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px',  }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Format Struktur</span>
                 <span style={{ fontSize: 14, color: '#34B34A', fontWeight: 600 }}>{uploadedDataset.structure}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px',  }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Validasi AI</span>
                 <span style={{ fontSize: 14, color: uploadedDataset.valid === 'ya' ? '#34B34A' : '#ef4444', fontWeight: 600 }}>
                   {uploadedDataset.valid === 'ya' ? 'VALID (Siap Diolah)' : 'TIDAK VALID'}
@@ -1018,7 +1018,7 @@ function StepThree(props) {
               onClick={() => setStep(1)}
               style={{
                 background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.15)',
+                
                 color: '#fff',
                 padding: '8px 16px',
                 borderRadius: '6px',
@@ -1091,7 +1091,7 @@ function StepThree(props) {
                       axisLine={false}
                     />
                     <Tooltip 
-                      contentStyle={{ background: '#121a21', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px' }}
+                      contentStyle={{ background: '#121a21',  borderRadius: '6px' }}
                       labelStyle={{ color: '#fff', fontWeight: 600 }}
                     />
                     <Bar dataKey="inflasi" fill="#34B34A" radius={[4, 4, 0, 0]} />
@@ -1104,19 +1104,19 @@ function StepThree(props) {
           <Wrapper>
             <p className={styles.sectionTitle}>Ringkasan Parameter Data Utama</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginTop: '16px' }}>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px',  }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>IHK Terakhir</span>
                 <span style={{ fontSize: 16, color: '#fff', fontWeight: 600 }}>{ihkValue}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px',  }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Inflasi MoM</span>
                 <span style={{ fontSize: 16, color: '#34B34A', fontWeight: 600 }}>{inflasiValue}%</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px',  }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Inflasi YoY</span>
                 <span style={{ fontSize: 16, color: '#34B34A', fontWeight: 600 }}>{yoyValue}%</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px',  }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Komoditas Pendorong</span>
                 <span style={{ fontSize: 15, color: '#fff', fontWeight: 600 }}>{pendorong}</span>
               </div>
@@ -1152,7 +1152,7 @@ function StepThree(props) {
                       <div style={{
                         width: '18px',
                         height: '18px',
-                        border: '2px solid rgba(255, 255, 255, 0.1)',
+                        
                         borderTopColor: '#fff',
                         borderRadius: '50%',
                         animation: 'spin 1s linear infinite',

@@ -1,7 +1,7 @@
 import React from 'react'
 import styles from "./Wrapper.module.css"
 
-export default function Wrapper({ width, height, padding, children, onClick, style, hoverable, className }) {
+export default function Wrapper({ width, height, padding, children, onClick, style, hoverable, className, bgColor, color, border }) {
   const isClickable = typeof onClick === 'function';
   const shouldHover = hoverable !== undefined ? hoverable : isClickable;
 
@@ -12,7 +12,9 @@ export default function Wrapper({ width, height, padding, children, onClick, sty
         height: height,
         padding: padding ? padding : "16px",
         cursor: isClickable ? 'pointer' : 'default',
-        ...style
+        ...style,
+        color: color,
+        backgroundColor: bgColor
       }}
       onClick={onClick}
       className={`${styles.container} ${shouldHover ? '' : styles.noHover} ${className || ''}`}

@@ -26,9 +26,9 @@ export default function Overview() {
           <div className={styles.wrapper}>
             <p className={styles.sectionTitle}>KPI Utama <i>(BPS Indicator)</i></p>
             <div className={styles.section}>
-              <Wrapper><div className={styles.kpiUtama}><Inflasi onLoad={() => { }} /></div></Wrapper>
-              <Wrapper><div className={styles.kpiUtama}><IHK onLoad={() => { }} /></div></Wrapper>
-              <Wrapper><div className={styles.kpiUtama}><KomoditasDom onLoad={() => { }} /></div></Wrapper>
+              <Wrapper border={"none"}><div className={styles.kpiUtama}><Inflasi onLoad={() => { }} /></div></Wrapper>
+              <Wrapper border={"none"}><div className={styles.kpiUtama}><IHK onLoad={() => { }} /></div></Wrapper>
+              <Wrapper border={"none"}><div className={styles.kpiUtama}><KomoditasDom onLoad={() => { }} /></div></Wrapper>
             </div>
           </div>
 

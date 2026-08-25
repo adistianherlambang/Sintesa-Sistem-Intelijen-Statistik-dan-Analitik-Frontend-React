@@ -15,7 +15,6 @@
   justify-content: space-between;
   padding: 8px 12px;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -23,12 +22,10 @@
 
 .layerItem:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .selected {
   background: rgba(52, 179, 74, 0.15) !important;
-  border-color: rgba(52, 179, 74, 0.4) !important;
 }
 
 .leftInfo {
@@ -55,7 +52,6 @@
 
 .actionBtn {
   background: transparent;
-  border: none;
   color: rgba(255, 255, 255, 0.4);
   cursor: pointer;
   padding: 4px;
@@ -89,6 +85,5 @@
 
 .dragging {
   opacity: 0.4;
-  border: 1px dashed #34b34a !important;
   background: rgba(255, 255, 255, 0.01) !important;
 }

@@ -39,7 +39,6 @@
   color: rgba(255, 255, 255, 0.5);
 
   padding: 8px 0 4px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   margin-bottom: 6px;
 }
 
@@ -53,7 +52,6 @@
 
 .presetCard {
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 10px 8px;
   cursor: pointer;
@@ -67,7 +65,6 @@
 
 .presetCard:hover {
   background: rgba(52, 179, 74, 0.08);
-  border-color: rgba(52, 179, 74, 0.35);
 }
 
 .presetName {
@@ -91,7 +88,6 @@
 .paperIcon {
   width: 20px;
   height: 26px;
-  border: 1.5px solid rgba(255, 255, 255, 0.4);
   border-radius: 2px;
   position: relative;
   margin-bottom: 2px;
@@ -100,7 +96,6 @@
 .paperIconWide {
   width: 26px;
   height: 20px;
-  border: 1.5px solid rgba(255, 255, 255, 0.4);
   border-radius: 2px;
   margin-bottom: 2px;
 }

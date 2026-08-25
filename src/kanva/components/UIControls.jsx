@@ -323,7 +323,7 @@ export const Upload = ({ children, multiple, onChange, style }) => {
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        border: '1px dashed rgba(255,255,255,0.2)',
+        
         borderRadius: 8,
         cursor: 'pointer',
         padding: 20,

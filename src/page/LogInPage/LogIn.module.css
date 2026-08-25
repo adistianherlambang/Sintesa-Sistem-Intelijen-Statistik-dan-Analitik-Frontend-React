@@ -16,7 +16,6 @@
   padding: 4rem;
   box-sizing: border-box;
   overflow: hidden;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .leftSection::before {
@@ -82,7 +81,6 @@
 .illustrationCard {
   position: relative;
   background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
   padding: 2rem;
   box-sizing: border-box;
@@ -94,7 +92,6 @@
 
 .illustrationCard:hover {
   transform: translateY(-4px);
-  border-color: rgba(52, 179, 74, 0.3);
 }
 
 .chartGlow {
@@ -189,7 +186,6 @@
 
 .errorAlert {
   background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
   color: #ef4444;
   padding: 10px 12px;
   border-radius: 4px;

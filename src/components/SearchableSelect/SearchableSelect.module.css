@@ -11,7 +11,6 @@
   justify-content: space-between;
   align-items: center;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 6px;
   color: #fff;
   padding: 8px 12px;
@@ -25,11 +24,9 @@
 
 .trigger:hover:not(.triggerDisabled) {
   background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .triggerActive {
-  border-color: #34B34A !important;
   box-shadow: 0 0 0 2px rgba(52, 179, 74, 0.2);
 }
 
@@ -70,7 +67,6 @@
   left: 0;
   width: 100%;
   background-color: #0A180B; /* Match register's dropdown background */
-  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 6px;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
   z-index: 1000;
@@ -85,14 +81,12 @@
 
 .searchWrapper {
   padding: 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   box-sizing: border-box;
   background-color: rgba(0, 0, 0, 0.1);
 }
 
 .searchInput {
   background-color: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 4px;
   padding: 6px 10px;
   width: 100%;
@@ -105,7 +99,6 @@
 }
 
 .searchInput:focus {
-  border-color: #34B34A;
 }
 
 .optionList {

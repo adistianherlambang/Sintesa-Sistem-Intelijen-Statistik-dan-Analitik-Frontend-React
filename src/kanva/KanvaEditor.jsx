@@ -1255,7 +1255,7 @@ export default function KanvaEditor() {
                                         </div>
                                         <button
                                             className={styles.backBtn}
-                                            style={{ width: '100%', padding: '4px', fontSize: 12, color: '#ef4444', borderColor: '#ef4444' }}
+                                            style={{ width: '100%', padding: '4px', fontSize: 12, color: '#ef4444',  }}
                                             onClick={clearAnnotations}
                                         >
                                             Hapus Coretan
@@ -1270,7 +1270,7 @@ export default function KanvaEditor() {
 
                             <button
                                 className={styles.backBtn}
-                                style={{ background: '#34B34A', borderColor: '#2da140', color: '#fff', fontWeight: 600 }}
+                                style={{ background: '#34B34A',  color: '#fff', fontWeight: 600 }}
                                 onClick={saveTemplate}
                                 disabled={saving}
                             >

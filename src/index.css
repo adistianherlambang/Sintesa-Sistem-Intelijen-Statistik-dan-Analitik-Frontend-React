@@ -8,12 +8,10 @@
 
 .passiveComponent {
   background-color: #0A180B;
-  border: rgba(255, 255, 255, 0.2)
 }
 
 .activeComponent {
   background-color: solid rgba(255, 255, 255, 0.2) 1px;
-  border: solid rgba(255, 255, 255, 0.4) 1px;
 }
 
 html, body, #root {
@@ -23,6 +21,15 @@ html, body, #root {
   padding: 0;
   box-sizing: border-box;
   overflow-x: hidden;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+button, input, select, textarea {
+  border: none !important;
+  outline: none;
 }
 
 

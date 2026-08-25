@@ -87,7 +87,7 @@ export default function Element({ setPagesWithHistory }) {
                         onClick={() => addShape(IconComp, name)}
                         style={{
                             cursor: "pointer",
-                            border: "1px solid rgba(255, 255, 255, 0.15)",
+                            
                             borderRadius: 8,
                             display: "flex",
                             alignItems: "center",

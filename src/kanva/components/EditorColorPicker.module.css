@@ -10,7 +10,6 @@
   width: 26px;
   height: 26px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
   display: inline-block;
   cursor: pointer;
   position: relative;
@@ -32,5 +31,4 @@
   height: 100%;
   cursor: pointer;
   padding: 0;
-  border: none;
 }

@@ -1,7 +1,6 @@
 .container {
   height: 100%;
   background-color: var(--secondaryColor);
-  border: solid rgba(255, 255, 255, 0.2) 1px;
   border-radius: 8px;
   width: 100%;
   box-sizing: border-box;
@@ -14,7 +13,6 @@
 
 .container:hover:not(.noHover) {
   background-color: rgba(255, 255, 255, 0.05);
-  border: solid rgba(255, 255, 255, 0.5) 1px;
 }
 
 .noHover {

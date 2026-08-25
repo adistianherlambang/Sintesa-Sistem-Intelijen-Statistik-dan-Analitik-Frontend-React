@@ -19,7 +19,6 @@
 
 .seeAllBtn {
   background: transparent;
-  border: none;
   color: #34B34A;
   font-size: 13px;
   cursor: pointer;
@@ -38,7 +37,6 @@
   gap: 12px;
   padding: 20px;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px dashed rgba(255, 255, 255, 0.1);
   border-radius: 8px;
 }
 
@@ -50,7 +48,6 @@
 
 .createBtn {
   background: #34B34A;
-  border: none;
   border-radius: 6px;
   color: #fff;
   font-size: 13px;
@@ -88,13 +85,11 @@
   cursor: pointer;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(0, 0, 0, 0.2);
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
 .card:hover {
-  border-color: rgba(255, 255, 255, 0.25);
 }
 
 .thumb {

@@ -31,7 +31,7 @@ export default function AILoader({ text = "Sedang diproses oleh AI Agent...", mi
       overflow: 'hidden',
       borderRadius: '8px',
       background: 'rgba(52, 179, 74, 0.02)',
-      border: '1px solid rgba(52, 179, 74, 0.05)',
+      
       padding: '24px',
       boxSizing: 'border-box'
     }}>

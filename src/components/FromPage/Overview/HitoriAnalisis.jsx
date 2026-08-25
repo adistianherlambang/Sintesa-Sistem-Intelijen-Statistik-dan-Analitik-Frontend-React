@@ -112,7 +112,7 @@ export default function HitoriAnalisis({ onLoad }) {
                       onClick={() => handleDownloadIDML(item._id, item.title)}
                       style={{
                         background: 'transparent',
-                        border: '1px solid #34B34A',
+                        
                         color: '#34B34A',
                         padding: '6px 12px',
                         borderRadius: '6px',

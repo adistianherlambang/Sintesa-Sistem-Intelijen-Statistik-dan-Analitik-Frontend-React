@@ -194,7 +194,7 @@ export default function ChartEdit({ selectedEl, setElement }) {
                                     style={{
                                         flex: 1,
                                         background: "rgba(255,255,255,0.03)",
-                                        border: "1px solid rgba(255,255,255,0.1)",
+                                        
                                         color: "#fff",
                                         padding: "4px 8px",
                                         borderRadius: "4px",
@@ -217,7 +217,7 @@ export default function ChartEdit({ selectedEl, setElement }) {
                             onClick={addSeries}
                             style={{
                                 background: "rgba(255,255,255,0.05)",
-                                border: "1px dashed rgba(255,255,255,0.2)",
+                                
                                 color: "#fff",
                                 padding: "6px",
                                 borderRadius: "4px",
@@ -321,7 +321,7 @@ export default function ChartEdit({ selectedEl, setElement }) {
                     onClick={addColor}
                     style={{
                         background: "rgba(255,255,255,0.05)",
-                        border: "1px dashed rgba(255,255,255,0.2)",
+                        
                         color: "#fff",
                         padding: "6px",
                         borderRadius: "4px",
@@ -357,7 +357,7 @@ export default function ChartEdit({ selectedEl, setElement }) {
                         : [item.value !== undefined ? item.value : 0];
 
                     return (
-                        <div key={`data-item-${idx}`} style={{ display: "flex", flexDirection: "column", gap: 4, background: "rgba(255,255,255,0.02)", padding: 6, borderRadius: 4, border: "1px solid rgba(255,255,255,0.05)" }}>
+                        <div key={`data-item-${idx}`} style={{ display: "flex", flexDirection: "column", gap: 4, background: "rgba(255,255,255,0.02)", padding: 6, borderRadius: 4,  }}>
                             <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                                 <input
                                     type="text"
@@ -367,7 +367,7 @@ export default function ChartEdit({ selectedEl, setElement }) {
                                     style={{
                                         flex: 1,
                                         background: "rgba(255,255,255,0.03)",
-                                        border: "1px solid rgba(255,255,255,0.1)",
+                                        
                                         color: "#fff",
                                         padding: "4px 8px",
                                         borderRadius: "4px",
@@ -383,7 +383,7 @@ export default function ChartEdit({ selectedEl, setElement }) {
                                         style={{
                                             width: 65,
                                             background: "rgba(255,255,255,0.03)",
-                                            border: "1px solid rgba(255,255,255,0.1)",
+                                            
                                             color: "#fff",
                                             padding: "4px 8px",
                                             borderRadius: "4px",
@@ -415,7 +415,7 @@ export default function ChartEdit({ selectedEl, setElement }) {
                                                 style={{
                                                     width: 55,
                                                     background: "rgba(255,255,255,0.03)",
-                                                    border: "1px solid rgba(255,255,255,0.1)",
+                                                    
                                                     color: "#fff",
                                                     padding: "3px 6px",
                                                     borderRadius: "4px",
@@ -434,7 +434,7 @@ export default function ChartEdit({ selectedEl, setElement }) {
                     onClick={addDataItem}
                     style={{
                         background: "rgba(255,255,255,0.05)",
-                        border: "1px dashed rgba(255,255,255,0.2)",
+                        
                         color: "#fff",
                         padding: "6px",
                         borderRadius: "4px",

@@ -30,7 +30,6 @@
 
 .inputNumber {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 6px;
   color: #fff;
   padding: 6px 10px;
@@ -42,7 +41,6 @@
 }
 
 .inputNumber:focus {
-  border-color: #34B34A;
 }
 
 .colorPickerWrapper {
@@ -58,18 +56,15 @@
   width: 34px;
   height: 34px;
   background-color: rgba(255, 255, 255, 0.05);
-  border: solid rgba(255, 255, 255, 0.2) 1px;
   cursor: pointer;
   padding: 2px;
   border-radius: 4px;
 }
 
 .colorInput::-webkit-color-swatch {
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .colorInput::-moz-color-swatch {
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .switch {
@@ -145,7 +140,6 @@
 
 .select {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 6px;
   color: #fff;
   padding: 8px 12px;
@@ -170,12 +164,10 @@
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
-  border: 1px solid transparent;
 }
 
 .default {
   background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.15);
   color: #D5D5D5;
 }
 
@@ -222,7 +214,6 @@
 .divider::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .divider:not(:empty)::before {
@@ -240,7 +231,6 @@
 .spinner {
   width: 24px;
   height: 24px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
   border-top-color: #34B34A;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -320,7 +310,6 @@
 
 .card {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 16px;
   box-sizing: border-box;
@@ -331,7 +320,6 @@
 
 .cardHoverable:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: #34B34A;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }

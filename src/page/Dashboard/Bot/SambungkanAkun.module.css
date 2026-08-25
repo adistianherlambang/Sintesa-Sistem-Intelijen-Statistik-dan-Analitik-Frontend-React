@@ -83,7 +83,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  border-left: 1px solid rgba(255, 255, 255, 0.06);
   padding-left: 2rem;
   min-height: 250px;
 }
@@ -94,7 +93,6 @@
   align-items: center;
   gap: 12px;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 24px;
 }
@@ -122,7 +120,6 @@
   text-align: center;
   gap: 8px;
   color: #888888;
-  border: 2px dashed rgba(255, 255, 255, 0.06);
   border-radius: 12px;
   width: 100%;
   height: 100%;
@@ -153,7 +150,6 @@
 .spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid rgba(255, 255, 255, 0.1);
   border-top-color: #34B34A;
   border-radius: 50%;
   animation: spin 1s infinite linear;
@@ -172,7 +168,6 @@
 /* Alerts */
 .errorAlert {
   background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
   color: #ef4444;
   padding: 12px 16px;
   border-radius: 6px;
@@ -181,7 +176,6 @@
 
 .successAlert {
   background-color: rgba(52, 179, 74, 0.1);
-  border: 1px solid rgba(52, 179, 74, 0.2);
   color: #34B34A;
   padding: 12px 16px;
   border-radius: 6px;
@@ -211,7 +205,6 @@
 
 .statusCard {
   background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 8px;
   padding: 20px;
   display: flex;
@@ -256,7 +249,6 @@
 
 .restartBtn {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #ffffff;
   padding: 10px 16px;
   border-radius: 6px;
@@ -273,7 +265,6 @@
 
 .disconnectBtn {
   background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
   color: #ef4444;
   padding: 10px 16px;
   border-radius: 6px;
@@ -300,7 +291,6 @@
 
 .statBox {
   background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 8px;
   padding: 16px;
   display: flex;
@@ -325,7 +315,6 @@
   justify-content: space-between;
   align-items: center;
   font-size: 13px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
   padding-top: 12px;
   color: #aaaaaa;
 }
@@ -364,7 +353,6 @@
 .selectInput {
   width: 100%;
   background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   color: #ffffff;
   border-radius: 6px;
   padding: 12px;
@@ -397,7 +385,6 @@
 
 .timeInput {
   background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   color: #ffffff;
   border-radius: 6px;
   padding: 12px;
