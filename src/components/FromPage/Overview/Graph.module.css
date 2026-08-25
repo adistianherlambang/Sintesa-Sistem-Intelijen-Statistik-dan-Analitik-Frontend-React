@@ -1,13 +1,17 @@
-/* .container { */
-/* outer container styling if needed */
-/* } */
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
 
 .header {
   display: flex;
-  flex-direction: column;
-  padding: 1rem;
-  gap: 4px;
-  width: fit-content;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1rem 0.5rem 1rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .subtitle {
@@ -33,6 +37,68 @@
 
 .chartWrapper {
   width: 100%;
-  height: 10rem;
-  pointer-events: none;
+  height: 12rem;
+  min-height: 180px;
+  flex: 1;
+}
+
+.customTooltip {
+  background: rgba(10, 24, 11, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.tooltipLabel {
+  font-weight: bold;
+  margin: 0 0 4px 0;
+  color: #AAAAAA;
+}
+
+.tooltipItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.legendContainer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 12px;
+  color: #AAAAAA;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dotMom {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #fb3131ff;
+  display: inline-block;
+}
+
+.dotYoy {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #34B34A;
+  display: inline-block;
+}
+
+.dotYtd {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #F0B244;
+  display: inline-block;
 }
