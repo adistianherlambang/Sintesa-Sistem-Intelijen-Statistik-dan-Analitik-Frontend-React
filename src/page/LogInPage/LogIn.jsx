@@ -8,6 +8,7 @@ import styles from "./LogIn.module.css";
 import Logo from "../../components/Logo/Logo";
 import Input from "../../components/Input/Input";
 import MainButton from "../../components/MainButton/MainButton";
+import Beams from "../../components/Beams/Beams";
 
 export default function LogIn() {
   const [email, setEmail] = useState("");
@@ -55,22 +56,33 @@ export default function LogIn() {
 
   return (
     <div className={styles.pageContainer}>
-      <div className={styles.leftSection}>
-        <div className={styles.brandContent}>
-          <div className={styles.brandLogo}>
-            <Logo />
+      <div className={styles.leftContainer}>
+        <div className={styles.leftSectionCard}>
+          <div className={styles.beamsWrapper}>
+            <div style={{ width: '1080px', height: '1080px', position: 'relative' }}>
+              <Beams
+                beamWidth={2}
+                beamHeight={15}
+                beamNumber={12}
+                lightColor="#84CC16"
+                speed={2}
+                noiseIntensity={1.75}
+                scale={0.2}
+                rotation={0}
+              />
+            </div>
           </div>
-          <h2 className={styles.brandTitle}>Sintesa</h2>
-          <p className={styles.brandDescription}>
-            Sistem Intelijen Statistik dan Analitik terintegrasi untuk membantu pengambilan keputusan berbasis data yang cepat, akurat, dan andal.
-          </p>
-          
-          {/* Area Konten Custom */}
-          <div className={styles.customContentArea}>
-            <div className={styles.illustrationCard}>
-              <div className={styles.chartGlow}></div>
-              <h3>Visualisasi Data Instan</h3>
-              <p>Otomatisasi pengolahan dataset dan pembuatan ringkasan eksekutif berbasis kecerdasan artifisial.</p>
+
+          <div className={styles.brandContent}>
+            <div className={styles.brandLogo}>
+              <Logo />
+            </div>
+            
+            <div className={styles.brandDescriptionWrapper}>
+              <h2 className={styles.brandTitle}>Sintesa</h2>
+              <p className={styles.brandDescription}>
+                Sistem Intelijen Statistik dan Analitik terintegrasi untuk membantu pengambilan keputusan berbasis data yang cepat, akurat, dan andal.
+              </p>
             </div>
           </div>
         </div>

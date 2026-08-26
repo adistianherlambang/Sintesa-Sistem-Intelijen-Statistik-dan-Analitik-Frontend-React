@@ -101,7 +101,7 @@ export default function HitoriAnalisis({ onLoad }) {
               </tr>
             </thead>
             <tbody>
-              {historyList.map((item, index) => (
+              {historyList.slice(0, 5).map((item, index) => (
                 <tr key={item._id || index}>
                   <td className={styles.noCol}>{index + 1}</td>
                   <td>{item.title}</td>
