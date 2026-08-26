@@ -229,35 +229,35 @@ function StepTwoManual(props) {
               gap: '12px',
               marginTop: '16px'
             }}>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px',  }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Nama File</span>
                 <span style={{ fontSize: 14, color: '#fff', fontWeight: 500, wordBreak: 'break-all' }}>{uploadedDataset.fileInfo.name}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px',  }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Ukuran</span>
                 <span style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>{uploadedDataset.fileInfo.size}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px',  }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Dimensi (Rows x Cols)</span>
                 <span style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>{uploadedDataset.fileInfo.rows} x {uploadedDataset.fileInfo.cols}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px',  }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Sheet Terdeteksi</span>
                 <span style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>{uploadedDataset.fileInfo.sheet}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px',  }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Wilayah (Konteks)</span>
                 <span style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>{uploadedDataset.context.city}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px',  }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Periode</span>
                 <span style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>{uploadedDataset.context.period}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px',  }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Format Struktur</span>
                 <span style={{ fontSize: 14, color: '#34B34A', fontWeight: 600 }}>{uploadedDataset.structure}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px',  }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px', }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Validasi AI</span>
                 <span style={{ fontSize: 14, color: uploadedDataset.valid === 'ya' ? '#34B34A' : '#ef4444', fontWeight: 600 }}>
                   {uploadedDataset.valid === 'ya' ? 'VALID (Siap Diolah)' : 'TIDAK VALID'}
@@ -667,21 +667,21 @@ function StepTwoAvailable(props) {
                 onClick={() => setActiveYear("now")}
                 className={`${styles.yearBtn} ${activeYear === "now" ? styles.yearBtnActive : ""}`}
               >
-                Tahun {currentYear} (year.now)
+                {currentYear}
               </button>
               <button
                 type="button"
                 onClick={() => setActiveYear("prev")}
                 className={`${styles.yearBtn} ${activeYear === "prev" ? styles.yearBtnActive : ""}`}
               >
-                Tahun {prevYear} (year - 1)
+                {prevYear}
               </button>
               <button
                 type="button"
                 onClick={() => setActiveYear("prev2")}
                 className={`${styles.yearBtn} ${activeYear === "prev2" ? styles.yearBtnActive : ""}`}
               >
-                Tahun {prev2Year} (year - 2)
+                {prev2Year}
               </button>
             </div>
           </div>
@@ -1043,7 +1043,7 @@ function StepThree(props) {
               onClick={() => setStep(1)}
               style={{
                 background: 'rgba(255,255,255,0.06)',
-                
+
                 color: '#fff',
                 padding: '8px 16px',
                 borderRadius: '6px',
@@ -1129,19 +1129,19 @@ function StepThree(props) {
           <Wrapper>
             <p className={styles.sectionTitle}>Ringkasan Parameter Data Utama</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginTop: '16px' }}>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px',  }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px', }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>IHK Terakhir</span>
                 <span style={{ fontSize: 16, color: '#fff', fontWeight: 600 }}>{ihkValue}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px',  }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px', }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Inflasi MoM</span>
                 <span style={{ fontSize: 16, color: '#34B34A', fontWeight: 600 }}>{inflasiValue}%</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px',  }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px', }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Inflasi YoY</span>
                 <span style={{ fontSize: 16, color: '#34B34A', fontWeight: 600 }}>{yoyValue}%</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px',  }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px', }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Komoditas Pendorong</span>
                 <span style={{ fontSize: 15, color: '#fff', fontWeight: 600 }}>{pendorong}</span>
               </div>
@@ -1177,7 +1177,7 @@ function StepThree(props) {
                       <div style={{
                         width: '18px',
                         height: '18px',
-                        
+
                         borderTopColor: '#fff',
                         borderRadius: '50%',
                         animation: 'spin 1s linear infinite',
