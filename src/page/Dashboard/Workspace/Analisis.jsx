@@ -406,7 +406,10 @@ function StepTwoAvailable(props) {
 
   const komoditasLabelsKey = useMemo(() => {
     if (!komoditasList) return "";
-    return komoditasList.map(c => `${c.label}:${(c.sub || []).map(s => s.label).join(",")}`).join("|");
+    return komoditasList.map(c => {
+      const biKey = (c.hargaBI || []).map(b => (typeof b === 'string' ? b : b?.name || b?.label || '')).join(",");
+      return `${c.label}:${(c.sub || []).map(s => s.label).join(",")}:bi[${biKey}]`;
+    }).join("|");
   }, [komoditasList]);
 
   const countTreeLeaves = (node) => {
@@ -422,12 +425,34 @@ function StepTwoAvailable(props) {
     const rootLabel = "Umum"
     const rootChildren = {}
 
+    const fallbackHargaBI = komoditasData.mom?.hierarki?.find(
+      item => item.label && item.label.toLowerCase().includes("makanan")
+    )?.hargaBI || []
+
     komoditasList.forEach(c => {
       const cLabel = c.label
       const cChildren = {}
       if (c.sub && Array.isArray(c.sub)) {
         c.sub.forEach(subItem => {
-          cChildren[subItem.label] = {}
+          const subChildren = {}
+          const hargaBIList = (c.hargaBI && c.hargaBI.length > 0)
+            ? c.hargaBI
+            : (cLabel.toLowerCase().includes("makanan") ? fallbackHargaBI : [])
+
+          if (
+            hargaBIList &&
+            Array.isArray(hargaBIList) &&
+            hargaBIList.length > 0 &&
+            subItem.label === "Makanan"
+          ) {
+            hargaBIList.forEach(biItem => {
+              const biName = typeof biItem === 'string' ? biItem : (biItem?.name || biItem?.label || '');
+              if (biName) {
+                subChildren[biName] = {}
+              }
+            })
+          }
+          cChildren[subItem.label] = subChildren
         })
       }
       rootChildren[cLabel] = cChildren
@@ -437,7 +462,7 @@ function StepTwoAvailable(props) {
       [rootLabel]: rootChildren
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [komoditasLabelsKey])
+  }, [komoditasLabelsKey, komoditasData])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -782,7 +807,7 @@ function StepTwoAvailable(props) {
           <div className={styles.hierarchyWrapper}>
             <Hierarchy
               data={hierarchyData}
-              width={1050}
+              width={1350}
               height={treeHeight}
               fill={"rgba(255, 255, 255, 0.04)"}
               stroke={"rgba(255, 255, 255, 0.2)"}

@@ -12,10 +12,11 @@ import {
   SambungkanAkunIcon,
   BotKnowledgeIcon,
   TentangAkunIcon,
-  LanggananBillingIcon
+  LanggananBillingIcon,
+  LogoutIcon
 } from "../../Icon/Icon";
 
-export default function NavButton({ keyword, tab }) {
+export default function NavButton({ keyword, tab, onClick }) {
 
   const navigate = useNavigate();
   const location = useLocation()
@@ -23,11 +24,11 @@ export default function NavButton({ keyword, tab }) {
   const [active, setActive] = useState(false)
 
   useEffect(() => {
-    if(location.pathname == "/dashboard"){
+    if (location.pathname == "/dashboard") {
 
     }
   }, [])
-  
+
   const arr = {
     overview: OverviewIcon,
     analisis: AnalisisIcon,
@@ -36,7 +37,8 @@ export default function NavButton({ keyword, tab }) {
     sambungkanAkun: SambungkanAkunIcon,
     botKnowledge: BotKnowledgeIcon,
     tentangAkun: TentangAkunIcon,
-    langgananDanBilling: LanggananBillingIcon
+    langgananDanBilling: LanggananBillingIcon,
+    logout: LogoutIcon
   };
 
   const IconComponent = arr[keyword];
@@ -58,7 +60,7 @@ export default function NavButton({ keyword, tab }) {
     (currentTab === tab && currentKeyword === keyword);
 
   const handleClick = () => {
-    if(keyword == "overview") {
+    if (keyword == "overview") {
       navigate(`/dashboard`)
     } else {
       navigate(`/dashboard/${tab}/${keyword}`)
@@ -68,7 +70,7 @@ export default function NavButton({ keyword, tab }) {
   return (
     <div
       className={`${styles.container} ${isActive ? styles.active : ""}`}
-      onClick={handleClick}
+      onClick={onClick ? onClick : handleClick}
     >
       <div className={`${styles.icon} ${isActive ? styles.iconActive : ""}`}>{IconComponent && <IconComponent />}</div>
       <div>{capitalize(keyword)}</div>

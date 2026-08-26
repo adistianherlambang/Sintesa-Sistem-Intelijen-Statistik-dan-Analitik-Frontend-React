@@ -66,6 +66,7 @@ export default function Graph({ onLoad }) {
   }, []);
 
   const monthShort = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
+  const month = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
 
   const data = tren?.data?.map((item, index) => ({
     x: index + 1,
@@ -78,8 +79,6 @@ export default function Graph({ onLoad }) {
   const date = new Date()
   const year = date.getFullYear()
 
-  const month = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
-
   if (load) {
     return <Skeleton height="280px" />;
   }
@@ -87,7 +86,7 @@ export default function Graph({ onLoad }) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <p className={styles.subtitle}>Grafik Inflasi <i className={styles.monthInfo}>{month[data.length - 1]}</i> {year}</p>
+        <p className={styles.subtitle}>Grafik Inflasi {user?.location?.name} <i className={styles.monthInfo}>{month[data.length - 1]}</i> {year}</p>
         <div className={styles.legendContainer}>
           <div className={styles.legendItem}>
             <span className={styles.dotMom} />
@@ -116,15 +115,15 @@ export default function Graph({ onLoad }) {
           >
             <defs>
               <linearGradient id="gradientMom" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#fb3131ff" stopOpacity={0.6} />
+                <stop offset="0%" stopColor="#fb3131ff" stopOpacity={0.0} />
                 <stop offset="100%" stopColor="#71111100" stopOpacity={0.0} />
               </linearGradient>
               <linearGradient id="gradientYoy" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#34B34A" stopOpacity={0.6} />
+                <stop offset="0%" stopColor="#34B34A" stopOpacity={0.0} />
                 <stop offset="100%" stopColor="#34B34A00" stopOpacity={0.0} />
               </linearGradient>
               <linearGradient id="gradientYtd" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#F0B244" stopOpacity={0.6} />
+                <stop offset="0%" stopColor="#F0B244" stopOpacity={0.0} />
                 <stop offset="100%" stopColor="#F0B24400" stopOpacity={0.0} />
               </linearGradient>
             </defs>
