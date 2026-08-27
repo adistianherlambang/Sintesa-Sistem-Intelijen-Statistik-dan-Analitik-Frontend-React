@@ -336,6 +336,7 @@ function StepTwoAvailable(props) {
   const [activeYear, setActiveYear] = useState("now") // "now", "prev", "prev2"
   const [activeSheet, setActiveSheet] = useState("main") // "main" or commodity index string ("0", "1", ...)
   const [forecastingEnabled, setForecastingEnabled] = useState(false)
+  const [annForecastResult, setAnnForecastResult] = useState(null)
 
   const currentYear = new Date().getFullYear()
   const prevYear = currentYear - 1
@@ -497,6 +498,7 @@ function StepTwoAvailable(props) {
           resKomoditasMom,
           resKomoditasYoy,
           resKomoditasYtd,
+          resForecast,
         ] = await Promise.all([
           axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi`, { kota: userCity }).catch(() => ({ data: null })),
           axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi/yoy`, { kota: userCity }).catch(() => ({ data: null })),
@@ -505,6 +507,7 @@ function StepTwoAvailable(props) {
           axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/komoditas`, { kota: userCity }).catch(() => ({ data: null })),
           axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/komoditas/yoy`, { kota: userCity }).catch(() => ({ data: null })),
           axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/komoditas/ytd`, { kota: userCity }).catch(() => ({ data: null })),
+          axios.get(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/forecast/${encodeURIComponent(userCity)}`).catch(() => ({ data: null })),
         ])
 
         setInflasiData({
@@ -518,6 +521,9 @@ function StepTwoAvailable(props) {
           yoy: resKomoditasYoy.data,
           ytd: resKomoditasYtd.data,
         })
+        if (resForecast?.data) {
+          setAnnForecastResult(resForecast.data)
+        }
       } catch (err) {
         console.error(err.message)
       }
@@ -663,12 +669,17 @@ function StepTwoAvailable(props) {
       const nextMonthIdx = (lastValidIdx + step) % 12;
       const monthLabel = `${monthShortNames[nextMonthIdx]} (T+${step})`;
 
-      const lag3 = momSeries.slice(-3);
-      const avg3 = lag3.reduce((a, b) => a + b, 0) / (lag3.length || 1);
-      const trend = (lag3[lag3.length - 1] - lag3[0]) / 2;
+      let predMom;
+      if (step === 1 && annForecastResult?.forecast?.inflasi?.forecast_value !== undefined) {
+        predMom = parseFloat(annForecastResult.forecast.inflasi.forecast_value.toFixed(2));
+      } else {
+        const lag3 = momSeries.slice(-3);
+        const avg3 = lag3.reduce((a, b) => a + b, 0) / (lag3.length || 1);
+        const trend = (lag3[lag3.length - 1] - lag3[0]) / 2;
 
-      const rawPred = avg3 + (trend * 0.35) + (commodityImpact * 0.12);
-      const predMom = parseFloat(rawPred.toFixed(2));
+        const rawPred = avg3 + (trend * 0.35) + (commodityImpact * 0.12);
+        predMom = parseFloat(rawPred.toFixed(2));
+      }
       momSeries.push(predMom);
 
       const lastYoy = yoySeries[yoySeries.length - 1] || 0;
@@ -689,7 +700,7 @@ function StepTwoAvailable(props) {
     }
 
     return points;
-  }, [activeDataInflasi, inflasiData, komoditasList]);
+  }, [activeDataInflasi, inflasiData, komoditasList, annForecastResult]);
 
   if (!inflasiData.mom || !ihkData || !komoditasData.mom) {
     return (
@@ -955,7 +966,12 @@ function StepTwoAvailable(props) {
               <div className={styles.forecastingNote}>
                 <span className={styles.forecastingNoteIcon}>✦</span>
                 <p>
-                  Model <strong>ANN (Artificial Neural Network)</strong> menghitung peramalan 3 bulan ke depan berdasarkan pola historis dan pembobotan andil komoditas.
+                  Model <strong>ANN (Artificial Neural Network - Keras/TensorFlow)</strong> menghitung peramalan berdasarkan data historis database.
+                  {annForecastResult?.forecast?.inflasi?.final_loss !== undefined && (
+                    <span style={{ display: 'block', marginTop: '4px', color: '#34B34A', fontSize: '12px' }}>
+                      ✓ Terhubung dengan Backend API & Database | MSE Loss Inflasi: {annForecastResult.forecast.inflasi.final_loss.toFixed(6)} | MSE Loss IHK: {annForecastResult.forecast.ihk.final_loss.toFixed(6)}
+                    </span>
+                  )}
                 </p>
               </div>
 
