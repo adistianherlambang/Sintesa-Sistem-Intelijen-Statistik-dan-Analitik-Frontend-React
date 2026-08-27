@@ -1,19 +1,23 @@
-import { useState, useEffect } from "react";
+import React from "react";
+import styles from "./MainButton.module.css";
 
-export default function MainButton({ children, onClick }) {
+export default function MainButton({
+  children,
+  onClick,
+  type = "button",
+  disabled = false,
+  className = "",
+  style = {}
+}) {
   return (
-    <div onClick={onClick} style={{
-      backgroundColor: "#34B34A",
-      width: "100%",
-      color: "white",
-      height: "32px",
-      borderRadius: "4px",
-      display: "flex",
-      gap: "0.5rem",
-      justifyContent: "center",
-      alignItems: "center",
-      cursor: "pointer",
-      padding: "4px 1rem"
-    }}>{children}</div>
-  )
+    <button
+      type={type}
+      disabled={disabled}
+      onClick={onClick}
+      className={`${styles.button} ${className}`}
+      style={style}
+    >
+      {children}
+    </button>
+  );
 }

@@ -1,19 +1,17 @@
-import { useState, useEffect } from "react";
-import styles from "./Input.module.css"
+import { useState } from "react";
+import styles from "./Input.module.css";
 
 export default function Input({
   value,
   setValue,
-  type,
-  placeholder,
-  disabled
+  type = "text",
+  placeholder = "",
+  disabled = false,
+  ...props
 }) {
   const [internalValue, setInternalValue] = useState("");
 
-  const currentValue =
-    value !== undefined
-      ? value
-      : internalValue;
+  const currentValue = value !== undefined ? value : internalValue;
 
   const handleChange = (e) => {
     if (typeof setValue === "function") {
@@ -26,11 +24,12 @@ export default function Input({
   return (
     <input
       className={styles.input}
-      type={type || "text"}
+      type={type}
       value={currentValue}
       onChange={handleChange}
-      placeholder={placeholder || "input"}
+      placeholder={placeholder}
       disabled={disabled}
+      {...props}
     />
   );
 }

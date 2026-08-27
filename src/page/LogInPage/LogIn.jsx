@@ -64,7 +64,7 @@ export default function LogIn() {
                 beamWidth={2}
                 beamHeight={15}
                 beamNumber={12}
-                lightColor="#84CC16"
+                lightColor="#34B34A"
                 speed={2}
                 noiseIntensity={1.75}
                 scale={0.2}
@@ -77,9 +77,8 @@ export default function LogIn() {
             <div className={styles.brandLogo}>
               <Logo />
             </div>
-            
+
             <div className={styles.brandDescriptionWrapper}>
-              <h2 className={styles.brandTitle}>Sintesa</h2>
               <p className={styles.brandDescription}>
                 Sistem Intelijen Statistik dan Analitik terintegrasi untuk membantu pengambilan keputusan berbasis data yang cepat, akurat, dan andal.
               </p>
@@ -94,7 +93,7 @@ export default function LogIn() {
             <div className={styles.mobileLogo}>
               <Logo />
             </div>
-            
+
             <div className={styles.header}>
               <h1 className={styles.title}>Selamat Datang</h1>
               <p className={styles.subtitle}>Masuk untuk mengakses dasbor Sistem Intelijen Statistik</p>
