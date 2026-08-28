@@ -89,8 +89,7 @@
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
-.card:hover {
-}
+.card:hover {}
 
 .thumb {
   position: relative;

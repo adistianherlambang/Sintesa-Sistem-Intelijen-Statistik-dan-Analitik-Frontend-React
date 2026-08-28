@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import styles from './HistoriInfografisPage.module.css'
@@ -24,9 +24,21 @@ export default function HistoriInfografisPage() {
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const [openMenuId, setOpenMenuId] = useState(null)
 
+  const menuRef = useRef(null)
   const token = localStorage.getItem("token")
   const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000"
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpenMenuId(null)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   const fetchProjects = async () => {
     try {
@@ -66,6 +78,26 @@ export default function HistoriInfografisPage() {
     } finally {
       setDeleteConfirm(null)
     }
+  }
+
+  const handleDownload = (project, e) => {
+    e.stopPropagation()
+    setOpenMenuId(null)
+    if (!project.preview) {
+      alert("Gambar preview tidak tersedia untuk diunduh.")
+      return
+    }
+    const link = document.createElement("a")
+    link.href = project.preview
+    link.download = `Infografis-${project.id}.png`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  const toggleMenu = (id, e) => {
+    e.stopPropagation()
+    setOpenMenuId((prev) => (prev === id ? null : id))
   }
 
   if (loading) {
@@ -138,11 +170,11 @@ export default function HistoriInfografisPage() {
                   </div>
                 )}
                 <div className={styles.thumbnailOverlay}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  {/* <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                   </svg>
-                  <span>Buka Editor</span>
+                  <span>Buka Editor</span> */}
                 </div>
               </div>
 
@@ -154,18 +186,53 @@ export default function HistoriInfografisPage() {
                   </p>
                   <p className={styles.cardDate}>{formatDate(project.id, project.createdAt)}</p>
                 </div>
-                <button
-                  className={styles.deleteBtn}
-                  onClick={() => setDeleteConfirm(project.id)}
-                  title="Hapus project"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                    <path d="M10 11v6M14 11v6" />
-                    <path d="M9 6V4h6v2" />
-                  </svg>
-                </button>
+
+                <div className={styles.actionMenuWrapper} ref={openMenuId === project.id ? menuRef : null}>
+                  <button
+                    className={`${styles.menuDotsBtn} ${openMenuId === project.id ? styles.menuDotsBtnActive : ''}`}
+                    onClick={(e) => toggleMenu(project.id, e)}
+                    title="Opsi Opsi"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="5" r="1.5" />
+                      <circle cx="12" cy="12" r="1.5" />
+                      <circle cx="12" cy="19" r="1.5" />
+                    </svg>
+                  </button>
+
+                  {openMenuId === project.id && (
+                    <div className={styles.dropdownMenu}>
+                      <button
+                        className={styles.menuItem}
+                        onClick={(e) => handleDownload(project, e)}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="7 10 12 15 17 10" />
+                          <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        <span>Download</span>
+                      </button>
+
+                      <button
+                        className={`${styles.menuItem} ${styles.menuItemDelete}`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setOpenMenuId(null)
+                          setDeleteConfirm(project.id)
+                        }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                          <path d="M10 11v6M14 11v6" />
+                          <path d="M9 6V4h6v2" />
+                        </svg>
+                        <span>Hapus</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ))}
