@@ -12,11 +12,11 @@ import MainButton from '../../../components/MainButton/MainButton'
 import Input from '../../../components/Input/Input'
 import Skeleton from '../../../components/Skeleton/Skeleton'
 import AILoader from '../../../components/AILoader/AILoader'
-import SearchableSelect from '../../../components/SearchableSelect/SearchableSelect'
+
 
 export default function Analisis() {
   const [datasetSource, setDatasetSource] = useState("available") // "available" or "manual"
-  const [selectedIndicator, setSelectedIndicator] = useState("komoditas")
+  const [selectedIndicators, setSelectedIndicators] = useState(["komoditas"])
   const [analysisTitle, setAnalysisTitle] = useState("Analisis BPS Kota Metro")
   const [uploadedDataset, setUploadedDataset] = useState(null)
   const [brsPreview, setBrsPreview] = useState(null)
@@ -37,8 +37,8 @@ export default function Analisis() {
       content: (props) => (
         <StepConfigAvailable
           {...props}
-          selectedIndicator={selectedIndicator}
-          setSelectedIndicator={setSelectedIndicator}
+          selectedIndicators={selectedIndicators}
+          setSelectedIndicators={setSelectedIndicators}
           analysisTitle={analysisTitle}
           setAnalysisTitle={setAnalysisTitle}
         />
@@ -50,7 +50,7 @@ export default function Analisis() {
         <StepTwoAvailable
           {...props}
           datasetSource={datasetSource}
-          selectedIndicator={selectedIndicator}
+          selectedIndicators={selectedIndicators}
           analysisTitle={analysisTitle}
           uploadedDataset={uploadedDataset}
           setUploadedDataset={setUploadedDataset}
@@ -114,7 +114,7 @@ export default function Analisis() {
 }
 
 function StepConfigAvailable(props) {
-  const { setStep, selectedIndicator, setSelectedIndicator, analysisTitle, setAnalysisTitle } = props
+  const { setStep, selectedIndicators, setSelectedIndicators, analysisTitle, setAnalysisTitle } = props
 
   const indicatorOptions = [
     { value: "komoditas", label: "Komoditas & Inflasi (IHK)" },
@@ -128,12 +128,21 @@ function StepConfigAvailable(props) {
     { value: "demografi-kemiskinan", label: "Demografi - Persentase Penduduk Miskin" },
   ]
 
+  const toggleIndicator = (val) => {
+    if (selectedIndicators.includes(val)) {
+      if (selectedIndicators.length === 1) return
+      setSelectedIndicators(selectedIndicators.filter(item => item !== val))
+    } else {
+      setSelectedIndicators([...selectedIndicators, val])
+    }
+  }
+
   return (
     <div className={styles.container}>
       <Wrapper>
         <p className={styles.sectionTitle}>Konfigurasi Dataset & Indikator</p>
         <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: 14, margin: '0 0 20px 0' }}>
-          Masukkan judul analisis dan pilih indikator dataset yang tersedia dari BPS untuk melanjutkan ke tahap edit data.
+          Masukkan judul analisis dan pilih indikator dataset yang tersedia dari BPS (centang checkbox) untuk melanjutkan ke tahap edit data.
         </p>
 
         <div className={styles.configFormContainer}>
@@ -149,14 +158,31 @@ function StepConfigAvailable(props) {
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Pilih Indikator Dataset</label>
-            <SearchableSelect
-              options={indicatorOptions}
-              value={selectedIndicator}
-              onChange={(val) => setSelectedIndicator(val)}
-              placeholder="Cari & Pilih Indikator BPS..."
-            />
-            <span className={styles.formSubtext}>Pilih indikator data BPS resmi yang ingin Anda analisis.</span>
+            <label className={styles.formLabel}>
+              Pilih Indikator Dataset <span style={{ color: '#34B34A', fontSize: 12, marginLeft: 4 }}>({selectedIndicators.length} terpilih)</span>
+            </label>
+            <div className={styles.checkboxGrid}>
+              {indicatorOptions.map((opt) => {
+                const isChecked = selectedIndicators.includes(opt.value)
+                return (
+                  <div
+                    key={opt.value}
+                    className={`${styles.checkboxCard} ${isChecked ? styles.checkboxCardActive : ''}`}
+                    onClick={() => toggleIndicator(opt.value)}
+                  >
+                    <div className={`${styles.checkboxBox} ${isChecked ? styles.checkboxBoxActive : ''}`}>
+                      {isChecked && (
+                        <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M1 5L4.5 8.5L11 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </div>
+                    <span className={styles.checkboxLabel}>{opt.label}</span>
+                  </div>
+                )
+              })}
+            </div>
+            <span className={styles.formSubtext}>Centang satu atau lebih indikator yang ingin Anda analisis dan edit.</span>
           </div>
 
           <div style={{ marginTop: '12px' }}>
@@ -167,6 +193,7 @@ function StepConfigAvailable(props) {
     </div>
   )
 }
+
 
 
 function StepOne(props) {
@@ -425,18 +452,21 @@ function StepTwoManual(props) {
 }
 
 function StepTwoAvailable(props) {
-  const { setStep, setUploadedDataset, datasetSource = "available", selectedIndicator = "komoditas", analysisTitle = "Analisis BPS Kota Metro" } = props
+  const { setStep, setUploadedDataset, datasetSource = "available", selectedIndicators = ["komoditas"], analysisTitle = "Analisis BPS Kota Metro" } = props
   const user = userStore((state) => state.user)
 
-  const isCommodity = selectedIndicator === "komoditas"
+  const isCommodity = selectedIndicators.includes("komoditas")
+  const nonCommodityIndicators = useMemo(() => {
+    return selectedIndicators.filter(item => item !== "komoditas")
+  }, [selectedIndicators])
 
   // Commodity state
   const [inflasiData, setInflasiData] = useState({ mom: null, yoy: null, ytd: null })
   const [ihkData, setIhkData] = useState(null)
   const [komoditasData, setKomoditasData] = useState({ mom: null, yoy: null, ytd: null })
 
-  // PDRB / Demografi state
-  const [pdrbDemoData, setPdrbDemoData] = useState(null)
+  // Non-commodity indicators state map
+  const [pdrbDemoMap, setPdrbDemoMap] = useState({})
   const [loadingPdrbDemo, setLoadingPdrbDemo] = useState(false)
 
   const [metricType, setMetricType] = useState("mom") // "mom", "yoy", "ytd"
@@ -477,150 +507,156 @@ function StepTwoAvailable(props) {
   }, [activeInflasiObj, user])
 
   useEffect(() => {
-    if (isCommodity) return
+    if (nonCommodityIndicators.length === 0) return
 
-    const fetchOtherIndicator = async () => {
+    const fetchOtherIndicators = async () => {
       setLoadingPdrbDemo(true)
       try {
         const userCity = user?.location?.name || "KOTA METRO"
-        let endpoint = ""
-        if (selectedIndicator === "pdrb-pengeluaran-adhk") {
-          endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/pdrb/pengeluaran-adhk`
-        } else if (selectedIndicator === "pdrb-pengeluaran-adhb") {
-          endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/pdrb/pengeluaran-adhb`
-        } else if (selectedIndicator === "pdrb-lapangan-usaha-adhk") {
-          endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/pdrb/lapangan-usaha-adhk`
-        } else if (selectedIndicator === "pdrb-lapangan-usaha-adhb") {
-          endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/pdrb/lapangan-usaha-adhb`
-        } else if (selectedIndicator === "demografi-penduduk") {
-          endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/demografi/penduduk`
-        } else if (selectedIndicator === "demografi-laki") {
-          endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/demografi/penduduk-laki-laki`
-        } else if (selectedIndicator === "demografi-perempuan") {
-          endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/demografi/penduduk-perempuan`
-        } else if (selectedIndicator === "demografi-kemiskinan") {
-          endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/demografi/kemiskinan`
-        }
+        const newMap = {}
 
-        if (endpoint) {
-          const res = await axios.post(endpoint, { kota: userCity })
-          setPdrbDemoData(res.data)
-        }
+        await Promise.all(nonCommodityIndicators.map(async (key) => {
+          let endpoint = ""
+          if (key === "pdrb-pengeluaran-adhk") endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/pdrb/pengeluaran-adhk`
+          else if (key === "pdrb-pengeluaran-adhb") endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/pdrb/pengeluaran-adhb`
+          else if (key === "pdrb-lapangan-usaha-adhk") endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/pdrb/lapangan-usaha-adhk`
+          else if (key === "pdrb-lapangan-usaha-adhb") endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/pdrb/lapangan-usaha-adhb`
+          else if (key === "demografi-penduduk") endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/demografi/penduduk`
+          else if (key === "demografi-laki") endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/demografi/penduduk-laki-laki`
+          else if (key === "demografi-perempuan") endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/demografi/penduduk-perempuan`
+          else if (key === "demografi-kemiskinan") endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/demografi/kemiskinan`
+
+          if (endpoint) {
+            const res = await axios.post(endpoint, { kota: userCity })
+            newMap[key] = res.data
+          }
+        }))
+
+        setPdrbDemoMap(newMap)
       } catch (err) {
         console.error("Gagal memuat data indikator:", err.message)
       } finally {
         setLoadingPdrbDemo(false)
       }
     }
-    fetchOtherIndicator()
-  }, [selectedIndicator, user, isCommodity])
+    fetchOtherIndicators()
+  }, [nonCommodityIndicators, user])
 
-  const handlePdrbDemoValueChange = (idx, val) => {
-    setPdrbDemoData(prev => {
-      if (!prev || !prev.data) return prev
-      const newList = [...prev.data]
+  const handlePdrbDemoValueChange = (indicatorKey, idx, val) => {
+    setPdrbDemoMap(prev => {
+      const targetObj = prev[indicatorKey]
+      if (!targetObj || !targetObj.data) return prev
+      const newList = [...targetObj.data]
       newList[idx] = { ...newList[idx], value: val }
-      return { ...prev, data: newList }
+      return {
+        ...prev,
+        [indicatorKey]: {
+          ...targetObj,
+          data: newList
+        }
+      }
     })
   }
 
   const handleSave = () => {
     const nextStepIndex = datasetSource === "available" ? 3 : 2;
+    const combinedParsedData = [];
 
-    if (!isCommodity) {
-      const varLabel = pdrbDemoData?.var?.label || analysisTitle || "Data BPS";
-      const userCity = pdrbDemoData?.kota || user?.location?.name || "KOTA METRO";
-      const parsedData = [
-        ["Kategori / Sub Variabel", "Tahun / Periode", "Nilai"],
-        ...(pdrbDemoData?.data || []).map(row => [
-          row.turvarLabel || (row.turvarVal ? `Kategori ${row.turvarVal}` : "Utama"),
-          row.tahunLabel || "Terbaru",
-          String(row.value !== undefined && row.value !== null ? row.value : 0)
-        ])
-      ];
+    if (isCommodity) {
+      let monthIndex = 0;
+      for (let i = 11; i >= 0; i--) {
+        if (activeDataInflasi[i] && activeDataInflasi[i].value !== undefined && activeDataInflasi[i].value !== "") {
+          monthIndex = i;
+          break;
+        }
+      }
 
-      setUploadedDataset({
-        valid: "ya",
-        fileInfo: {
-          name: `Database BPS - ${varLabel}`,
-          size: "N/A",
-          rows: parsedData.length,
-          cols: 3,
-          sheet: "Sheet Utama"
-        },
-        context: {
-          city: userCity,
-          period: analysisTitle || varLabel,
-          monthIndex: 0,
-          year: currentYear,
-          title: analysisTitle
-        },
-        structure: varLabel,
-        columns: parsedData[0],
-        parsedData: parsedData,
-        editedData: { pdrbDemoData }
+      const infValue = activeDataInflasi?.[monthIndex]?.value || "0.00";
+      const yValue = inflasiData.yoy?.data?.[monthIndex]?.value || "0.00";
+      const iValue = activeDataIhk?.[monthIndex]?.value || "100.00";
+
+      const divisions = komoditasList.map(c => {
+        const dataKeys = Object.keys(c.data || {});
+        const targetKey = dataKeys[monthIndex];
+        return {
+          name: c.label,
+          inflasi: parseFloat(c.data?.[targetKey]) || 0
+        };
       });
 
-      setStep(nextStepIndex);
-      return;
+      combinedParsedData.push(
+        ["Tahun", "Bulan", "Kode Kota", "Nama Kota", "Kode Komoditas", "Nama Komoditas", "Timbangan", "IHK Lalu", "IHK", "Inflasi", "Inflasi YtD", "Inflasi YoY", "Andil"],
+        [currentYear, monthIndex + 1, "1872", userCityName, "0", "UMUM", "100", "100", iValue, infValue, "0", yValue, "0"]
+      );
+
+      divisions.forEach((div, idx) => {
+        const code = String(idx + 1).padStart(2, "0");
+        combinedParsedData.push([currentYear, monthIndex + 1, "1872", userCityName, code, div.name, "10", "10", "100", String(div.inflasi), "0", "0", String(div.inflasi)]);
+      });
     }
 
-    let monthIndex = 0;
-    for (let i = 11; i >= 0; i--) {
-      if (activeDataInflasi[i] && activeDataInflasi[i].value !== undefined && activeDataInflasi[i].value !== "") {
-        monthIndex = i;
-        break;
+    nonCommodityIndicators.forEach((key) => {
+      const itemData = pdrbDemoMap[key];
+      if (itemData && itemData.data) {
+        const varLabel = itemData?.var?.label || key;
+        const cityName = itemData?.kota || userCityName || "KOTA METRO";
+
+        if (combinedParsedData.length === 0) {
+          combinedParsedData.push(["Tahun", "Bulan", "Kode Kota", "Nama Kota", "Kode Komoditas", "Nama Komoditas", "Timbangan", "IHK Lalu", "IHK", "Inflasi", "Inflasi YtD", "Inflasi YoY", "Andil"]);
+        }
+
+        itemData.data.forEach((row, rIdx) => {
+          combinedParsedData.push([
+            currentYear,
+            1,
+            "1872",
+            cityName,
+            String(rIdx + 1),
+            `${varLabel} - ${row.turvarLabel || "Utama"}`,
+            "10",
+            "10",
+            "100",
+            String(row.value !== undefined && row.value !== null ? row.value : 0),
+            "0",
+            "0",
+            String(row.value !== undefined && row.value !== null ? row.value : 0)
+          ]);
+        });
       }
+    });
+
+    if (combinedParsedData.length === 0) {
+      combinedParsedData.push(
+        ["Tahun", "Bulan", "Kode Kota", "Nama Kota", "Kode Komoditas", "Nama Komoditas", "Timbangan", "IHK Lalu", "IHK", "Inflasi", "Inflasi YtD", "Inflasi YoY", "Andil"],
+        [currentYear, 1, "1872", userCityName || "KOTA METRO", "0", "UMUM", "100", "100", "100", "0", "0", "0", "0"]
+      );
     }
-
-    const periodText = `${monthNames[monthIndex]} ${currentYear}`;
-    const infValue = activeDataInflasi?.[monthIndex]?.value || "0.00";
-    const yValue = inflasiData.yoy?.data?.[monthIndex]?.value || "0.00";
-    const iValue = activeDataIhk?.[monthIndex]?.value || "100.00";
-
-    const divisions = komoditasList.map(c => {
-      const dataKeys = Object.keys(c.data || {});
-      const targetKey = dataKeys[monthIndex];
-      return {
-        name: c.label,
-        inflasi: parseFloat(c.data?.[targetKey]) || 0
-      };
-    });
-
-    const parsedData = [
-      ["Tahun", "Bulan", "Kode Kota", "Nama Kota", "Kode Komoditas", "Nama Komoditas", "Timbangan", "IHK Lalu", "IHK", "Inflasi", "Inflasi YtD", "Inflasi YoY", "Andil"],
-      [currentYear, monthIndex + 1, "1872", userCityName, "0", "UMUM", "100", "100", iValue, infValue, "0", yValue, "0"],
-    ];
-
-    divisions.forEach((div, idx) => {
-      const code = String(idx + 1).padStart(2, "0");
-      parsedData.push([currentYear, monthIndex + 1, "1872", userCityName, code, div.name, "10", "10", "100", String(div.inflasi), "0", "0", String(div.inflasi)]);
-    });
 
     setUploadedDataset({
       valid: "ya",
       fileInfo: {
-        name: "Database BPS",
+        name: `Database BPS (${selectedIndicators.join(", ")})`,
         size: "N/A",
-        rows: parsedData.length,
-        cols: 13,
+        rows: combinedParsedData.length,
+        cols: combinedParsedData[0]?.length || 13,
         sheet: "Sheet Utama"
       },
       context: {
-        city: userCityName,
-        period: periodText,
-        monthIndex: monthIndex,
+        city: userCityName || user?.location?.name || "KOTA METRO",
+        period: analysisTitle || "Analisis BPS",
+        monthIndex: 0,
         year: currentYear,
         title: analysisTitle
       },
-      structure: "BPS Inflasi / IHK",
-      columns: parsedData[0],
-      parsedData: parsedData,
-      editedData: { inflasiData, ihkData, komoditasData }
+      structure: "BPS Multi-Indikator",
+      columns: combinedParsedData[0],
+      parsedData: combinedParsedData,
+      editedData: { inflasiData, ihkData, komoditasData, pdrbDemoMap }
     });
 
     setStep(nextStepIndex);
   };
+
 
 
   const komoditasLabelsKey = useMemo(() => {
@@ -904,70 +940,10 @@ function StepTwoAvailable(props) {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   }
 
-  if (!isCommodity) {
-    if (loadingPdrbDemo || !pdrbDemoData) {
-      return (
-        <div className={styles.container}>
-          <Wrapper>
-            <p className={styles.sectionTitle}>Memuat Data BPS ({analysisTitle})...</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
-              <Skeleton height="42px" />
-              <Skeleton height="200px" />
-            </div>
-          </Wrapper>
-        </div>
-      )
-    }
+  const isCommodityLoading = isCommodity && (!inflasiData.mom || !ihkData || !komoditasData.mom)
+  const isNonCommodityLoading = nonCommodityIndicators.length > 0 && loadingPdrbDemo
 
-    const varLabel = pdrbDemoData?.var?.label || analysisTitle || "Indikator Data BPS"
-    const cityName = pdrbDemoData?.kota || user?.location?.name || "KOTA METRO"
-
-    return (
-      <div className={styles.container}>
-        <Wrapper>
-          <div className={styles.editHeader}>
-            <p className={styles.sectionTitle}>
-              Edit Data BPS ({varLabel} - {capitalize(cityName)})
-            </p>
-          </div>
-
-          <div className={styles.tableContainer}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th style={{ width: '60px' }}>No</th>
-                  <th>Kategori / Sub Variabel</th>
-                  <th>Tahun / Periode</th>
-                  <th>Nilai Data</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(pdrbDemoData?.data || []).map((row, idx) => (
-                  <tr key={idx}>
-                    <td style={{ textAlign: 'center' }}>{idx + 1}</td>
-                    <td>{row.turvarLabel || (row.turvarVal ? `Kategori ${row.turvarVal}` : "Utama")}</td>
-                    <td style={{ textAlign: 'center' }}>{row.tahunLabel || "Terbaru"}</td>
-                    <td>
-                      <Input
-                        type="text"
-                        placeholder="Masukkan nilai"
-                        value={row.value !== undefined && row.value !== null ? row.value : ""}
-                        setValue={(val) => handlePdrbDemoValueChange(idx, val)}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Wrapper>
-
-        <MainButton onClick={handleSave}>Simpan & Lanjutkan</MainButton>
-      </div>
-    )
-  }
-
-  if (!inflasiData.mom || !ihkData || !komoditasData.mom) {
+  if (isCommodityLoading || isNonCommodityLoading) {
     return (
       <div className={styles.container}>
         <Wrapper>
@@ -990,351 +966,402 @@ function StepTwoAvailable(props) {
 
   return (
     <div className={styles.container}>
-      <Wrapper>
-        <div className={styles.editHeader}>
-          <p className={styles.sectionTitle}>
-            {activeSheet === "main"
-              ? `Edit Data BPS ${capitalize(userCityName)}`
-              : `Edit Sub Komoditas (${capitalize(activeCommodity?.label)})`
-            }
-          </p>
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-            {/* Metric Type Selector (MoM, YoY, YtD) */}
-            <div className={styles.yearSelector}>
-              <button
-                type="button"
-                onClick={() => setMetricType("mom")}
-                className={`${styles.yearBtn} ${metricType === "mom" ? styles.yearBtnActive : ""}`}
-              >
-                MoM
-              </button>
-              <button
-                type="button"
-                onClick={() => setMetricType("yoy")}
-                className={`${styles.yearBtn} ${metricType === "yoy" ? styles.yearBtnActive : ""}`}
-              >
-                YoY
-              </button>
-              <button
-                type="button"
-                onClick={() => setMetricType("ytd")}
-                className={`${styles.yearBtn} ${metricType === "ytd" ? styles.yearBtnActive : ""}`}
-              >
-                YtD
-              </button>
-            </div>
-
-            {/* Year Selector (year.now, year - 1, year - 2) */}
-            <div className={styles.yearSelector}>
-              <button
-                type="button"
-                onClick={() => setActiveYear("now")}
-                className={`${styles.yearBtn} ${activeYear === "now" ? styles.yearBtnActive : ""}`}
-              >
-                {currentYear}
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveYear("prev")}
-                className={`${styles.yearBtn} ${activeYear === "prev" ? styles.yearBtnActive : ""}`}
-              >
-                {prevYear}
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveYear("prev2")}
-                className={`${styles.yearBtn} ${activeYear === "prev2" ? styles.yearBtnActive : ""}`}
-              >
-                {prev2Year}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.tableContainer}>
-          <table className={styles.table}>
-            {activeSheet === "main" ? (
-              <>
-                <thead>
-                  <tr>
-                    <th>Bulan</th>
-                    <th>Inflasi {metricType.toUpperCase()} (%)</th>
-                    <th>IHK</th>
-                    {komoditasList.map((item, cIndex) => (
-                      <th key={cIndex}>{item.label}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {activeDataInflasi.map((item, index) => (
-                    <tr key={index}>
-                      <td className={styles.monthCol}>{monthNames[index % 12]}</td>
-                      <td>
-                        <Input
-                          type="text"
-                          placeholder="Masukkan nilai"
-                          value={item.value}
-                          setValue={(val) => handleInflasiChange(index, val)}
-                        />
-                      </td>
-                      <td>
-                        <Input
-                          type="text"
-                          placeholder="Masukkan nilai"
-                          value={activeDataIhk[index] ? activeDataIhk[index].value : ""}
-                          setValue={(val) => handleIhkChange(index, val)}
-                        />
-                      </td>
-                      {komoditasList.map((cItem, cIndex) => {
-                        const dataKeys = Object.keys(cItem.data || {})
-                        const targetKey = dataKeys[index]
-                        const val = targetKey !== undefined ? cItem.data[targetKey] : ""
-                        return (
-                          <td key={cIndex}>
-                            <Input
-                              type="text"
-                              placeholder="Masukkan nilai"
-                              value={val}
-                              setValue={(newVal) => handleKomoditasChange(cIndex, index, newVal)}
-                            />
-                          </td>
-                        )
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </>
-            ) : (
-              <>
-                <thead>
-                  <tr>
-                    <th>Bulan</th>
-                    {subList.map((subItem, sIndex) => (
-                      <th key={sIndex}>{subItem.label}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {activeDataInflasi.map((item, index) => (
-                    <tr key={index}>
-                      <td className={styles.monthCol}>{monthNames[index % 12]}</td>
-                      {subList.map((subItem, sIndex) => {
-                        const dataKeys = Object.keys(subItem.data || {})
-                        const targetKey = dataKeys[index]
-                        const val = targetKey !== undefined ? subItem.data[targetKey] : ""
-                        return (
-                          <td key={sIndex}>
-                            <Input
-                              type="text"
-                              placeholder="Masukkan nilai"
-                              value={val}
-                              setValue={(newVal) => handleSubKomoditasChange(activeCommodityIndex, sIndex, index, newVal)}
-                            />
-                          </td>
-                        )
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </>
-            )}
-          </table>
-        </div>
-
-        <div className={styles.sheetTabs}>
-          <button
-            type="button"
-            onClick={() => setActiveSheet("main")}
-            className={`${styles.sheetTab} ${activeSheet === "main" ? styles.sheetTabActive : ""}`}
-          >
-            Sheet Utama
-          </button>
-          {komoditasList.map((item, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => setActiveSheet(index.toString())}
-              className={`${styles.sheetTab} ${activeSheet === index.toString() ? styles.sheetTabActive : ""}`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </Wrapper>
+      {/* ─── SECTION KOMODITAS & INFLASI ─── */}
       {isCommodity && (
-        <Wrapper>
-          <div className={styles.hierarchyContainer}>
-            <div className={styles.hierarchyHeader}>
+        <>
+          <Wrapper>
+            <div className={styles.editHeader}>
               <p className={styles.sectionTitle}>
-                Preview Hierarki
+                {activeSheet === "main"
+                  ? `Edit Data BPS - Komoditas & Inflasi (${capitalize(userCityName)})`
+                  : `Edit Sub Komoditas (${capitalize(activeCommodity?.label)})`
+                }
               </p>
-            </div>
-            <div className={styles.hierarchyWrapper}>
-              <Hierarchy
-                data={hierarchyData}
-                width={1350}
-                height={treeHeight}
-                fill={"rgba(255, 255, 255, 0.04)"}
-                stroke={"rgba(255, 255, 255, 0.2)"}
-                textColor={"#F8FAFC"}
-                lineColor={"rgba(255, 255, 255, 0.15)"}
-              />
-            </div>
-          </div>
-        </Wrapper>
-      )}
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+                {/* Metric Type Selector (MoM, YoY, YtD) */}
+                <div className={styles.yearSelector}>
+                  <button
+                    type="button"
+                    onClick={() => setMetricType("mom")}
+                    className={`${styles.yearBtn} ${metricType === "mom" ? styles.yearBtnActive : ""}`}
+                  >
+                    MoM
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMetricType("yoy")}
+                    className={`${styles.yearBtn} ${metricType === "yoy" ? styles.yearBtnActive : ""}`}
+                  >
+                    YoY
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMetricType("ytd")}
+                    className={`${styles.yearBtn} ${metricType === "ytd" ? styles.yearBtnActive : ""}`}
+                  >
+                    YtD
+                  </button>
+                </div>
 
-      {/* ─── Wrapper Forecasting ─── */}
-      <Wrapper>
-        <div className={styles.forecastingContainer}>
-          <div className={styles.forecastingHeader}>
-            <div>
-              <p className={styles.sectionTitle}>Forecasting (Prediksi)</p>
-              <p className={styles.forecastingDesc}>
-                Aktifkan untuk menghasilkan prediksi inflasi periode berikutnya menggunakan model Machine Learning.
-              </p>
-            </div>
-            <div className={styles.sliderToggle}>
-              <div
-                className={`${styles.sliderTrack} ${forecastingEnabled ? styles.sliderTrackActive : ""}`}
-                role="group"
-                aria-label="Pilih opsi forecasting"
-                onClick={() => setForecastingEnabled(prev => !prev)}
-              >
-                <span
-                  className={`${styles.sliderPill} ${forecastingEnabled ? styles.sliderPillRight : styles.sliderPillLeft}`}
-                />
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); setForecastingEnabled(false) }}
-                  className={`${styles.sliderBtn} ${!forecastingEnabled ? styles.sliderBtnActiveTidak : ""}`}
-                  aria-pressed={forecastingEnabled}
-                >
-                  Tidak
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); setForecastingEnabled(true) }}
-                  className={`${styles.sliderBtn} ${forecastingEnabled ? styles.sliderBtnActiveYa : ""}`}
-                  aria-pressed={!forecastingEnabled}
-                >
-                  Ya
-                </button>
+                {/* Year Selector (year.now, year - 1, year - 2) */}
+                <div className={styles.yearSelector}>
+                  <button
+                    type="button"
+                    onClick={() => setActiveYear("now")}
+                    className={`${styles.yearBtn} ${activeYear === "now" ? styles.yearBtnActive : ""}`}
+                  >
+                    {currentYear}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveYear("prev")}
+                    className={`${styles.yearBtn} ${activeYear === "prev" ? styles.yearBtnActive : ""}`}
+                  >
+                    {prevYear}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveYear("prev2")}
+                    className={`${styles.yearBtn} ${activeYear === "prev2" ? styles.yearBtnActive : ""}`}
+                  >
+                    {prev2Year}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
 
-          {forecastingEnabled && (
-            <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div className={styles.forecastingNote}>
-                <span className={styles.forecastingNoteIcon}>✦</span>
-                <p>
-                  Model <strong>ANN (Artificial Neural Network - Keras/TensorFlow)</strong> menghitung peramalan berdasarkan data historis database.
-                  {annForecastResult?.forecast?.inflasi?.final_loss !== undefined && (
-                    <span style={{ display: 'block', marginTop: '4px', color: '#34B34A', fontSize: '12px' }}>
-                      ✓ Terhubung dengan Backend API & Database | MSE Loss Inflasi: {annForecastResult.forecast.inflasi.final_loss.toFixed(6)} | MSE Loss IHK: {annForecastResult.forecast.ihk.final_loss.toFixed(6)}
-                    </span>
-                  )}
+            <div className={styles.tableContainer}>
+              <table className={styles.table}>
+                {activeSheet === "main" ? (
+                  <>
+                    <thead>
+                      <tr>
+                        <th>Bulan</th>
+                        <th>Inflasi {metricType.toUpperCase()} (%)</th>
+                        <th>IHK</th>
+                        {komoditasList.map((item, cIndex) => (
+                          <th key={cIndex}>{item.label}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {activeDataInflasi.map((item, index) => (
+                        <tr key={index}>
+                          <td className={styles.monthCol}>{monthNames[index % 12]}</td>
+                          <td>
+                            <Input
+                              type="text"
+                              placeholder="Masukkan nilai"
+                              value={item.value}
+                              setValue={(val) => handleInflasiChange(index, val)}
+                            />
+                          </td>
+                          <td>
+                            <Input
+                              type="text"
+                              placeholder="Masukkan nilai"
+                              value={activeDataIhk[index] ? activeDataIhk[index].value : ""}
+                              setValue={(val) => handleIhkChange(index, val)}
+                            />
+                          </td>
+                          {komoditasList.map((cItem, cIndex) => {
+                            const dataKeys = Object.keys(cItem.data || {})
+                            const targetKey = dataKeys[index]
+                            const val = targetKey !== undefined ? cItem.data[targetKey] : ""
+                            return (
+                              <td key={cIndex}>
+                                <Input
+                                  type="text"
+                                  placeholder="Masukkan nilai"
+                                  value={val}
+                                  setValue={(newVal) => handleKomoditasChange(cIndex, index, newVal)}
+                                />
+                              </td>
+                            )
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </>
+                ) : (
+                  <>
+                    <thead>
+                      <tr>
+                        <th>Bulan</th>
+                        {subList.map((subItem, sIndex) => (
+                          <th key={sIndex}>{subItem.label}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {activeDataInflasi.map((item, index) => (
+                        <tr key={index}>
+                          <td className={styles.monthCol}>{monthNames[index % 12]}</td>
+                          {subList.map((subItem, sIndex) => {
+                            const dataKeys = Object.keys(subItem.data || {})
+                            const targetKey = dataKeys[index]
+                            const val = targetKey !== undefined ? subItem.data[targetKey] : ""
+                            return (
+                              <td key={sIndex}>
+                                <Input
+                                  type="text"
+                                  placeholder="Masukkan nilai"
+                                  value={val}
+                                  setValue={(newVal) => handleSubKomoditasChange(activeCommodityIndex, sIndex, index, newVal)}
+                                />
+                              </td>
+                            )
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </>
+                )}
+              </table>
+            </div>
+
+            <div className={styles.sheetTabs}>
+              <button
+                type="button"
+                onClick={() => setActiveSheet("main")}
+                className={`${styles.sheetTab} ${activeSheet === "main" ? styles.sheetTabActive : ""}`}
+              >
+                Sheet Utama
+              </button>
+              {komoditasList.map((item, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => setActiveSheet(index.toString())}
+                  className={`${styles.sheetTab} ${activeSheet === index.toString() ? styles.sheetTabActive : ""}`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </Wrapper>
+
+          {/* Hierarki Preview */}
+          <Wrapper>
+            <div className={styles.hierarchyContainer}>
+              <div className={styles.hierarchyHeader}>
+                <p className={styles.sectionTitle}>
+                  Preview Hierarki
                 </p>
               </div>
+              <div className={styles.hierarchyWrapper}>
+                <Hierarchy
+                  data={hierarchyData}
+                  width={1350}
+                  height={treeHeight}
+                  fill={"rgba(255, 255, 255, 0.04)"}
+                  stroke={"rgba(255, 255, 255, 0.2)"}
+                  textColor={"#F8FAFC"}
+                  lineColor={"rgba(255, 255, 255, 0.15)"}
+                />
+              </div>
+            </div>
+          </Wrapper>
 
-              {/* ─── Chart Forecasting 3 Bulan Ke Depan (Graph.jsx style) ─── */}
-              <div style={{
-                background: 'rgba(0, 0, 0, 0.25)',
-                borderRadius: '12px',
-                padding: '16px',
-                border: '1px solid rgba(255, 255, 255, 0.08)'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                  <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#F8FAFC' }}>
-                    Grafik Prediksi Inflasi 3 Bulan Ke Depan ({userCityName || "KOTA METRO"})
+          {/* Forecasting */}
+          <Wrapper>
+            <div className={styles.forecastingContainer}>
+              <div className={styles.forecastingHeader}>
+                <div>
+                  <p className={styles.sectionTitle}>Forecasting (Prediksi)</p>
+                  <p className={styles.forecastingDesc}>
+                    Aktifkan untuk menghasilkan prediksi inflasi periode berikutnya menggunakan model Machine Learning.
                   </p>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', fontSize: '12px', color: '#AAAAAA' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#fb3131ff', display: 'inline-block' }} />
-                      <span>MoM</span>
+                </div>
+                <div className={styles.sliderToggle}>
+                  <div
+                    className={`${styles.sliderTrack} ${forecastingEnabled ? styles.sliderTrackActive : ""}`}
+                    role="group"
+                    aria-label="Pilih opsi forecasting"
+                    onClick={() => setForecastingEnabled(prev => !prev)}
+                  >
+                    <span
+                      className={`${styles.sliderPill} ${forecastingEnabled ? styles.sliderPillRight : styles.sliderPillLeft}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setForecastingEnabled(false) }}
+                      className={`${styles.sliderBtn} ${!forecastingEnabled ? styles.sliderBtnActiveTidak : ""}`}
+                      aria-pressed={forecastingEnabled}
+                    >
+                      Tidak
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setForecastingEnabled(true) }}
+                      className={`${styles.sliderBtn} ${forecastingEnabled ? styles.sliderBtnActiveYa : ""}`}
+                      aria-pressed={!forecastingEnabled}
+                    >
+                      Ya
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {forecastingEnabled && (
+                <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div className={styles.forecastingNote}>
+                    <span className={styles.forecastingNoteIcon}>✦</span>
+                    <p>
+                      Model <strong>ANN (Artificial Neural Network - Keras/TensorFlow)</strong> menghitung peramalan berdasarkan data historis database.
+                      {annForecastResult?.forecast?.inflasi?.final_loss !== undefined && (
+                        <span style={{ display: 'block', marginTop: '4px', color: '#34B34A', fontSize: '12px' }}>
+                          ✓ Terhubung dengan Backend API & Database | MSE Loss Inflasi: {annForecastResult.forecast.inflasi.final_loss.toFixed(6)} | MSE Loss IHK: {annForecastResult.forecast.ihk.final_loss.toFixed(6)}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+
+                  <div style={{
+                    background: 'rgba(0, 0, 0, 0.25)',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    border: '1px solid rgba(255, 255, 255, 0.08)'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                      <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#F8FAFC' }}>
+                        Grafik Prediksi Inflasi 3 Bulan Ke Depan ({userCityName || "KOTA METRO"})
+                      </p>
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', fontSize: '12px', color: '#AAAAAA' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#fb3131ff', display: 'inline-block' }} />
+                          <span>MoM</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34B34A', display: 'inline-block' }} />
+                          <span>YoY</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#F0B244', display: 'inline-block' }} />
+                          <span>YtD</span>
+                        </div>
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34B34A', display: 'inline-block' }} />
-                      <span>YoY</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#F0B244', display: 'inline-block' }} />
-                      <span>YtD</span>
+
+                    <div style={{ width: '100%', height: '220px' }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart
+                          data={forecastChartData}
+                          margin={{ top: 10, right: 15, left: -20, bottom: 0 }}
+                        >
+                          <defs>
+                            <linearGradient id="forecastGradMom" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#fb3131ff" stopOpacity={0.25} />
+                              <stop offset="100%" stopColor="#fb3131ff" stopOpacity={0.0} />
+                            </linearGradient>
+                            <linearGradient id="forecastGradYoy" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#34B34A" stopOpacity={0.25} />
+                              <stop offset="100%" stopColor="#34B34A" stopOpacity={0.0} />
+                            </linearGradient>
+                            <linearGradient id="forecastGradYtd" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#F0B244" stopOpacity={0.25} />
+                              <stop offset="100%" stopColor="#F0B244" stopOpacity={0.0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid stroke="rgba(255, 255, 255, 0.08)" strokeWidth={0.5} />
+                          <XAxis
+                            dataKey="label"
+                            axisLine={{ stroke: 'rgba(255, 255, 255, 0.15)', strokeWidth: 0.5 }}
+                            tickLine={false}
+                            tick={{ fill: '#AAAAAA', fontSize: 10 }}
+                          />
+                          <YAxis
+                            axisLine={{ stroke: 'rgba(255, 255, 255, 0.15)', strokeWidth: 0.5 }}
+                            tickLine={false}
+                            tick={{ fill: '#AAAAAA', fontSize: 10 }}
+                            domain={['auto', 'auto']}
+                            unit="%"
+                          />
+                          <Tooltip content={<CustomForecastTooltip />} />
+                          <Area
+                            type="monotone"
+                            dataKey="mom"
+                            name="MoM"
+                            stroke="#fb3131ff"
+                            fill="url(#forecastGradMom)"
+                            strokeWidth={2}
+                            dot={{ r: 4, fill: '#fb3131ff' }}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="yoy"
+                            name="YoY"
+                            stroke="#34B34A"
+                            fill="url(#forecastGradYoy)"
+                            strokeWidth={2}
+                            dot={{ r: 4, fill: '#34B34A' }}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="ytd"
+                            name="YtD"
+                            stroke="#F0B244"
+                            fill="url(#forecastGradYtd)"
+                            strokeWidth={2}
+                            dot={{ r: 4, fill: '#F0B244' }}
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
                     </div>
                   </div>
                 </div>
-
-                <div style={{ width: '100%', height: '220px' }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                      data={forecastChartData}
-                      margin={{ top: 10, right: 15, left: -20, bottom: 0 }}
-                    >
-                      <defs>
-                        <linearGradient id="forecastGradMom" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#fb3131ff" stopOpacity={0.25} />
-                          <stop offset="100%" stopColor="#fb3131ff" stopOpacity={0.0} />
-                        </linearGradient>
-                        <linearGradient id="forecastGradYoy" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#34B34A" stopOpacity={0.25} />
-                          <stop offset="100%" stopColor="#34B34A" stopOpacity={0.0} />
-                        </linearGradient>
-                        <linearGradient id="forecastGradYtd" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#F0B244" stopOpacity={0.25} />
-                          <stop offset="100%" stopColor="#F0B244" stopOpacity={0.0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid stroke="rgba(255, 255, 255, 0.08)" strokeWidth={0.5} />
-                      <XAxis
-                        dataKey="label"
-                        axisLine={{ stroke: 'rgba(255, 255, 255, 0.15)', strokeWidth: 0.5 }}
-                        tickLine={false}
-                        tick={{ fill: '#AAAAAA', fontSize: 10 }}
-                      />
-                      <YAxis
-                        axisLine={{ stroke: 'rgba(255, 255, 255, 0.15)', strokeWidth: 0.5 }}
-                        tickLine={false}
-                        tick={{ fill: '#AAAAAA', fontSize: 10 }}
-                        domain={['auto', 'auto']}
-                        unit="%"
-                      />
-                      <Tooltip content={<CustomForecastTooltip />} />
-                      <Area
-                        type="monotone"
-                        dataKey="mom"
-                        name="MoM"
-                        stroke="#fb3131ff"
-                        fill="url(#forecastGradMom)"
-                        strokeWidth={2}
-                        dot={{ r: 4, fill: '#fb3131ff' }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="yoy"
-                        name="YoY"
-                        stroke="#34B34A"
-                        fill="url(#forecastGradYoy)"
-                        strokeWidth={2}
-                        dot={{ r: 4, fill: '#34B34A' }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="ytd"
-                        name="YtD"
-                        stroke="#F0B244"
-                        fill="url(#forecastGradYtd)"
-                        strokeWidth={2}
-                        dot={{ r: 4, fill: '#F0B244' }}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
+              )}
             </div>
-          )}
-        </div>
-      </Wrapper>
+          </Wrapper>
+        </>
+      )}
+
+      {/* ─── SECTION TERPISAH PER INDIKATOR NON-KOMODITAS ─── */}
+      {nonCommodityIndicators.map((indicatorKey) => {
+        const itemData = pdrbDemoMap[indicatorKey]
+        const varLabel = itemData?.var?.label || indicatorKey
+        const cityName = itemData?.kota || userCityName || "KOTA METRO"
+
+        return (
+          <Wrapper key={indicatorKey}>
+            <div className={styles.editHeader}>
+              <p className={styles.sectionTitle}>
+                Edit Data BPS - {varLabel} ({capitalize(cityName)})
+              </p>
+            </div>
+
+            <div className={styles.tableContainer}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={{ width: '60px' }}>No</th>
+                    <th>Kategori / Sub Variabel</th>
+                    <th>Tahun / Periode</th>
+                    <th>Nilai Data</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(itemData?.data || []).map((row, idx) => (
+                    <tr key={idx}>
+                      <td style={{ textAlign: 'center' }}>{idx + 1}</td>
+                      <td>{row.turvarLabel || (row.turvarVal ? `Kategori ${row.turvarVal}` : "Utama")}</td>
+                      <td style={{ textAlign: 'center' }}>{row.tahunLabel || "Terbaru"}</td>
+                      <td>
+                        <Input
+                          type="text"
+                          placeholder="Masukkan nilai"
+                          value={row.value !== undefined && row.value !== null ? row.value : ""}
+                          setValue={(val) => handlePdrbDemoValueChange(indicatorKey, idx, val)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Wrapper>
+        )
+      })}
 
       <MainButton onClick={handleSave}>Simpan & Lanjutkan</MainButton>
     </div>

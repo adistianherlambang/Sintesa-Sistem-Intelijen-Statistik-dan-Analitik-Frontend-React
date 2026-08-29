@@ -502,3 +502,57 @@
   color: rgba(255, 255, 255, 0.45);
   margin-top: -2px;
 }
+
+.checkboxGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.checkboxCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.checkboxCard:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.checkboxCardActive {
+  background: rgba(52, 179, 74, 0.08);
+  border-color: #34B34A;
+}
+
+.checkboxBox {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.checkboxBoxActive {
+  background: #34B34A;
+  border-color: #34B34A;
+  color: #FFFFFF;
+}
+
+.checkboxLabel {
+  font-size: 14px;
+  color: #E2E8F0;
+  font-weight: 500;
+}
