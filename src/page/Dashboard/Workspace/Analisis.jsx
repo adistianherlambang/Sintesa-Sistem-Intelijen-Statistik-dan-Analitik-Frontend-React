@@ -12,15 +12,18 @@ import MainButton from '../../../components/MainButton/MainButton'
 import Input from '../../../components/Input/Input'
 import Skeleton from '../../../components/Skeleton/Skeleton'
 import AILoader from '../../../components/AILoader/AILoader'
+import SearchableSelect from '../../../components/SearchableSelect/SearchableSelect'
 
 export default function Analisis() {
   const [datasetSource, setDatasetSource] = useState("available") // "available" or "manual"
+  const [selectedIndicator, setSelectedIndicator] = useState("komoditas")
+  const [analysisTitle, setAnalysisTitle] = useState("Analisis BPS Kota Metro")
   const [uploadedDataset, setUploadedDataset] = useState(null)
   const [brsPreview, setBrsPreview] = useState(null)
 
-  const item = [
+  const item = datasetSource === "available" ? [
     {
-      label: "StepOne",
+      label: "Sumber Data",
       content: (props) => (
         <StepOne
           {...props}
@@ -30,9 +33,57 @@ export default function Analisis() {
       )
     },
     {
-      label: "StepTwo",
+      label: "Pilih Indikator",
       content: (props) => (
-        <StepTwo
+        <StepConfigAvailable
+          {...props}
+          selectedIndicator={selectedIndicator}
+          setSelectedIndicator={setSelectedIndicator}
+          analysisTitle={analysisTitle}
+          setAnalysisTitle={setAnalysisTitle}
+        />
+      )
+    },
+    {
+      label: "Edit Data BPS",
+      content: (props) => (
+        <StepTwoAvailable
+          {...props}
+          datasetSource={datasetSource}
+          selectedIndicator={selectedIndicator}
+          analysisTitle={analysisTitle}
+          uploadedDataset={uploadedDataset}
+          setUploadedDataset={setUploadedDataset}
+        />
+      )
+    },
+    {
+      label: "Ringkasan & BRS",
+      content: (props) => (
+        <StepThree
+          {...props}
+          datasetSource={datasetSource}
+          uploadedDataset={uploadedDataset}
+          brsPreview={brsPreview}
+          setBrsPreview={setBrsPreview}
+        />
+      )
+    },
+  ] : [
+    {
+      label: "Sumber Data",
+      content: (props) => (
+        <StepOne
+          {...props}
+          datasetSource={datasetSource}
+          setDatasetSource={setDatasetSource}
+        />
+      )
+    },
+    {
+      label: "Unggah Dataset",
+      content: (props) => (
+        <StepTwoManual
           {...props}
           datasetSource={datasetSource}
           uploadedDataset={uploadedDataset}
@@ -41,7 +92,7 @@ export default function Analisis() {
       )
     },
     {
-      label: "StepThree",
+      label: "Ringkasan & BRS",
       content: (props) => (
         <StepThree
           {...props}
@@ -61,6 +112,62 @@ export default function Analisis() {
     </div>
   )
 }
+
+function StepConfigAvailable(props) {
+  const { setStep, selectedIndicator, setSelectedIndicator, analysisTitle, setAnalysisTitle } = props
+
+  const indicatorOptions = [
+    { value: "komoditas", label: "Komoditas & Inflasi (IHK)" },
+    { value: "pdrb-pengeluaran-adhk", label: "PDRB Pengeluaran ADHK (Harga Konstan)" },
+    { value: "pdrb-pengeluaran-adhb", label: "PDRB Pengeluaran ADHB (Harga Berlaku)" },
+    { value: "pdrb-lapangan-usaha-adhk", label: "PDRB Lapangan Usaha ADHK (Harga Konstan)" },
+    { value: "pdrb-lapangan-usaha-adhb", label: "PDRB Lapangan Usaha ADHB (Harga Berlaku)" },
+    { value: "demografi-penduduk", label: "Demografi - Jumlah Penduduk Total" },
+    { value: "demografi-laki", label: "Demografi - Penduduk Laki-Laki" },
+    { value: "demografi-perempuan", label: "Demografi - Penduduk Perempuan" },
+    { value: "demografi-kemiskinan", label: "Demografi - Persentase Penduduk Miskin" },
+  ]
+
+  return (
+    <div className={styles.container}>
+      <Wrapper>
+        <p className={styles.sectionTitle}>Konfigurasi Dataset & Indikator</p>
+        <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: 14, margin: '0 0 20px 0' }}>
+          Masukkan judul analisis dan pilih indikator dataset yang tersedia dari BPS untuk melanjutkan ke tahap edit data.
+        </p>
+
+        <div className={styles.configFormContainer}>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>Judul Analisis</label>
+            <Input
+              type="text"
+              placeholder="Contoh: Analisis Perkembangan Inflasi & Komoditas Kota Metro"
+              value={analysisTitle}
+              setValue={setAnalysisTitle}
+            />
+            <span className={styles.formSubtext}>Judul ini akan digunakan pada laporan Berita Resmi Statistik (BRS).</span>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>Pilih Indikator Dataset</label>
+            <SearchableSelect
+              options={indicatorOptions}
+              value={selectedIndicator}
+              onChange={(val) => setSelectedIndicator(val)}
+              placeholder="Cari & Pilih Indikator BPS..."
+            />
+            <span className={styles.formSubtext}>Pilih indikator data BPS resmi yang ingin Anda analisis.</span>
+          </div>
+
+          <div style={{ marginTop: '12px' }}>
+            <MainButton onClick={() => setStep(2)}>Lanjutkan</MainButton>
+          </div>
+        </div>
+      </Wrapper>
+    </div>
+  )
+}
+
 
 function StepOne(props) {
   const { setStep, setDatasetSource } = props
@@ -115,13 +222,6 @@ function CustomForecastTooltip({ active, payload, label }) {
   return null;
 }
 
-function StepTwo(props) {
-  if (props.datasetSource === "available") {
-    return <StepTwoAvailable {...props} />
-  } else {
-    return <StepTwoManual {...props} />
-  }
-}
 
 function StepTwoManual(props) {
   const { setStep, setUploadedDataset, uploadedDataset } = props
@@ -325,12 +425,19 @@ function StepTwoManual(props) {
 }
 
 function StepTwoAvailable(props) {
-  const { setStep, setUploadedDataset } = props
+  const { setStep, setUploadedDataset, datasetSource = "available", selectedIndicator = "komoditas", analysisTitle = "Analisis BPS Kota Metro" } = props
   const user = userStore((state) => state.user)
 
+  const isCommodity = selectedIndicator === "komoditas"
+
+  // Commodity state
   const [inflasiData, setInflasiData] = useState({ mom: null, yoy: null, ytd: null })
   const [ihkData, setIhkData] = useState(null)
   const [komoditasData, setKomoditasData] = useState({ mom: null, yoy: null, ytd: null })
+
+  // PDRB / Demografi state
+  const [pdrbDemoData, setPdrbDemoData] = useState(null)
+  const [loadingPdrbDemo, setLoadingPdrbDemo] = useState(false)
 
   const [metricType, setMetricType] = useState("mom") // "mom", "yoy", "ytd"
   const [activeYear, setActiveYear] = useState("now") // "now", "prev", "prev2"
@@ -369,7 +476,95 @@ function StepTwoAvailable(props) {
     return activeInflasiObj?.kota || user?.location?.name || ""
   }, [activeInflasiObj, user])
 
+  useEffect(() => {
+    if (isCommodity) return
+
+    const fetchOtherIndicator = async () => {
+      setLoadingPdrbDemo(true)
+      try {
+        const userCity = user?.location?.name || "KOTA METRO"
+        let endpoint = ""
+        if (selectedIndicator === "pdrb-pengeluaran-adhk") {
+          endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/pdrb/pengeluaran-adhk`
+        } else if (selectedIndicator === "pdrb-pengeluaran-adhb") {
+          endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/pdrb/pengeluaran-adhb`
+        } else if (selectedIndicator === "pdrb-lapangan-usaha-adhk") {
+          endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/pdrb/lapangan-usaha-adhk`
+        } else if (selectedIndicator === "pdrb-lapangan-usaha-adhb") {
+          endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/pdrb/lapangan-usaha-adhb`
+        } else if (selectedIndicator === "demografi-penduduk") {
+          endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/demografi/penduduk`
+        } else if (selectedIndicator === "demografi-laki") {
+          endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/demografi/penduduk-laki-laki`
+        } else if (selectedIndicator === "demografi-perempuan") {
+          endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/demografi/penduduk-perempuan`
+        } else if (selectedIndicator === "demografi-kemiskinan") {
+          endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/demografi/kemiskinan`
+        }
+
+        if (endpoint) {
+          const res = await axios.post(endpoint, { kota: userCity })
+          setPdrbDemoData(res.data)
+        }
+      } catch (err) {
+        console.error("Gagal memuat data indikator:", err.message)
+      } finally {
+        setLoadingPdrbDemo(false)
+      }
+    }
+    fetchOtherIndicator()
+  }, [selectedIndicator, user, isCommodity])
+
+  const handlePdrbDemoValueChange = (idx, val) => {
+    setPdrbDemoData(prev => {
+      if (!prev || !prev.data) return prev
+      const newList = [...prev.data]
+      newList[idx] = { ...newList[idx], value: val }
+      return { ...prev, data: newList }
+    })
+  }
+
   const handleSave = () => {
+    const nextStepIndex = datasetSource === "available" ? 3 : 2;
+
+    if (!isCommodity) {
+      const varLabel = pdrbDemoData?.var?.label || analysisTitle || "Data BPS";
+      const userCity = pdrbDemoData?.kota || user?.location?.name || "KOTA METRO";
+      const parsedData = [
+        ["Kategori / Sub Variabel", "Tahun / Periode", "Nilai"],
+        ...(pdrbDemoData?.data || []).map(row => [
+          row.turvarLabel || (row.turvarVal ? `Kategori ${row.turvarVal}` : "Utama"),
+          row.tahunLabel || "Terbaru",
+          String(row.value !== undefined && row.value !== null ? row.value : 0)
+        ])
+      ];
+
+      setUploadedDataset({
+        valid: "ya",
+        fileInfo: {
+          name: `Database BPS - ${varLabel}`,
+          size: "N/A",
+          rows: parsedData.length,
+          cols: 3,
+          sheet: "Sheet Utama"
+        },
+        context: {
+          city: userCity,
+          period: analysisTitle || varLabel,
+          monthIndex: 0,
+          year: currentYear,
+          title: analysisTitle
+        },
+        structure: varLabel,
+        columns: parsedData[0],
+        parsedData: parsedData,
+        editedData: { pdrbDemoData }
+      });
+
+      setStep(nextStepIndex);
+      return;
+    }
+
     let monthIndex = 0;
     for (let i = 11; i >= 0; i--) {
       if (activeDataInflasi[i] && activeDataInflasi[i].value !== undefined && activeDataInflasi[i].value !== "") {
@@ -415,7 +610,8 @@ function StepTwoAvailable(props) {
         city: userCityName,
         period: periodText,
         monthIndex: monthIndex,
-        year: currentYear
+        year: currentYear,
+        title: analysisTitle
       },
       structure: "BPS Inflasi / IHK",
       columns: parsedData[0],
@@ -423,8 +619,9 @@ function StepTwoAvailable(props) {
       editedData: { inflasiData, ihkData, komoditasData }
     });
 
-    setStep(2);
+    setStep(nextStepIndex);
   };
+
 
   const komoditasLabelsKey = useMemo(() => {
     if (!komoditasList) return "";
@@ -702,6 +899,74 @@ function StepTwoAvailable(props) {
     return points;
   }, [activeDataInflasi, inflasiData, komoditasList, annForecastResult]);
 
+  function capitalize(str) {
+    if (!str) return ""
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
+
+  if (!isCommodity) {
+    if (loadingPdrbDemo || !pdrbDemoData) {
+      return (
+        <div className={styles.container}>
+          <Wrapper>
+            <p className={styles.sectionTitle}>Memuat Data BPS ({analysisTitle})...</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+              <Skeleton height="42px" />
+              <Skeleton height="200px" />
+            </div>
+          </Wrapper>
+        </div>
+      )
+    }
+
+    const varLabel = pdrbDemoData?.var?.label || analysisTitle || "Indikator Data BPS"
+    const cityName = pdrbDemoData?.kota || user?.location?.name || "KOTA METRO"
+
+    return (
+      <div className={styles.container}>
+        <Wrapper>
+          <div className={styles.editHeader}>
+            <p className={styles.sectionTitle}>
+              Edit Data BPS ({varLabel} - {capitalize(cityName)})
+            </p>
+          </div>
+
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th style={{ width: '60px' }}>No</th>
+                  <th>Kategori / Sub Variabel</th>
+                  <th>Tahun / Periode</th>
+                  <th>Nilai Data</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(pdrbDemoData?.data || []).map((row, idx) => (
+                  <tr key={idx}>
+                    <td style={{ textAlign: 'center' }}>{idx + 1}</td>
+                    <td>{row.turvarLabel || (row.turvarVal ? `Kategori ${row.turvarVal}` : "Utama")}</td>
+                    <td style={{ textAlign: 'center' }}>{row.tahunLabel || "Terbaru"}</td>
+                    <td>
+                      <Input
+                        type="text"
+                        placeholder="Masukkan nilai"
+                        value={row.value !== undefined && row.value !== null ? row.value : ""}
+                        setValue={(val) => handlePdrbDemoValueChange(idx, val)}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Wrapper>
+
+        <MainButton onClick={handleSave}>Simpan & Lanjutkan</MainButton>
+      </div>
+    )
+  }
+
   if (!inflasiData.mom || !ihkData || !komoditasData.mom) {
     return (
       <div className={styles.container}>
@@ -722,10 +987,6 @@ function StepTwoAvailable(props) {
 
   const treeHeight = Math.max(600, countTreeLeaves(hierarchyData) * 90 + 100)
 
-  function capitalize(str) {
-    if (!str) return ""
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-  }
 
   return (
     <div className={styles.container}>
@@ -900,26 +1161,28 @@ function StepTwoAvailable(props) {
           ))}
         </div>
       </Wrapper>
-      <Wrapper>
-        <div className={styles.hierarchyContainer}>
-          <div className={styles.hierarchyHeader}>
-            <p className={styles.sectionTitle}>
-              Preview Hierarki
-            </p>
+      {isCommodity && (
+        <Wrapper>
+          <div className={styles.hierarchyContainer}>
+            <div className={styles.hierarchyHeader}>
+              <p className={styles.sectionTitle}>
+                Preview Hierarki
+              </p>
+            </div>
+            <div className={styles.hierarchyWrapper}>
+              <Hierarchy
+                data={hierarchyData}
+                width={1350}
+                height={treeHeight}
+                fill={"rgba(255, 255, 255, 0.04)"}
+                stroke={"rgba(255, 255, 255, 0.2)"}
+                textColor={"#F8FAFC"}
+                lineColor={"rgba(255, 255, 255, 0.15)"}
+              />
+            </div>
           </div>
-          <div className={styles.hierarchyWrapper}>
-            <Hierarchy
-              data={hierarchyData}
-              width={1350}
-              height={treeHeight}
-              fill={"rgba(255, 255, 255, 0.04)"}
-              stroke={"rgba(255, 255, 255, 0.2)"}
-              textColor={"#F8FAFC"}
-              lineColor={"rgba(255, 255, 255, 0.15)"}
-            />
-          </div>
-        </div>
-      </Wrapper>
+        </Wrapper>
+      )}
 
       {/* ─── Wrapper Forecasting ─── */}
       <Wrapper>
