@@ -2,9 +2,15 @@ import { useState, useEffect } from "react";
 import styles from "./Stepper.module.css"
 
 export default function Stepper({ item }) {
-
   const [step, setStep] = useState(0)
-  const CurrentContent = item[step].content
+
+  const renderContent = () => {
+    const current = item[step]?.content;
+    if (typeof current === "function") {
+      return current({ setStep });
+    }
+    return current;
+  };
 
   return (
     <div className={styles.container}>
@@ -37,7 +43,7 @@ export default function Stepper({ item }) {
           </div>
         ))}
       </div>
-      <CurrentContent setStep={setStep} />
+      {renderContent()}
     </div>
   )
 }

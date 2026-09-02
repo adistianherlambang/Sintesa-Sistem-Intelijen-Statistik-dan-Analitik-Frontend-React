@@ -63,6 +63,7 @@ export default function Analisis() {
         <StepThree
           {...props}
           datasetSource={datasetSource}
+          analysisTitle={analysisTitle}
           uploadedDataset={uploadedDataset}
           brsPreview={brsPreview}
           setBrsPreview={setBrsPreview}
@@ -97,6 +98,7 @@ export default function Analisis() {
         <StepThree
           {...props}
           datasetSource={datasetSource}
+          analysisTitle={analysisTitle}
           uploadedDataset={uploadedDataset}
           brsPreview={brsPreview}
           setBrsPreview={setBrsPreview}
@@ -122,10 +124,10 @@ function StepConfigAvailable(props) {
     { value: "pdrb-pengeluaran-adhb", label: "PDRB Pengeluaran ADHB (Harga Berlaku)" },
     { value: "pdrb-lapangan-usaha-adhk", label: "PDRB Lapangan Usaha ADHK (Harga Konstan)" },
     { value: "pdrb-lapangan-usaha-adhb", label: "PDRB Lapangan Usaha ADHB (Harga Berlaku)" },
-    { value: "demografi-penduduk", label: "Demografi - Jumlah Penduduk Total" },
-    { value: "demografi-laki", label: "Demografi - Penduduk Laki-Laki" },
-    { value: "demografi-perempuan", label: "Demografi - Penduduk Perempuan" },
-    { value: "demografi-kemiskinan", label: "Demografi - Persentase Penduduk Miskin" },
+    { value: "demografi-penduduk", label: "Demografi Jumlah Penduduk Total" },
+    { value: "demografi-laki", label: "Demografi Penduduk Laki-Laki" },
+    { value: "demografi-perempuan", label: "Demografi Penduduk Perempuan" },
+    { value: "demografi-kemiskinan", label: "Demografi Persentase Penduduk Miskin" },
   ]
 
   const toggleIndicator = (val) => {
@@ -173,7 +175,7 @@ function StepConfigAvailable(props) {
                     <div className={`${styles.checkboxBox} ${isChecked ? styles.checkboxBoxActive : ''}`}>
                       {isChecked && (
                         <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M1 5L4.5 8.5L11 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M1 5L4.5 8.5L11 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       )}
                     </div>
@@ -465,6 +467,10 @@ function StepTwoAvailable(props) {
   const [ihkData, setIhkData] = useState(null)
   const [komoditasData, setKomoditasData] = useState({ mom: null, yoy: null, ytd: null })
 
+  // Bobot komoditas state
+  const [backendBobotMap, setBackendBobotMap] = useState({})
+  const [commodityWeights, setCommodityWeights] = useState({})
+
   // Non-commodity indicators state map
   const [pdrbDemoMap, setPdrbDemoMap] = useState({})
   const [loadingPdrbDemo, setLoadingPdrbDemo] = useState(false)
@@ -578,8 +584,10 @@ function StepTwoAvailable(props) {
       const divisions = komoditasList.map(c => {
         const dataKeys = Object.keys(c.data || {});
         const targetKey = dataKeys[monthIndex];
+        const wVal = commodityWeights[c.label] !== undefined ? commodityWeights[c.label] : "10";
         return {
           name: c.label,
+          weight: wVal,
           inflasi: parseFloat(c.data?.[targetKey]) || 0
         };
       });
@@ -591,9 +599,10 @@ function StepTwoAvailable(props) {
 
       divisions.forEach((div, idx) => {
         const code = String(idx + 1).padStart(2, "0");
-        combinedParsedData.push([currentYear, monthIndex + 1, "1872", userCityName, code, div.name, "10", "10", "100", String(div.inflasi), "0", "0", String(div.inflasi)]);
+        combinedParsedData.push([currentYear, monthIndex + 1, "1872", userCityName, code, div.name, String(div.weight), "10", "100", String(div.inflasi), "0", "0", String(div.inflasi)]);
       });
     }
+
 
     nonCommodityIndicators.forEach((key) => {
       const itemData = pdrbDemoMap[key];
@@ -723,6 +732,11 @@ function StepTwoAvailable(props) {
     const fetchData = async () => {
       try {
         const userCity = user?.location?.name || ""
+        const normalizeGroupName = (str) => {
+          if (!str) return ""
+          return str.toLowerCase().replace(/,/g, "").replace(/\s+/g, " ").trim()
+        }
+
         const [
           resInflasiMom,
           resInflasiYoy,
@@ -732,6 +746,7 @@ function StepTwoAvailable(props) {
           resKomoditasYoy,
           resKomoditasYtd,
           resForecast,
+          resBobot,
         ] = await Promise.all([
           axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi`, { kota: userCity }).catch(() => ({ data: null })),
           axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi/yoy`, { kota: userCity }).catch(() => ({ data: null })),
@@ -741,6 +756,7 @@ function StepTwoAvailable(props) {
           axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/komoditas/yoy`, { kota: userCity }).catch(() => ({ data: null })),
           axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/komoditas/ytd`, { kota: userCity }).catch(() => ({ data: null })),
           axios.get(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/forecast/${encodeURIComponent(userCity)}`).catch(() => ({ data: null })),
+          axios.get(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/bobot`).catch(() => ({ data: null })),
         ])
 
         setInflasiData({
@@ -757,12 +773,60 @@ function StepTwoAvailable(props) {
         if (resForecast?.data) {
           setAnnForecastResult(resForecast.data)
         }
+        if (resBobot?.data?.bobot && Array.isArray(resBobot.data.bobot)) {
+          const map = {}
+          resBobot.data.bobot.forEach((item) => {
+            map[normalizeGroupName(item.kelompok)] = String(item.bobot)
+          })
+          setBackendBobotMap(map)
+        }
       } catch (err) {
         console.error(err.message)
       }
     }
     fetchData()
   }, [user])
+
+  const normalizeGroupName = (str) => {
+    if (!str) return ""
+    return str.toLowerCase().replace(/,/g, "").replace(/\s+/g, " ").trim()
+  }
+
+  useEffect(() => {
+    if (komoditasList && komoditasList.length > 0) {
+      setCommodityWeights(prev => {
+        const nextWeights = { ...prev }
+        komoditasList.forEach((c) => {
+          if (nextWeights[c.label] === undefined) {
+            const normKey = normalizeGroupName(c.label)
+            if (backendBobotMap[normKey] !== undefined) {
+              nextWeights[c.label] = backendBobotMap[normKey]
+            } else {
+              nextWeights[c.label] = (100 / komoditasList.length).toFixed(2)
+            }
+          }
+        })
+        return nextWeights
+      })
+    }
+  }, [komoditasList, backendBobotMap])
+
+  const handleWeightChange = (label, val) => {
+    setCommodityWeights(prev => ({
+      ...prev,
+      [label]: val
+    }))
+  }
+
+  const totalWeight = useMemo(() => {
+    if (!komoditasList || komoditasList.length === 0) return "0.00"
+    const sum = komoditasList.reduce((acc, c) => {
+      const w = parseFloat(commodityWeights[c.label]) || 0
+      return acc + w
+    }, 0)
+    return sum.toFixed(2)
+  }, [komoditasList, commodityWeights])
+
 
   const handleInflasiChange = (index, val) => {
     setInflasiData(prev => {
@@ -1141,6 +1205,45 @@ function StepTwoAvailable(props) {
             </div>
           </Wrapper>
 
+
+          {/* Bobot per Komoditas Section */}
+          <Wrapper>
+            <div className={styles.editHeader}>
+              <div>
+                <p className={styles.sectionTitle}>Bobot per Komoditas</p>
+              </div>
+            </div>
+
+            <div className={styles.tableContainer}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={{ width: '60px' }}>No</th>
+                    <th>Kelompok Komoditas</th>
+                    <th style={{ width: '220px' }}>Bobot / Timbangan (%)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {komoditasList.map((cItem, index) => (
+                    <tr key={index}>
+                      <td style={{ textAlign: 'center' }}>{index + 1}</td>
+                      <td style={{ fontWeight: 500 }}>{cItem.label}</td>
+                      <td>
+                        <Input
+                          type="text"
+                          placeholder="Masukkan bobot (%)"
+                          value={commodityWeights[cItem.label] !== undefined ? commodityWeights[cItem.label] : ""}
+                          setValue={(val) => handleWeightChange(cItem.label, val)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Wrapper>
+
+
           {/* Hierarki Preview */}
           <Wrapper>
             <div className={styles.hierarchyContainer}>
@@ -1369,7 +1472,7 @@ function StepTwoAvailable(props) {
 }
 
 function StepThree(props) {
-  const { setStep, datasetSource, uploadedDataset } = props
+  const { setStep, datasetSource, uploadedDataset, analysisTitle } = props
   const [loadingSummary, setLoadingSummary] = useState(false)
   const [aiSummary, setAiSummary] = useState(null)
   const [generatingBRS, setGeneratingBRS] = useState(false)
@@ -1454,9 +1557,12 @@ function StepThree(props) {
     setError("");
     try {
       const token = localStorage.getItem("token");
+      const reportTitle = uploadedDataset?.context?.title || analysisTitle || "Analisis BPS Kota Metro";
       const res = await axios.post(
         `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/generate-and-save-brs`,
         {
+          title: reportTitle,
+          analysisTitle: reportTitle,
           city: uploadedDataset.context.city,
           monthIndex: uploadedDataset.context.monthIndex,
           year: uploadedDataset.context.year,
