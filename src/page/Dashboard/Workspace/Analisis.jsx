@@ -13,6 +13,17 @@ import Input from '../../../components/Input/Input'
 import Skeleton from '../../../components/Skeleton/Skeleton'
 import AILoader from '../../../components/AILoader/AILoader'
 
+const INDICATOR_OPTIONS = [
+  { value: "komoditas", label: "Komoditas & Inflasi (IHK)" },
+  { value: "pdrb-pengeluaran-adhk", label: "PDRB Pengeluaran ADHK (Harga Konstan)" },
+  { value: "pdrb-pengeluaran-adhb", label: "PDRB Pengeluaran ADHB (Harga Berlaku)" },
+  { value: "pdrb-lapangan-usaha-adhk", label: "PDRB Lapangan Usaha ADHK (Harga Konstan)" },
+  { value: "pdrb-lapangan-usaha-adhb", label: "PDRB Lapangan Usaha ADHB (Harga Berlaku)" },
+  { value: "demografi-penduduk", label: "Demografi Jumlah Penduduk Total" },
+  { value: "demografi-laki", label: "Demografi Penduduk Laki-Laki" },
+  { value: "demografi-perempuan", label: "Demografi Penduduk Perempuan" },
+  { value: "demografi-kemiskinan", label: "Demografi Persentase Penduduk Miskin" },
+]
 
 export default function Analisis() {
   const [datasetSource, setDatasetSource] = useState("available") // "available" or "manual"
@@ -118,18 +129,6 @@ export default function Analisis() {
 function StepConfigAvailable(props) {
   const { setStep, selectedIndicators, setSelectedIndicators, analysisTitle, setAnalysisTitle } = props
 
-  const indicatorOptions = [
-    { value: "komoditas", label: "Komoditas & Inflasi (IHK)" },
-    { value: "pdrb-pengeluaran-adhk", label: "PDRB Pengeluaran ADHK (Harga Konstan)" },
-    { value: "pdrb-pengeluaran-adhb", label: "PDRB Pengeluaran ADHB (Harga Berlaku)" },
-    { value: "pdrb-lapangan-usaha-adhk", label: "PDRB Lapangan Usaha ADHK (Harga Konstan)" },
-    { value: "pdrb-lapangan-usaha-adhb", label: "PDRB Lapangan Usaha ADHB (Harga Berlaku)" },
-    { value: "demografi-penduduk", label: "Demografi Jumlah Penduduk Total" },
-    { value: "demografi-laki", label: "Demografi Penduduk Laki-Laki" },
-    { value: "demografi-perempuan", label: "Demografi Penduduk Perempuan" },
-    { value: "demografi-kemiskinan", label: "Demografi Persentase Penduduk Miskin" },
-  ]
-
   const toggleIndicator = (val) => {
     if (selectedIndicators.includes(val)) {
       if (selectedIndicators.length === 1) return
@@ -164,7 +163,7 @@ function StepConfigAvailable(props) {
               Pilih Indikator Dataset <span style={{ color: '#34B34A', fontSize: 12, marginLeft: 4 }}>({selectedIndicators.length} terpilih)</span>
             </label>
             <div className={styles.checkboxGrid}>
-              {indicatorOptions.map((opt) => {
+              {INDICATOR_OPTIONS.map((opt) => {
                 const isChecked = selectedIndicators.includes(opt.value)
                 return (
                   <div
@@ -173,11 +172,7 @@ function StepConfigAvailable(props) {
                     onClick={() => toggleIndicator(opt.value)}
                   >
                     <div className={`${styles.checkboxBox} ${isChecked ? styles.checkboxBoxActive : ''}`}>
-                      {isChecked && (
-                        <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M1 5L4.5 8.5L11 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      )}
+                      {isChecked && <span style={{ fontSize: 13, fontWeight: 'bold' }}>✓</span>}
                     </div>
                     <span className={styles.checkboxLabel}>{opt.label}</span>
                   </div>
@@ -239,12 +234,15 @@ function CustomForecastTooltip({ active, payload, label }) {
         <p className={styles.tooltipLabel}>
           Bulan: {label} {isForecast && <span style={{ color: '#34B34A', fontSize: 10, marginLeft: 4 }}>(Prediksi ANN)</span>}
         </p>
-        {payload.map((entry, idx) => (
-          <div key={idx} className={styles.tooltipItem}>
-            <span style={{ color: entry.color, fontWeight: 600 }}>{entry.name}:</span>
-            <span style={{ fontWeight: 'bold' }}>{Number(entry.value).toFixed(2)}%</span>
-          </div>
-        ))}
+        {payload.map((entry, idx) => {
+          const unit = entry.payload?.unit !== undefined ? entry.payload.unit : "%";
+          return (
+            <div key={idx} className={styles.tooltipItem}>
+              <span style={{ color: entry.color, fontWeight: 600 }}>{entry.name}:</span>
+              <span style={{ fontWeight: 'bold' }}>{Number(entry.value).toFixed(2)}{unit}</span>
+            </div>
+          );
+        })}
       </div>
     );
   }
@@ -479,10 +477,14 @@ function StepTwoAvailable(props) {
   const [loadingPdrbDemo, setLoadingPdrbDemo] = useState(false)
 
   const [metricType, setMetricType] = useState("mom") // "mom", "yoy", "ytd"
-  const [activeYear, setActiveYear] = useState("now") // "now", "prev", "prev2"
+  const [yearKomoditasInflasi, setYearKomoditasInflasi] = useState("now") // "now", "prev", "prev2"
+  const [yearKomoditasIhk, setYearKomoditasIhk] = useState("now") // "now", "prev", "prev2"
+  const [yearIhkUmum, setYearIhkUmum] = useState("now") // "now", "prev", "prev2"
+  const [yearInflasiUmum, setYearInflasiUmum] = useState("now") // "now", "prev", "prev2"
   const [activeSheet, setActiveSheet] = useState("main") // "main" or commodity index string ("0", "1", ...)
   const [forecastingEnabled, setForecastingEnabled] = useState(false)
   const [annForecastResult, setAnnForecastResult] = useState(null)
+  const [forecastActiveTab, setForecastActiveTab] = useState("inflasi-umum")
 
   const currentYear = new Date().getFullYear()
   const prevYear = currentYear - 1
@@ -491,53 +493,53 @@ function StepTwoAvailable(props) {
   const activeInflasiObj = inflasiData[metricType]
   const activeDataInflasi = useMemo(() => {
     if (!activeInflasiObj) return []
-    if (activeYear === "now") return activeInflasiObj.data || []
-    if (activeYear === "prev") return activeInflasiObj.prevYear || []
+    if (yearInflasiUmum === "now") return activeInflasiObj.data || []
+    if (yearInflasiUmum === "prev") return activeInflasiObj.prevYear || []
     return activeInflasiObj.prev2Year || []
-  }, [activeInflasiObj, activeYear])
+  }, [activeInflasiObj, yearInflasiUmum])
 
   const activeDataInflasiMoM = useMemo(() => {
     if (!inflasiData.mom) return []
-    if (activeYear === "now") return inflasiData.mom.data || []
-    if (activeYear === "prev") return inflasiData.mom.prevYear || []
+    if (yearInflasiUmum === "now") return inflasiData.mom.data || []
+    if (yearInflasiUmum === "prev") return inflasiData.mom.prevYear || []
     return inflasiData.mom.prev2Year || []
-  }, [inflasiData.mom, activeYear])
+  }, [inflasiData.mom, yearInflasiUmum])
 
   const activeDataInflasiYoY = useMemo(() => {
     if (!inflasiData.yoy) return []
-    if (activeYear === "now") return inflasiData.yoy.data || []
-    if (activeYear === "prev") return inflasiData.yoy.prevYear || []
+    if (yearInflasiUmum === "now") return inflasiData.yoy.data || []
+    if (yearInflasiUmum === "prev") return inflasiData.yoy.prevYear || []
     return inflasiData.yoy.prev2Year || []
-  }, [inflasiData.yoy, activeYear])
+  }, [inflasiData.yoy, yearInflasiUmum])
 
   const activeDataInflasiYtd = useMemo(() => {
     if (!inflasiData.ytd) return []
-    if (activeYear === "now") return inflasiData.ytd.data || []
-    if (activeYear === "prev") return inflasiData.ytd.prevYear || []
+    if (yearInflasiUmum === "now") return inflasiData.ytd.data || []
+    if (yearInflasiUmum === "prev") return inflasiData.ytd.prevYear || []
     return inflasiData.ytd.prev2Year || []
-  }, [inflasiData.ytd, activeYear])
+  }, [inflasiData.ytd, yearInflasiUmum])
 
   const activeDataIhk = useMemo(() => {
     if (!ihkData) return []
-    if (activeYear === "now") return ihkData.data || []
-    if (activeYear === "prev") return ihkData.prevYear || []
+    if (yearIhkUmum === "now") return ihkData.data || []
+    if (yearIhkUmum === "prev") return ihkData.prevYear || []
     return ihkData.prev2Year || []
-  }, [ihkData, activeYear])
+  }, [ihkData, yearIhkUmum])
 
   const activeKomoditasObj = komoditasData[metricType]
   const komoditasList = useMemo(() => {
     if (!activeKomoditasObj) return []
-    if (activeYear === "now") return activeKomoditasObj.hierarki || []
-    if (activeYear === "prev") return activeKomoditasObj.prevYear || activeKomoditasObj.prevYearList || []
+    if (yearKomoditasInflasi === "now") return activeKomoditasObj.hierarki || []
+    if (yearKomoditasInflasi === "prev") return activeKomoditasObj.prevYear || activeKomoditasObj.prevYearList || []
     return activeKomoditasObj.prev2Year || activeKomoditasObj.prev2YearList || []
-  }, [activeKomoditasObj, activeYear])
+  }, [activeKomoditasObj, yearKomoditasInflasi])
 
   const komoditasIhkList = useMemo(() => {
     if (!komoditasIhkData) return []
-    if (activeYear === "now") return komoditasIhkData.hierarki || []
-    if (activeYear === "prev") return komoditasIhkData.prevYear || komoditasIhkData.prevYearList || []
+    if (yearKomoditasIhk === "now") return komoditasIhkData.hierarki || []
+    if (yearKomoditasIhk === "prev") return komoditasIhkData.prevYear || komoditasIhkData.prevYearList || []
     return komoditasIhkData.prev2Year || komoditasIhkData.prev2YearList || []
-  }, [komoditasIhkData, activeYear])
+  }, [komoditasIhkData, yearKomoditasIhk])
 
   const activeCommodityIhkIndex = activeSheetIhk !== "main" ? Number(activeSheetIhk) : null
   const activeCommodityIhk = activeCommodityIhkIndex !== null ? komoditasIhkList[activeCommodityIhkIndex] : null
@@ -715,7 +717,7 @@ function StepTwoAvailable(props) {
       structure: "BPS Multi-Indikator",
       columns: combinedParsedData[0],
       parsedData: combinedParsedData,
-      editedData: { inflasiData, ihkData, komoditasData, komoditasIhkData, pdrbDemoMap }
+      editedData: { inflasiData, ihkData, komoditasData, komoditasIhkData, pdrbDemoMap, forecast: annForecastResult?.forecast || null }
     });
 
     setStep(nextStepIndex);
@@ -890,7 +892,7 @@ function StepTwoAvailable(props) {
     setInflasiData(prev => {
       const targetObj = prev[metricName]
       if (!targetObj) return prev
-      const targetField = activeYear === "now" ? "data" : activeYear === "prev" ? "prevYear" : "prev2Year"
+      const targetField = yearInflasiUmum === "now" ? "data" : yearInflasiUmum === "prev" ? "prevYear" : "prev2Year"
       const newList = [...(targetObj[targetField] || [])]
       newList[index] = { ...newList[index], value: val }
       return {
@@ -910,7 +912,7 @@ function StepTwoAvailable(props) {
   const handleIhkChange = (index, val) => {
     setIhkData(prev => {
       if (!prev) return prev
-      const targetField = activeYear === "now" ? "data" : activeYear === "prev" ? "prevYear" : "prev2Year"
+      const targetField = yearIhkUmum === "now" ? "data" : yearIhkUmum === "prev" ? "prevYear" : "prev2Year"
       const newList = [...(prev[targetField] || [])]
       newList[index] = { ...newList[index], value: val }
       return {
@@ -924,7 +926,7 @@ function StepTwoAvailable(props) {
     setKomoditasData(prev => {
       const targetObj = prev[metricType]
       if (!targetObj) return prev
-      const targetField = activeYear === "now" ? "hierarki" : activeYear === "prev" ? (targetObj.prevYear ? "prevYear" : "prevYearList") : (targetObj.prev2Year ? "prev2Year" : "prev2YearList")
+      const targetField = yearKomoditasInflasi === "now" ? "hierarki" : yearKomoditasInflasi === "prev" ? (targetObj.prevYear ? "prevYear" : "prevYearList") : (targetObj.prev2Year ? "prev2Year" : "prev2YearList")
       const newList = [...(targetObj[targetField] || [])]
       const targetCommodity = { ...newList[commodityIndex] }
 
@@ -951,7 +953,7 @@ function StepTwoAvailable(props) {
     setKomoditasData(prev => {
       const targetObj = prev[metricType]
       if (!targetObj) return prev
-      const targetField = activeYear === "now" ? "hierarki" : activeYear === "prev" ? (targetObj.prevYear ? "prevYear" : "prevYearList") : (targetObj.prev2Year ? "prev2Year" : "prev2YearList")
+      const targetField = yearKomoditasInflasi === "now" ? "hierarki" : yearKomoditasInflasi === "prev" ? (targetObj.prevYear ? "prevYear" : "prevYearList") : (targetObj.prev2Year ? "prev2Year" : "prev2YearList")
       const newList = [...(targetObj[targetField] || [])]
       const targetCommodity = { ...newList[commodityIndex] }
 
@@ -983,7 +985,7 @@ function StepTwoAvailable(props) {
   const handleKomoditasIhkChange = (commodityIndex, monthIndex, val) => {
     setKomoditasIhkData(prev => {
       if (!prev) return prev
-      const targetField = activeYear === "now" ? "hierarki" : activeYear === "prev" ? (prev.prevYear ? "prevYear" : "prevYearList") : (prev.prev2Year ? "prev2Year" : "prev2YearList")
+      const targetField = yearKomoditasIhk === "now" ? "hierarki" : yearKomoditasIhk === "prev" ? (prev.prevYear ? "prevYear" : "prevYearList") : (prev.prev2Year ? "prev2Year" : "prev2YearList")
       const newList = [...(prev[targetField] || [])]
       const targetCommodity = { ...newList[commodityIndex] }
 
@@ -1006,7 +1008,7 @@ function StepTwoAvailable(props) {
   const handleSubKomoditasIhkChange = (commodityIndex, subIndex, monthIndex, val) => {
     setKomoditasIhkData(prev => {
       if (!prev) return prev
-      const targetField = activeYear === "now" ? "hierarki" : activeYear === "prev" ? (prev.prevYear ? "prevYear" : "prevYearList") : (prev.prev2Year ? "prev2Year" : "prev2YearList")
+      const targetField = yearKomoditasIhk === "now" ? "hierarki" : yearKomoditasIhk === "prev" ? (prev.prevYear ? "prevYear" : "prevYearList") : (prev.prev2Year ? "prev2Year" : "prev2YearList")
       const newList = [...(prev[targetField] || [])]
       const targetCommodity = { ...newList[commodityIndex] }
 
@@ -1036,6 +1038,30 @@ function StepTwoAvailable(props) {
     "Januari", "Februari", "Maret", "April", "Mei", "Juni",
     "Juli", "Agustus", "September", "Oktober", "November", "Desember"
   ]
+
+  const dynamicForecastTabs = useMemo(() => {
+    const tabs = [];
+    if (isCommodity) {
+      tabs.push({ id: "inflasi-umum", label: "Inflasi Umum (MoM / YoY / YtD)", category: "commodity" });
+      tabs.push({ id: "ihk-umum", label: "IHK Umum", category: "commodity" });
+      tabs.push({ id: "komoditas", label: "11 Kelompok Komoditas", category: "commodity" });
+    }
+    nonCommodityIndicators.forEach(key => {
+      const opt = INDICATOR_OPTIONS.find(o => o.value === key);
+      tabs.push({
+        id: key,
+        label: opt ? opt.label : key,
+        category: "non-commodity"
+      });
+    });
+    return tabs;
+  }, [isCommodity, nonCommodityIndicators]);
+
+  useEffect(() => {
+    if (dynamicForecastTabs.length > 0 && !dynamicForecastTabs.some(t => t.id === forecastActiveTab)) {
+      setForecastActiveTab(dynamicForecastTabs[0].id);
+    }
+  }, [dynamicForecastTabs, forecastActiveTab]);
 
   const forecastChartData = useMemo(() => {
     if (!activeDataInflasi || activeDataInflasi.length === 0) return [];
@@ -1081,8 +1107,10 @@ function StepTwoAvailable(props) {
       const monthLabel = `${monthShortNames[nextMonthIdx]} (T+${step})`;
 
       let predMom;
-      if (step === 1 && annForecastResult?.forecast?.inflasi?.forecast_value !== undefined) {
-        predMom = parseFloat(annForecastResult.forecast.inflasi.forecast_value.toFixed(2));
+      if (Array.isArray(annForecastResult?.forecast?.inflasi) && annForecastResult.forecast.inflasi[step - 1] !== undefined) {
+        predMom = parseFloat(Number(annForecastResult.forecast.inflasi[step - 1]).toFixed(2));
+      } else if (step === 1 && annForecastResult?.forecast?.inflasi?.forecast_value !== undefined) {
+        predMom = parseFloat(Number(annForecastResult.forecast.inflasi.forecast_value).toFixed(2));
       } else {
         const lag3 = momSeries.slice(-3);
         const avg3 = lag3.reduce((a, b) => a + b, 0) / (lag3.length || 1);
@@ -1112,6 +1140,142 @@ function StepTwoAvailable(props) {
 
     return points;
   }, [activeDataInflasi, inflasiData, komoditasList, annForecastResult]);
+
+  const forecastIhkChartData = useMemo(() => {
+    if (!activeDataIhk || activeDataIhk.length === 0) return [];
+
+    const monthShortNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    let lastValidIdx = 0;
+    for (let i = 11; i >= 0; i--) {
+      if (activeDataIhk[i] && activeDataIhk[i].value !== undefined && activeDataIhk[i].value !== "" && !isNaN(parseFloat(activeDataIhk[i].value))) {
+        lastValidIdx = i;
+        break;
+      }
+    }
+
+    const ihkValues = activeDataIhk.map(item => parseFloat(item.value) || 100);
+    const points = [];
+    const startIdx = Math.max(0, lastValidIdx - 2);
+    for (let i = startIdx; i <= lastValidIdx; i++) {
+      points.push({
+        label: monthShortNames[i % 12],
+        isForecast: false,
+        ihk: parseFloat((ihkValues[i] || 100).toFixed(2)),
+        unit: ""
+      });
+    }
+
+    let currentIhk = ihkValues[lastValidIdx] || 100;
+    for (let step = 1; step <= 3; step++) {
+      const nextMonthIdx = (lastValidIdx + step) % 12;
+      const monthLabel = `${monthShortNames[nextMonthIdx]} (T+${step})`;
+
+      let predIhk;
+      if (Array.isArray(annForecastResult?.forecast?.ihk) && annForecastResult.forecast.ihk[step - 1] !== undefined) {
+        predIhk = parseFloat(Number(annForecastResult.forecast.ihk[step - 1]).toFixed(2));
+      } else {
+        const momVal = Array.isArray(annForecastResult?.forecast?.inflasi) && annForecastResult.forecast.inflasi[step - 1] !== undefined
+          ? Number(annForecastResult.forecast.inflasi[step - 1])
+          : 0.25;
+        currentIhk = currentIhk * (1 + momVal / 100);
+        predIhk = parseFloat(currentIhk.toFixed(2));
+      }
+
+      points.push({
+        label: monthLabel,
+        isForecast: true,
+        ihk: predIhk,
+        unit: ""
+      });
+    }
+
+    return points;
+  }, [activeDataIhk, annForecastResult]);
+
+  const forecastKomoditasList = useMemo(() => {
+    if (!komoditasList || komoditasList.length === 0) return [];
+
+    const monthShortNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    let lastValidIdx = 0;
+    for (let i = 11; i >= 0; i--) {
+      if (activeDataInflasi[i] && activeDataInflasi[i].value !== undefined && activeDataInflasi[i].value !== "") {
+        lastValidIdx = i;
+        break;
+      }
+    }
+    const t1Label = monthShortNames[(lastValidIdx + 1) % 12];
+    const t2Label = monthShortNames[(lastValidIdx + 2) % 12];
+    const t3Label = monthShortNames[(lastValidIdx + 3) % 12];
+
+    const annKomoditas = annForecastResult?.forecast?.komoditas || {};
+
+    const cleanStr = str => (str || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+    return komoditasList.map(c => {
+      let t1 = 0, t2 = 0, t3 = 0;
+      const cClean = cleanStr(c.label);
+
+      const matchedKey = Object.keys(annKomoditas).find(k => {
+        const kClean = cleanStr(k);
+        return kClean === cClean || kClean.includes(cClean) || cClean.includes(kClean);
+      });
+
+      if (matchedKey && Array.isArray(annKomoditas[matchedKey])) {
+        const arr = annKomoditas[matchedKey];
+        t1 = parseFloat(Number(arr[0] || 0).toFixed(2));
+        t2 = parseFloat(Number(arr[1] || 0).toFixed(2));
+        t3 = parseFloat(Number(arr[2] || 0).toFixed(2));
+      } else {
+        const monthlyVals = Object.values(c.data || {}).map(v => parseFloat(v) || 0);
+        const last3 = monthlyVals.slice(-3);
+        const avg = last3.length ? last3.reduce((a, b) => a + b, 0) / last3.length : 0.15;
+        t1 = parseFloat(avg.toFixed(2));
+        t2 = parseFloat((avg * 0.95).toFixed(2));
+        t3 = parseFloat((avg * 0.9).toFixed(2));
+      }
+
+      return {
+        name: c.label,
+        t1,
+        t2,
+        t3,
+        t1Label,
+        t2Label,
+        t3Label,
+        status: t1 >= 0 ? "Inflasi" : "Deflasi"
+      };
+    });
+  }, [komoditasList, activeDataInflasi, annForecastResult]);
+
+  const forecastNonCommodityData = useMemo(() => {
+    const result = {};
+    nonCommodityIndicators.forEach(key => {
+      const itemData = pdrbDemoMap[key];
+      if (!itemData || !itemData.data) return;
+
+      const rows = itemData.data.map(row => {
+        const val = parseFloat(row.value) || 0;
+        const isDemografi = key.includes("demografi");
+        const growthRate = isDemografi ? 0.012 : 0.035;
+        const predNext = parseFloat((val * (1 + growthRate)).toFixed(2));
+        const predNext2 = parseFloat((val * (1 + growthRate * 2)).toFixed(2));
+
+        return {
+          turvarLabel: row.turvarLabel || (row.turvarVal ? `Kategori ${row.turvarVal}` : "Utama"),
+          currentVal: val,
+          predNext,
+          predNext2,
+          growthRate: (growthRate * 100).toFixed(1)
+        };
+      });
+
+      result[key] = {
+        label: itemData?.var?.label || key,
+        data: rows
+      };
+    });
+    return result;
+  }, [nonCommodityIndicators, pdrbDemoMap]);
 
   function capitalize(str) {
     if (!str) return ""
@@ -1149,443 +1313,443 @@ function StepTwoAvailable(props) {
         <>
           {/* ─── 1. TABEL KOMODITAS INFLASI ─── */}
           <Wrapper>
-              <div className={styles.editHeader}>
-                <p className={styles.sectionTitle}>
-                  {activeSheet === "main"
-                    ? `Edit Data BPS - Komoditas Inflasi (${capitalize(userCityName)})`
-                    : `Edit Sub Komoditas Inflasi (${capitalize(activeCommodity?.label)})`
-                  }
-                </p>
-                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                  {/* Metric Type Selector (MoM, YoY, YtD) */}
-                  <div className={styles.yearSelector}>
-                    <button
-                      type="button"
-                      onClick={() => setMetricType("mom")}
-                      className={`${styles.yearBtn} ${metricType === "mom" ? styles.yearBtnActive : ""}`}
-                    >
-                      MoM
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setMetricType("yoy")}
-                      className={`${styles.yearBtn} ${metricType === "yoy" ? styles.yearBtnActive : ""}`}
-                    >
-                      YoY
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setMetricType("ytd")}
-                      className={`${styles.yearBtn} ${metricType === "ytd" ? styles.yearBtnActive : ""}`}
-                    >
-                      YtD
-                    </button>
-                  </div>
+            <div className={styles.editHeader}>
+              <p className={styles.sectionTitle}>
+                {activeSheet === "main"
+                  ? `Komoditas Inflasi`
+                  : `Edit Sub Komoditas Inflasi`
+                }
+              </p>
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+                {/* Metric Type Selector (MoM, YoY, YtD) */}
+                <div className={styles.yearSelector}>
+                  <button
+                    type="button"
+                    onClick={() => setMetricType("mom")}
+                    className={`${styles.yearBtn} ${metricType === "mom" ? styles.yearBtnActive : ""}`}
+                  >
+                    MoM
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMetricType("yoy")}
+                    className={`${styles.yearBtn} ${metricType === "yoy" ? styles.yearBtnActive : ""}`}
+                  >
+                    YoY
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMetricType("ytd")}
+                    className={`${styles.yearBtn} ${metricType === "ytd" ? styles.yearBtnActive : ""}`}
+                  >
+                    YtD
+                  </button>
+                </div>
 
-                  {/* Year Selector */}
-                  <div className={styles.yearSelector}>
-                    <button
-                      type="button"
-                      onClick={() => setActiveYear("now")}
-                      className={`${styles.yearBtn} ${activeYear === "now" ? styles.yearBtnActive : ""}`}
-                    >
-                      {currentYear}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveYear("prev")}
-                      className={`${styles.yearBtn} ${activeYear === "prev" ? styles.yearBtnActive : ""}`}
-                    >
-                      {prevYear}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveYear("prev2")}
-                      className={`${styles.yearBtn} ${activeYear === "prev2" ? styles.yearBtnActive : ""}`}
-                    >
-                      {prev2Year}
-                    </button>
-                  </div>
+                {/* Year Selector */}
+                <div className={styles.yearSelector}>
+                  <button
+                    type="button"
+                    onClick={() => setYearKomoditasInflasi("now")}
+                    className={`${styles.yearBtn} ${yearKomoditasInflasi === "now" ? styles.yearBtnActive : ""}`}
+                  >
+                    {currentYear}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setYearKomoditasInflasi("prev")}
+                    className={`${styles.yearBtn} ${yearKomoditasInflasi === "prev" ? styles.yearBtnActive : ""}`}
+                  >
+                    {prevYear}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setYearKomoditasInflasi("prev2")}
+                    className={`${styles.yearBtn} ${yearKomoditasInflasi === "prev2" ? styles.yearBtnActive : ""}`}
+                  >
+                    {prev2Year}
+                  </button>
                 </div>
               </div>
+            </div>
 
-              <div className={styles.tableContainer}>
-                <table className={styles.table}>
-                  {activeSheet === "main" ? (
-                    <>
-                      <thead>
-                        <tr>
-                          <th>Bulan</th>
-                          {komoditasList.map((item, cIndex) => (
-                            <th key={cIndex}>{item.label}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {monthNames.map((mName, index) => (
-                          <tr key={index}>
-                            <td className={styles.monthCol}>{mName}</td>
-                            {komoditasList.map((cItem, cIndex) => {
-                              const dataKeys = Object.keys(cItem.data || {})
-                              const targetKey = dataKeys[index]
-                              const val = targetKey !== undefined ? cItem.data[targetKey] : ""
-                              return (
-                                <td key={cIndex}>
-                                  <Input
-                                    type="text"
-                                    placeholder="0.00"
-                                    value={val}
-                                    setValue={(newVal) => handleKomoditasChange(cIndex, index, newVal)}
-                                  />
-                                </td>
-                              )
-                            })}
-                          </tr>
+            <div className={styles.tableContainer}>
+              <table className={styles.table}>
+                {activeSheet === "main" ? (
+                  <>
+                    <thead>
+                      <tr>
+                        <th>Bulan</th>
+                        {komoditasList.map((item, cIndex) => (
+                          <th key={cIndex}>{item.label}</th>
                         ))}
-                      </tbody>
-                    </>
-                  ) : (
-                    <>
-                      <thead>
-                        <tr>
-                          <th>Bulan</th>
-                          {subList.map((subItem, sIndex) => (
-                            <th key={sIndex}>{subItem.label}</th>
-                          ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {monthNames.map((mName, index) => (
+                        <tr key={index}>
+                          <td className={styles.monthCol}>{mName}</td>
+                          {komoditasList.map((cItem, cIndex) => {
+                            const dataKeys = Object.keys(cItem.data || {})
+                            const targetKey = dataKeys[index]
+                            const val = targetKey !== undefined ? cItem.data[targetKey] : ""
+                            return (
+                              <td key={cIndex}>
+                                <Input
+                                  type="text"
+                                  placeholder="0.00"
+                                  value={val}
+                                  setValue={(newVal) => handleKomoditasChange(cIndex, index, newVal)}
+                                />
+                              </td>
+                            )
+                          })}
                         </tr>
-                      </thead>
-                      <tbody>
-                        {monthNames.map((mName, index) => (
-                          <tr key={index}>
-                            <td className={styles.monthCol}>{mName}</td>
-                            {subList.map((subItem, sIndex) => {
-                              const dataKeys = Object.keys(subItem.data || {})
-                              const targetKey = dataKeys[index]
-                              const val = targetKey !== undefined ? subItem.data[targetKey] : ""
-                              return (
-                                <td key={sIndex}>
-                                  <Input
-                                    type="text"
-                                    placeholder="0.00"
-                                    value={val}
-                                    setValue={(newVal) => handleSubKomoditasChange(activeCommodityIndex, sIndex, index, newVal)}
-                                  />
-                                </td>
-                              )
-                            })}
-                          </tr>
+                      ))}
+                    </tbody>
+                  </>
+                ) : (
+                  <>
+                    <thead>
+                      <tr>
+                        <th>Bulan</th>
+                        {subList.map((subItem, sIndex) => (
+                          <th key={sIndex}>{subItem.label}</th>
                         ))}
-                      </tbody>
-                    </>
-                  )}
-                </table>
-              </div>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {monthNames.map((mName, index) => (
+                        <tr key={index}>
+                          <td className={styles.monthCol}>{mName}</td>
+                          {subList.map((subItem, sIndex) => {
+                            const dataKeys = Object.keys(subItem.data || {})
+                            const targetKey = dataKeys[index]
+                            const val = targetKey !== undefined ? subItem.data[targetKey] : ""
+                            return (
+                              <td key={sIndex}>
+                                <Input
+                                  type="text"
+                                  placeholder="0.00"
+                                  value={val}
+                                  setValue={(newVal) => handleSubKomoditasChange(activeCommodityIndex, sIndex, index, newVal)}
+                                />
+                              </td>
+                            )
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </>
+                )}
+              </table>
+            </div>
 
-              <div className={styles.sheetTabs}>
+            <div className={styles.sheetTabs}>
+              <button
+                type="button"
+                onClick={() => setActiveSheet("main")}
+                className={`${styles.sheetTab} ${activeSheet === "main" ? styles.sheetTabActive : ""}`}
+              >
+                Sheet Utama
+              </button>
+              {komoditasList.map((item, index) => (
                 <button
+                  key={index}
                   type="button"
-                  onClick={() => setActiveSheet("main")}
-                  className={`${styles.sheetTab} ${activeSheet === "main" ? styles.sheetTabActive : ""}`}
+                  onClick={() => setActiveSheet(index.toString())}
+                  className={`${styles.sheetTab} ${activeSheet === index.toString() ? styles.sheetTabActive : ""}`}
                 >
-                  Sheet Utama
+                  {item.label}
                 </button>
-                {komoditasList.map((item, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => setActiveSheet(index.toString())}
-                    className={`${styles.sheetTab} ${activeSheet === index.toString() ? styles.sheetTabActive : ""}`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </Wrapper>
+              ))}
+            </div>
+          </Wrapper>
 
           {/* ─── 2. TABEL KOMODITAS IHK (TANPA YOY & YTD) ─── */}
           <Wrapper>
-              <div className={styles.editHeader}>
-                <div>
-                  <p className={styles.sectionTitle}>
-                    {activeSheetIhk === "main"
-                      ? `Edit Data BPS - Komoditas IHK (${capitalize(userCityName)})`
-                      : `Edit Sub Komoditas IHK (${capitalize(activeCommodityIhk?.label)})`
-                    }
-                  </p>
-                  <p style={{ color: '#94A3B8', fontSize: 13, margin: '4px 0 0 0' }}>
-                    Indeks Harga Konsumen per kelompok komoditas (Level indeks, tidak ada YoY dan YtD).
-                  </p>
-                </div>
-                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                  {/* Year Selector Only */}
-                  <div className={styles.yearSelector}>
-                    <button
-                      type="button"
-                      onClick={() => setActiveYear("now")}
-                      className={`${styles.yearBtn} ${activeYear === "now" ? styles.yearBtnActive : ""}`}
-                    >
-                      {currentYear}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveYear("prev")}
-                      className={`${styles.yearBtn} ${activeYear === "prev" ? styles.yearBtnActive : ""}`}
-                    >
-                      {prevYear}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveYear("prev2")}
-                      className={`${styles.yearBtn} ${activeYear === "prev2" ? styles.yearBtnActive : ""}`}
-                    >
-                      {prev2Year}
-                    </button>
-                  </div>
-                </div>
+            <div className={styles.editHeader}>
+              <div>
+                <p className={styles.sectionTitle}>
+                  {activeSheetIhk === "main"
+                    ? `Komoditas IHK`
+                    : `Edit Sub Komoditas IHK`
+                  }
+                </p>
+                <p style={{ color: '#94A3B8', fontSize: 13, margin: '4px 0 0 0' }}>
+                  Indeks Harga Konsumen per kelompok komoditas (Level indeks, tidak ada YoY dan YtD).
+                </p>
               </div>
-
-              <div className={styles.tableContainer}>
-                <table className={styles.table}>
-                  {activeSheetIhk === "main" ? (
-                    <>
-                      <thead>
-                        <tr>
-                          <th>Bulan</th>
-                          {komoditasIhkList.map((item, cIndex) => (
-                            <th key={cIndex}>{item.label}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {monthNames.map((mName, index) => (
-                          <tr key={index}>
-                            <td className={styles.monthCol}>{mName}</td>
-                            {komoditasIhkList.map((cItem, cIndex) => {
-                              const dataKeys = Object.keys(cItem.data || {})
-                              const targetKey = dataKeys[index]
-                              const val = targetKey !== undefined ? cItem.data[targetKey] : ""
-                              return (
-                                <td key={cIndex}>
-                                  <Input
-                                    type="text"
-                                    placeholder="100.00"
-                                    value={val}
-                                    setValue={(newVal) => handleKomoditasIhkChange(cIndex, index, newVal)}
-                                  />
-                                </td>
-                              )
-                            })}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </>
-                  ) : (
-                    <>
-                      <thead>
-                        <tr>
-                          <th>Bulan</th>
-                          {subIhkList.map((subItem, sIndex) => (
-                            <th key={sIndex}>{subItem.label}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {monthNames.map((mName, index) => (
-                          <tr key={index}>
-                            <td className={styles.monthCol}>{mName}</td>
-                            {subIhkList.map((subItem, sIndex) => {
-                              const dataKeys = Object.keys(subItem.data || {})
-                              const targetKey = dataKeys[index]
-                              const val = targetKey !== undefined ? subItem.data[targetKey] : ""
-                              return (
-                                <td key={sIndex}>
-                                  <Input
-                                    type="text"
-                                    placeholder="100.00"
-                                    value={val}
-                                    setValue={(newVal) => handleSubKomoditasIhkChange(activeCommodityIhkIndex, sIndex, index, newVal)}
-                                  />
-                                </td>
-                              )
-                            })}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </>
-                  )}
-                </table>
-              </div>
-
-              <div className={styles.sheetTabs}>
-                <button
-                  type="button"
-                  onClick={() => setActiveSheetIhk("main")}
-                  className={`${styles.sheetTab} ${activeSheetIhk === "main" ? styles.sheetTabActive : ""}`}
-                >
-                  Sheet Utama
-                </button>
-                {komoditasIhkList.map((item, index) => (
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+                {/* Year Selector Only */}
+                <div className={styles.yearSelector}>
                   <button
-                    key={index}
                     type="button"
-                    onClick={() => setActiveSheetIhk(index.toString())}
-                    className={`${styles.sheetTab} ${activeSheetIhk === index.toString() ? styles.sheetTabActive : ""}`}
+                    onClick={() => setYearKomoditasIhk("now")}
+                    className={`${styles.yearBtn} ${yearKomoditasIhk === "now" ? styles.yearBtnActive : ""}`}
                   >
-                    {item.label}
+                    {currentYear}
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() => setYearKomoditasIhk("prev")}
+                    className={`${styles.yearBtn} ${yearKomoditasIhk === "prev" ? styles.yearBtnActive : ""}`}
+                  >
+                    {prevYear}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setYearKomoditasIhk("prev2")}
+                    className={`${styles.yearBtn} ${yearKomoditasIhk === "prev2" ? styles.yearBtnActive : ""}`}
+                  >
+                    {prev2Year}
+                  </button>
+                </div>
               </div>
-            </Wrapper>
+            </div>
+
+            <div className={styles.tableContainer}>
+              <table className={styles.table}>
+                {activeSheetIhk === "main" ? (
+                  <>
+                    <thead>
+                      <tr>
+                        <th>Bulan</th>
+                        {komoditasIhkList.map((item, cIndex) => (
+                          <th key={cIndex}>{item.label}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {monthNames.map((mName, index) => (
+                        <tr key={index}>
+                          <td className={styles.monthCol}>{mName}</td>
+                          {komoditasIhkList.map((cItem, cIndex) => {
+                            const dataKeys = Object.keys(cItem.data || {})
+                            const targetKey = dataKeys[index]
+                            const val = targetKey !== undefined ? cItem.data[targetKey] : ""
+                            return (
+                              <td key={cIndex}>
+                                <Input
+                                  type="text"
+                                  placeholder="100.00"
+                                  value={val}
+                                  setValue={(newVal) => handleKomoditasIhkChange(cIndex, index, newVal)}
+                                />
+                              </td>
+                            )
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </>
+                ) : (
+                  <>
+                    <thead>
+                      <tr>
+                        <th>Bulan</th>
+                        {subIhkList.map((subItem, sIndex) => (
+                          <th key={sIndex}>{subItem.label}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {monthNames.map((mName, index) => (
+                        <tr key={index}>
+                          <td className={styles.monthCol}>{mName}</td>
+                          {subIhkList.map((subItem, sIndex) => {
+                            const dataKeys = Object.keys(subItem.data || {})
+                            const targetKey = dataKeys[index]
+                            const val = targetKey !== undefined ? subItem.data[targetKey] : ""
+                            return (
+                              <td key={sIndex}>
+                                <Input
+                                  type="text"
+                                  placeholder="100.00"
+                                  value={val}
+                                  setValue={(newVal) => handleSubKomoditasIhkChange(activeCommodityIhkIndex, sIndex, index, newVal)}
+                                />
+                              </td>
+                            )
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </>
+                )}
+              </table>
+            </div>
+
+            <div className={styles.sheetTabs}>
+              <button
+                type="button"
+                onClick={() => setActiveSheetIhk("main")}
+                className={`${styles.sheetTab} ${activeSheetIhk === "main" ? styles.sheetTabActive : ""}`}
+              >
+                Sheet Utama
+              </button>
+              {komoditasIhkList.map((item, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => setActiveSheetIhk(index.toString())}
+                  className={`${styles.sheetTab} ${activeSheetIhk === index.toString() ? styles.sheetTabActive : ""}`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </Wrapper>
 
           {/* ─── 3. TABEL IHK UMUM ─── */}
           <Wrapper>
-              <div className={styles.editHeader}>
-                <div>
-                  <p className={styles.sectionTitle}>
-                    {`Edit Data BPS - IHK Umum (${capitalize(userCityName)})`}
-                  </p>
-                  <p style={{ color: '#94A3B8', fontSize: 13, margin: '4px 0 0 0' }}>
-                    Indeks Harga Konsumen (IHK) Gabungan Kota.
-                  </p>
-                </div>
-                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                  {/* Year Selector Only */}
-                  <div className={styles.yearSelector}>
-                    <button
-                      type="button"
-                      onClick={() => setActiveYear("now")}
-                      className={`${styles.yearBtn} ${activeYear === "now" ? styles.yearBtnActive : ""}`}
-                    >
-                      {currentYear}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveYear("prev")}
-                      className={`${styles.yearBtn} ${activeYear === "prev" ? styles.yearBtnActive : ""}`}
-                    >
-                      {prevYear}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveYear("prev2")}
-                      className={`${styles.yearBtn} ${activeYear === "prev2" ? styles.yearBtnActive : ""}`}
-                    >
-                      {prev2Year}
-                    </button>
-                  </div>
+            <div className={styles.editHeader}>
+              <div>
+                <p className={styles.sectionTitle}>
+                  IHK Umum
+                </p>
+                <p style={{ color: '#94A3B8', fontSize: 13, margin: '4px 0 0 0' }}>
+                  Indeks Harga Konsumen (IHK) Gabungan Kota.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+                {/* Year Selector Only */}
+                <div className={styles.yearSelector}>
+                  <button
+                    type="button"
+                    onClick={() => setYearIhkUmum("now")}
+                    className={`${styles.yearBtn} ${yearIhkUmum === "now" ? styles.yearBtnActive : ""}`}
+                  >
+                    {currentYear}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setYearIhkUmum("prev")}
+                    className={`${styles.yearBtn} ${yearIhkUmum === "prev" ? styles.yearBtnActive : ""}`}
+                  >
+                    {prevYear}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setYearIhkUmum("prev2")}
+                    className={`${styles.yearBtn} ${yearIhkUmum === "prev2" ? styles.yearBtnActive : ""}`}
+                  >
+                    {prev2Year}
+                  </button>
                 </div>
               </div>
+            </div>
 
-              <div className={styles.tableContainer}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th style={{ width: '140px' }}>Bulan</th>
-                      <th>IHK Umum ({activeYear === "now" ? currentYear : activeYear === "prev" ? prevYear : prev2Year})</th>
+            <div className={styles.tableContainer}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={{ width: '140px' }}>Bulan</th>
+                    <th>IHK Umum ({yearIhkUmum === "now" ? currentYear : yearIhkUmum === "prev" ? prevYear : prev2Year})</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {monthNames.map((mName, index) => (
+                    <tr key={index}>
+                      <td className={styles.monthCol}>{mName}</td>
+                      <td>
+                        <Input
+                          type="text"
+                          placeholder="100.00"
+                          value={activeDataIhk[index] ? activeDataIhk[index].value : ""}
+                          setValue={(val) => handleIhkChange(index, val)}
+                        />
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {monthNames.map((mName, index) => (
-                      <tr key={index}>
-                        <td className={styles.monthCol}>{mName}</td>
-                        <td>
-                          <Input
-                            type="text"
-                            placeholder="100.00"
-                            value={activeDataIhk[index] ? activeDataIhk[index].value : ""}
-                            setValue={(val) => handleIhkChange(index, val)}
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </Wrapper>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Wrapper>
 
           {/* ─── 4. TABEL INFLASI UMUM ─── */}
           <Wrapper>
-              <div className={styles.editHeader}>
-                <div>
-                  <p className={styles.sectionTitle}>
-                    {`Edit Data BPS - Inflasi Umum (${capitalize(userCityName)})`}
-                  </p>
-                  <p style={{ color: '#94A3B8', fontSize: 13, margin: '4px 0 0 0' }}>
-                    Tingkat Inflasi Umum Gabungan: Bulan ke Bulan (MoM), Tahun ke Tahun (YoY), dan Tahun Kalender (YtD).
-                  </p>
-                </div>
-                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                  {/* Year Selector */}
-                  <div className={styles.yearSelector}>
-                    <button
-                      type="button"
-                      onClick={() => setActiveYear("now")}
-                      className={`${styles.yearBtn} ${activeYear === "now" ? styles.yearBtnActive : ""}`}
-                    >
-                      {currentYear}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveYear("prev")}
-                      className={`${styles.yearBtn} ${activeYear === "prev" ? styles.yearBtnActive : ""}`}
-                    >
-                      {prevYear}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveYear("prev2")}
-                      className={`${styles.yearBtn} ${activeYear === "prev2" ? styles.yearBtnActive : ""}`}
-                    >
-                      {prev2Year}
-                    </button>
-                  </div>
+            <div className={styles.editHeader}>
+              <div>
+                <p className={styles.sectionTitle}>
+                  Inflasi Umum
+                </p>
+                <p style={{ color: '#94A3B8', fontSize: 13, margin: '4px 0 0 0' }}>
+                  Tingkat Inflasi Umum Gabungan: Bulan ke Bulan (MoM), Tahun ke Tahun (YoY), dan Tahun Kalender (YtD).
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+                {/* Year Selector */}
+                <div className={styles.yearSelector}>
+                  <button
+                    type="button"
+                    onClick={() => setYearInflasiUmum("now")}
+                    className={`${styles.yearBtn} ${yearInflasiUmum === "now" ? styles.yearBtnActive : ""}`}
+                  >
+                    {currentYear}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setYearInflasiUmum("prev")}
+                    className={`${styles.yearBtn} ${yearInflasiUmum === "prev" ? styles.yearBtnActive : ""}`}
+                  >
+                    {prevYear}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setYearInflasiUmum("prev2")}
+                    className={`${styles.yearBtn} ${yearInflasiUmum === "prev2" ? styles.yearBtnActive : ""}`}
+                  >
+                    {prev2Year}
+                  </button>
                 </div>
               </div>
+            </div>
 
-              <div className={styles.tableContainer}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th style={{ width: '140px' }}>Bulan</th>
-                      <th>Inflasi MoM (%)</th>
-                      <th>Inflasi YoY (%)</th>
-                      <th>Inflasi YtD (%)</th>
+            <div className={styles.tableContainer}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={{ width: '140px' }}>Bulan</th>
+                    <th>Inflasi MoM (%)</th>
+                    <th>Inflasi YoY (%)</th>
+                    <th>Inflasi YtD (%)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {monthNames.map((mName, index) => (
+                    <tr key={index}>
+                      <td className={styles.monthCol}>{mName}</td>
+                      <td>
+                        <Input
+                          type="text"
+                          placeholder="0.00"
+                          value={activeDataInflasiMoM[index] ? activeDataInflasiMoM[index].value : ""}
+                          setValue={(val) => handleInflasiMetricChange("mom", index, val)}
+                        />
+                      </td>
+                      <td>
+                        <Input
+                          type="text"
+                          placeholder="0.00"
+                          value={activeDataInflasiYoY[index] ? activeDataInflasiYoY[index].value : ""}
+                          setValue={(val) => handleInflasiMetricChange("yoy", index, val)}
+                        />
+                      </td>
+                      <td>
+                        <Input
+                          type="text"
+                          placeholder="0.00"
+                          value={activeDataInflasiYtd[index] ? activeDataInflasiYtd[index].value : ""}
+                          setValue={(val) => handleInflasiMetricChange("ytd", index, val)}
+                        />
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {monthNames.map((mName, index) => (
-                      <tr key={index}>
-                        <td className={styles.monthCol}>{mName}</td>
-                        <td>
-                          <Input
-                            type="text"
-                            placeholder="0.00"
-                            value={activeDataInflasiMoM[index] ? activeDataInflasiMoM[index].value : ""}
-                            setValue={(val) => handleInflasiMetricChange("mom", index, val)}
-                          />
-                        </td>
-                        <td>
-                          <Input
-                            type="text"
-                            placeholder="0.00"
-                            value={activeDataInflasiYoY[index] ? activeDataInflasiYoY[index].value : ""}
-                            setValue={(val) => handleInflasiMetricChange("yoy", index, val)}
-                          />
-                        </td>
-                        <td>
-                          <Input
-                            type="text"
-                            placeholder="0.00"
-                            value={activeDataInflasiYtd[index] ? activeDataInflasiYtd[index].value : ""}
-                            setValue={(val) => handleInflasiMetricChange("ytd", index, val)}
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </Wrapper>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Wrapper>
 
 
           {/* Bobot per Komoditas Section */}
@@ -1647,157 +1811,6 @@ function StepTwoAvailable(props) {
               </div>
             </div>
           </Wrapper>
-
-          {/* Forecasting */}
-          <Wrapper>
-            <div className={styles.forecastingContainer}>
-              <div className={styles.forecastingHeader}>
-                <div>
-                  <p className={styles.sectionTitle}>Forecasting (Prediksi)</p>
-                  <p className={styles.forecastingDesc}>
-                    Aktifkan untuk menghasilkan prediksi inflasi periode berikutnya menggunakan model Machine Learning.
-                  </p>
-                </div>
-                <div className={styles.sliderToggle}>
-                  <div
-                    className={`${styles.sliderTrack} ${forecastingEnabled ? styles.sliderTrackActive : ""}`}
-                    role="group"
-                    aria-label="Pilih opsi forecasting"
-                    onClick={() => setForecastingEnabled(prev => !prev)}
-                  >
-                    <span
-                      className={`${styles.sliderPill} ${forecastingEnabled ? styles.sliderPillRight : styles.sliderPillLeft}`}
-                    />
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setForecastingEnabled(false) }}
-                      className={`${styles.sliderBtn} ${!forecastingEnabled ? styles.sliderBtnActiveTidak : ""}`}
-                      aria-pressed={forecastingEnabled}
-                    >
-                      Tidak
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setForecastingEnabled(true) }}
-                      className={`${styles.sliderBtn} ${forecastingEnabled ? styles.sliderBtnActiveYa : ""}`}
-                      aria-pressed={!forecastingEnabled}
-                    >
-                      Ya
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {forecastingEnabled && (
-                <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div className={styles.forecastingNote}>
-                    <span className={styles.forecastingNoteIcon}>✦</span>
-                    <p>
-                      Model <strong>ANN (Artificial Neural Network - Keras/TensorFlow)</strong> menghitung peramalan berdasarkan data historis database.
-                      {annForecastResult?.forecast?.inflasi?.final_loss !== undefined && (
-                        <span style={{ display: 'block', marginTop: '4px', color: '#34B34A', fontSize: '12px' }}>
-                          ✓ Terhubung dengan Backend API & Database | MSE Loss Inflasi: {annForecastResult.forecast.inflasi.final_loss.toFixed(6)} | MSE Loss IHK: {annForecastResult.forecast.ihk.final_loss.toFixed(6)}
-                        </span>
-                      )}
-                    </p>
-                  </div>
-
-                  <div style={{
-                    background: 'rgba(0, 0, 0, 0.25)',
-                    borderRadius: '12px',
-                    padding: '16px',
-                    border: '1px solid rgba(255, 255, 255, 0.08)'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                      <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#F8FAFC' }}>
-                        Grafik Prediksi Inflasi 3 Bulan Ke Depan ({userCityName || "KOTA METRO"})
-                      </p>
-                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', fontSize: '12px', color: '#AAAAAA' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#fb3131ff', display: 'inline-block' }} />
-                          <span>MoM</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34B34A', display: 'inline-block' }} />
-                          <span>YoY</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#F0B244', display: 'inline-block' }} />
-                          <span>YtD</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{ width: '100%', height: '220px' }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart
-                          data={forecastChartData}
-                          margin={{ top: 10, right: 15, left: -20, bottom: 0 }}
-                        >
-                          <defs>
-                            <linearGradient id="forecastGradMom" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#fb3131ff" stopOpacity={0.25} />
-                              <stop offset="100%" stopColor="#fb3131ff" stopOpacity={0.0} />
-                            </linearGradient>
-                            <linearGradient id="forecastGradYoy" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#34B34A" stopOpacity={0.25} />
-                              <stop offset="100%" stopColor="#34B34A" stopOpacity={0.0} />
-                            </linearGradient>
-                            <linearGradient id="forecastGradYtd" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#F0B244" stopOpacity={0.25} />
-                              <stop offset="100%" stopColor="#F0B244" stopOpacity={0.0} />
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid stroke="rgba(255, 255, 255, 0.08)" strokeWidth={0.5} />
-                          <XAxis
-                            dataKey="label"
-                            axisLine={{ stroke: 'rgba(255, 255, 255, 0.15)', strokeWidth: 0.5 }}
-                            tickLine={false}
-                            tick={{ fill: '#AAAAAA', fontSize: 10 }}
-                          />
-                          <YAxis
-                            axisLine={{ stroke: 'rgba(255, 255, 255, 0.15)', strokeWidth: 0.5 }}
-                            tickLine={false}
-                            tick={{ fill: '#AAAAAA', fontSize: 10 }}
-                            domain={['auto', 'auto']}
-                            unit="%"
-                          />
-                          <Tooltip content={<CustomForecastTooltip />} />
-                          <Area
-                            type="monotone"
-                            dataKey="mom"
-                            name="MoM"
-                            stroke="#fb3131ff"
-                            fill="url(#forecastGradMom)"
-                            strokeWidth={2}
-                            dot={{ r: 4, fill: '#fb3131ff' }}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="yoy"
-                            name="YoY"
-                            stroke="#34B34A"
-                            fill="url(#forecastGradYoy)"
-                            strokeWidth={2}
-                            dot={{ r: 4, fill: '#34B34A' }}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="ytd"
-                            name="YtD"
-                            stroke="#F0B244"
-                            fill="url(#forecastGradYtd)"
-                            strokeWidth={2}
-                            dot={{ r: 4, fill: '#F0B244' }}
-                          />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </Wrapper>
         </>
       )}
 
@@ -1811,7 +1824,7 @@ function StepTwoAvailable(props) {
           <Wrapper key={indicatorKey}>
             <div className={styles.editHeader}>
               <p className={styles.sectionTitle}>
-                Edit Data BPS - {varLabel} ({capitalize(cityName)})
+                {varLabel}
               </p>
             </div>
 
@@ -1847,6 +1860,346 @@ function StepTwoAvailable(props) {
           </Wrapper>
         )
       })}
+
+      {/* ─── FORECASTING INDIKATOR DINAMIS ─── */}
+      <Wrapper>
+        <div className={styles.forecastingContainer}>
+          <div className={styles.forecastingHeader}>
+            <div>
+              <p className={styles.sectionTitle}>Forecasting (Prediksi)</p>
+              <p className={styles.forecastingDesc}>
+                Aktifkan untuk menghasilkan prediksi indikator periode berikutnya menggunakan model Machine Learning / ANN.
+              </p>
+            </div>
+            <div className={styles.sliderToggle}>
+              <div
+                className={`${styles.sliderTrack} ${forecastingEnabled ? styles.sliderTrackActive : ""}`}
+                role="group"
+                aria-label="Pilih opsi forecasting"
+                onClick={() => setForecastingEnabled(prev => !prev)}
+              >
+                <span
+                  className={`${styles.sliderPill} ${forecastingEnabled ? styles.sliderPillRight : styles.sliderPillLeft}`}
+                />
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setForecastingEnabled(false) }}
+                  className={`${styles.sliderBtn} ${!forecastingEnabled ? styles.sliderBtnActiveTidak : ""}`}
+                  aria-pressed={forecastingEnabled}
+                >
+                  Tidak
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setForecastingEnabled(true) }}
+                  className={`${styles.sliderBtn} ${forecastingEnabled ? styles.sliderBtnActiveYa : ""}`}
+                  aria-pressed={!forecastingEnabled}
+                >
+                  Ya
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {forecastingEnabled && (
+            <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className={styles.forecastingNote}>
+                <span className={styles.forecastingNoteIcon}>✦</span>
+                <p>
+                  Model <strong>ANN (Artificial Neural Network - Keras/TensorFlow)</strong> menghitung peramalan berdasarkan data historis database.
+                  {annForecastResult?.forecast && (
+                    <span style={{ display: 'block', marginTop: '4px', color: '#34B34A', fontSize: '12px' }}>
+                      ✓ Terhubung dengan Backend API & Database | Hasil Prediksi Tersedia untuk {userCityName || "KOTA METRO"}
+                    </span>
+                  )}
+                </p>
+              </div>
+
+              {/* Dynamic Tabs Selection */}
+              {dynamicForecastTabs.length > 0 && (
+                <div className={styles.forecastTabContainer}>
+                  {dynamicForecastTabs.map(tab => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      className={`${styles.forecastTabBtn} ${forecastActiveTab === tab.id ? styles.forecastTabBtnActive : ''}`}
+                      onClick={() => setForecastActiveTab(tab.id)}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* View 1: Inflasi Umum */}
+              {forecastActiveTab === "inflasi-umum" && (
+                <div style={{
+                  background: 'rgba(0, 0, 0, 0.25)',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  border: '1px solid rgba(255, 255, 255, 0.08)'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                    <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#F8FAFC' }}>
+                      Grafik Prediksi Inflasi 3 Periode Ke Depan ({userCityName || "KOTA METRO"})
+                    </p>
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', fontSize: '12px', color: '#AAAAAA' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#fb3131ff', display: 'inline-block' }} />
+                        <span>MoM</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34B34A', display: 'inline-block' }} />
+                        <span>YoY</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#F0B244', display: 'inline-block' }} />
+                        <span>YtD</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ width: '100%', height: '220px' }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart
+                        data={forecastChartData}
+                        margin={{ top: 10, right: 15, left: -20, bottom: 0 }}
+                      >
+                        <defs>
+                          <linearGradient id="forecastGradMom" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#fb3131ff" stopOpacity={0.25} />
+                            <stop offset="100%" stopColor="#fb3131ff" stopOpacity={0.0} />
+                          </linearGradient>
+                          <linearGradient id="forecastGradYoy" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#34B34A" stopOpacity={0.25} />
+                            <stop offset="100%" stopColor="#34B34A" stopOpacity={0.0} />
+                          </linearGradient>
+                          <linearGradient id="forecastGradYtd" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#F0B244" stopOpacity={0.25} />
+                            <stop offset="100%" stopColor="#F0B244" stopOpacity={0.0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid stroke="rgba(255, 255, 255, 0.08)" strokeWidth={0.5} />
+                        <XAxis
+                          dataKey="label"
+                          axisLine={{ stroke: 'rgba(255, 255, 255, 0.15)', strokeWidth: 0.5 }}
+                          tickLine={false}
+                          tick={{ fill: '#AAAAAA', fontSize: 10 }}
+                        />
+                        <YAxis
+                          axisLine={{ stroke: 'rgba(255, 255, 255, 0.15)', strokeWidth: 0.5 }}
+                          tickLine={false}
+                          tick={{ fill: '#AAAAAA', fontSize: 10 }}
+                          domain={['auto', 'auto']}
+                          unit="%"
+                        />
+                        <Tooltip content={<CustomForecastTooltip />} />
+                        <Area
+                          type="monotone"
+                          dataKey="mom"
+                          name="MoM"
+                          stroke="#fb3131ff"
+                          fill="url(#forecastGradMom)"
+                          strokeWidth={2}
+                          dot={{ r: 4, fill: '#fb3131ff' }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="yoy"
+                          name="YoY"
+                          stroke="#34B34A"
+                          fill="url(#forecastGradYoy)"
+                          strokeWidth={2}
+                          dot={{ r: 4, fill: '#34B34A' }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="ytd"
+                          name="YtD"
+                          stroke="#F0B244"
+                          fill="url(#forecastGradYtd)"
+                          strokeWidth={2}
+                          dot={{ r: 4, fill: '#F0B244' }}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Summary Cards for Inflasi */}
+                  <div className={styles.forecastCardGrid}>
+                    {forecastChartData.filter(d => d.isForecast).map((item, idx) => (
+                      <div key={idx} className={styles.forecastCard}>
+                        <span className={styles.forecastCardMonth}>{item.label}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span className={styles.forecastCardValue}>{item.mom > 0 ? `+${item.mom}` : item.mom}%</span>
+                          <span className={item.mom >= 0 ? styles.forecastBadgePositive : styles.forecastBadgeNegative}>
+                            {item.mom >= 0 ? 'Inflasi' : 'Deflasi'}
+                          </span>
+                        </div>
+                        <span className={styles.forecastCardSub}>YoY: {item.yoy}% | YtD: {item.ytd}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* View 2: IHK Umum */}
+              {forecastActiveTab === "ihk-umum" && (
+                <div style={{
+                  background: 'rgba(0, 0, 0, 0.25)',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  border: '1px solid rgba(255, 255, 255, 0.08)'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                    <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#F8FAFC' }}>
+                      Grafik Prediksi Indeks Harga Konsumen (IHK) 3 Periode Ke Depan ({userCityName || "KOTA METRO"})
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#AAAAAA' }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#38BDF8', display: 'inline-block' }} />
+                      <span>Indeks IHK</span>
+                    </div>
+                  </div>
+
+                  <div style={{ width: '100%', height: '220px' }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart
+                        data={forecastIhkChartData}
+                        margin={{ top: 10, right: 15, left: -10, bottom: 0 }}
+                      >
+                        <defs>
+                          <linearGradient id="forecastGradIhk" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#38BDF8" stopOpacity={0.25} />
+                            <stop offset="100%" stopColor="#38BDF8" stopOpacity={0.0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid stroke="rgba(255, 255, 255, 0.08)" strokeWidth={0.5} />
+                        <XAxis
+                          dataKey="label"
+                          axisLine={{ stroke: 'rgba(255, 255, 255, 0.15)', strokeWidth: 0.5 }}
+                          tickLine={false}
+                          tick={{ fill: '#AAAAAA', fontSize: 10 }}
+                        />
+                        <YAxis
+                          axisLine={{ stroke: 'rgba(255, 255, 255, 0.15)', strokeWidth: 0.5 }}
+                          tickLine={false}
+                          tick={{ fill: '#AAAAAA', fontSize: 10 }}
+                          domain={['auto', 'auto']}
+                        />
+                        <Tooltip content={<CustomForecastTooltip />} />
+                        <Area
+                          type="monotone"
+                          dataKey="ihk"
+                          name="IHK"
+                          stroke="#38BDF8"
+                          fill="url(#forecastGradIhk)"
+                          strokeWidth={2}
+                          dot={{ r: 4, fill: '#38BDF8' }}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Summary Cards for IHK */}
+                  <div className={styles.forecastCardGrid}>
+                    {forecastIhkChartData.filter(d => d.isForecast).map((item, idx) => (
+                      <div key={idx} className={styles.forecastCard}>
+                        <span className={styles.forecastCardMonth}>{item.label}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span className={styles.forecastCardValue} style={{ color: '#38BDF8' }}>{item.ihk}</span>
+                          <span className={styles.forecastBadgeNeutral}>Indeks</span>
+                        </div>
+                        <span className={styles.forecastCardSub}>Tingkat IHK Prediksi</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* View 3: 11 Kelompok Komoditas */}
+              {forecastActiveTab === "komoditas" && (
+                <div className={styles.tableContainer}>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th style={{ width: '50px', textAlign: 'center' }}>No</th>
+                        <th>Kelompok Pengeluaran / Komoditas</th>
+                        <th style={{ textAlign: 'center' }}>T+1 ({forecastKomoditasList[0]?.t1Label || "M1"})</th>
+                        <th style={{ textAlign: 'center' }}>T+2 ({forecastKomoditasList[0]?.t2Label || "M2"})</th>
+                        <th style={{ textAlign: 'center' }}>T+3 ({forecastKomoditasList[0]?.t3Label || "M3"})</th>
+                        <th style={{ textAlign: 'center' }}>Status / Tren</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {forecastKomoditasList.map((item, idx) => (
+                        <tr key={idx}>
+                          <td style={{ textAlign: 'center' }}>{idx + 1}</td>
+                          <td style={{ fontWeight: 500 }}>{item.name}</td>
+                          <td style={{ textAlign: 'center', fontWeight: 600, color: item.t1 >= 0 ? '#F87171' : '#34B34A' }}>
+                            {item.t1 > 0 ? `+${item.t1}` : item.t1}%
+                          </td>
+                          <td style={{ textAlign: 'center', fontWeight: 600, color: item.t2 >= 0 ? '#F87171' : '#34B34A' }}>
+                            {item.t2 > 0 ? `+${item.t2}` : item.t2}%
+                          </td>
+                          <td style={{ textAlign: 'center', fontWeight: 600, color: item.t3 >= 0 ? '#F87171' : '#34B34A' }}>
+                            {item.t3 > 0 ? `+${item.t3}` : item.t3}%
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <span className={item.t1 >= 0 ? styles.forecastBadgePositive : styles.forecastBadgeNegative}>
+                              {item.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* View 4: Indikator Non-Komoditas */}
+              {forecastActiveTab !== "inflasi-umum" && forecastActiveTab !== "ihk-umum" && forecastActiveTab !== "komoditas" && (
+                <div className={styles.tableContainer}>
+                  <p style={{ margin: '0 0 12px 0', fontSize: '14px', color: '#94A3B8' }}>
+                    Proyeksi estimasi tren untuk <strong>{forecastNonCommodityData[forecastActiveTab]?.label || forecastActiveTab}</strong> pada periode mendatang:
+                  </p>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th style={{ width: '50px', textAlign: 'center' }}>No</th>
+                        <th>Kategori / Sub Variabel</th>
+                        <th style={{ textAlign: 'center' }}>Nilai Terakhir</th>
+                        <th style={{ textAlign: 'center' }}>Proyeksi Periode +1</th>
+                        <th style={{ textAlign: 'center' }}>Proyeksi Periode +2</th>
+                        <th style={{ textAlign: 'center' }}>Estimasi Pertumbuhan</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(forecastNonCommodityData[forecastActiveTab]?.data || []).map((row, idx) => (
+                        <tr key={idx}>
+                          <td style={{ textAlign: 'center' }}>{idx + 1}</td>
+                          <td style={{ fontWeight: 500 }}>{row.turvarLabel}</td>
+                          <td style={{ textAlign: 'center' }}>{row.currentVal}</td>
+                          <td style={{ textAlign: 'center', fontWeight: 600, color: '#38BDF8' }}>
+                            {row.predNext}
+                          </td>
+                          <td style={{ textAlign: 'center', fontWeight: 600, color: '#818CF8' }}>
+                            {row.predNext2}
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <span className={styles.forecastBadgeNeutral}>
+                              +{row.growthRate}% / thn
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </Wrapper>
 
       <MainButton onClick={handleSave}>Simpan & Lanjutkan</MainButton>
     </div>

@@ -556,3 +556,110 @@
   color: #E2E8F0;
   font-weight: 500;
 }
+
+/* ─── Dynamic Forecasting Sub-Tabs & Content ─── */
+.forecastTabContainer {
+  display: flex;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.forecastTabBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: transparent;
+  color: #94A3B8;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.forecastTabBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+}
+
+.forecastTabBtnActive {
+  background: rgba(52, 179, 74, 0.18);
+  color: #34B34A;
+  border: 1px solid rgba(52, 179, 74, 0.35);
+  font-weight: 600;
+}
+
+.forecastCardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.forecastCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.forecastCardMonth {
+  font-size: 12px;
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+.forecastCardValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: #F8FAFC;
+}
+
+.forecastCardSub {
+  font-size: 11px;
+  color: #64748B;
+}
+
+.forecastBadgePositive {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #F87171;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.forecastBadgeNegative {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(52, 179, 74, 0.15);
+  color: #34B34A;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.forecastBadgeNeutral {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #94A3B8;
+  font-size: 11px;
+  font-weight: 500;
+}
