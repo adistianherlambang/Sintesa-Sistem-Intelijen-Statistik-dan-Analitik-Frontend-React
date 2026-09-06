@@ -2340,6 +2340,8 @@ function StepThree(props) {
   const [loadingSummary, setLoadingSummary] = useState(false)
   const [aiSummary, setAiSummary] = useState(null)
   const [editorReady, setEditorReady] = useState(false)
+  const [generatingDoc, setGeneratingDoc] = useState(false)
+  const [populatedDocUrl, setPopulatedDocUrl] = useState(null)
   const [savingToDb, setSavingToDb] = useState(false)
   const [savedHistoryId, setSavedHistoryId] = useState(null)
   const [savedDocxUrl, setSavedDocxUrl] = useState(null)
@@ -2418,6 +2420,54 @@ function StepThree(props) {
     }
   }, [uploadedDataset, datasetSource, aiSummary, inflasiValue, yoyValue, ihkValue, pendorong, divisionData]);
 
+  // Main Generator: Generate Word BRS with ALL ${} replaced by Step 3 data
+  const generatePopulatedWordDoc = async () => {
+    setGeneratingDoc(true);
+    setError("");
+    try {
+      const token = localStorage.getItem("token");
+      const targetCity = uploadedDataset?.context?.city || "Kota Metro";
+      const targetPeriod = uploadedDataset?.context?.period || "November 2025";
+      const reportTitle = uploadedDataset?.context?.title || analysisTitle || "Berita Resmi Statistik";
+
+      const res = await axios.post(
+        `${process.env.REACT_APP_URL_SERVER}/api/analisis/word/generate`,
+        {
+          city: targetCity,
+          periode: targetPeriod,
+          title: reportTitle,
+          uploadedDataset: uploadedDataset,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.data?.success && res.data?.fullUrl) {
+        setPopulatedDocUrl(res.data.fullUrl);
+        if (editorIframeRef.current?.contentWindow) {
+          editorIframeRef.current.contentWindow.postMessage(
+            {
+              type: "document:open-url",
+              payload: {
+                url: res.data.fullUrl,
+                fileName: res.data.filename,
+              },
+            },
+            "*"
+          );
+        }
+        return res.data.fullUrl;
+      }
+    } catch (err) {
+      console.error("Gagal generate dokumen BRS terisi:", err.message);
+      // Fallback: load pre-filled template
+      loadDocInEditor("BERITA_FILLED.docx");
+    } finally {
+      setGeneratingDoc(false);
+    }
+  };
+
   // Helper: Open document in MS Word Editor iframe
   const loadDocInEditor = (templateFile = "BERITA_FILLED.docx") => {
     if (!editorIframeRef.current?.contentWindow) return;
@@ -2445,8 +2495,8 @@ function StepThree(props) {
 
       if (data.type === "document:ready") {
         setEditorReady(true);
-        // Automatically open the official BRS template
-        loadDocInEditor("BERITA_FILLED.docx");
+        // Automatically generate & populate Word document with real Step 3 data!
+        generatePopulatedWordDoc();
       }
     };
 
@@ -2709,27 +2759,48 @@ function StepThree(props) {
                 <span style={{ color: "#94a3b8", fontSize: "13px" }}>
                   {uploadedDataset?.context?.city || "Kota Metro"} • {uploadedDataset?.context?.period || "November 2025"}
                 </span>
-                {!editorReady && (
+                {!editorReady ? (
                   <span style={{ fontSize: "11px", color: "#f59e0b", background: "rgba(245,158,11,0.1)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
                     ● Menghubungkan Editor...
+                  </span>
+                ) : generatingDoc ? (
+                  <span style={{ fontSize: "11px", color: "#38bdf8", background: "rgba(56,189,248,0.1)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                    ● Mengisi Variabel dari Step 3...
+                  </span>
+                ) : (
+                  <span style={{ fontSize: "11px", color: "#34D399", background: "rgba(52,211,153,0.1)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                    ● Data Step 3 Terisi
                   </span>
                 )}
               </div>
 
               <div className={styles.wordEditorActions}>
                 <button
+                  onClick={generatePopulatedWordDoc}
+                  disabled={generatingDoc}
+                  className={styles.wordEditorBtnSecondary}
+                  title="Isi ulang semua variabel template dengan data riil dari Step 3"
+                  style={{ borderColor: "#38bdf8", color: "#38bdf8" }}
+                >
+                  {generatingDoc ? (
+                    <span>⏳ Memproses...</span>
+                  ) : (
+                    <span>🔄 Isi Data Step 3</span>
+                  )}
+                </button>
+                <button
                   onClick={() => loadDocInEditor("BERITA_FILLED.docx")}
                   className={styles.wordEditorBtnSecondary}
-                  title="Muat ulang template BERITA dengan data riil"
+                  title="Muat template standar BERITA_FILLED.docx"
                 >
-                  <span>✨ Buka Data Riil</span>
+                  <span>✨ Data Sampel</span>
                 </button>
                 <button
                   onClick={() => loadDocInEditor("BERITA.docx")}
                   className={styles.wordEditorBtnSecondary}
-                  title="Muat template standar BERITA.docx"
+                  title="Muat template mentah BERITA.docx dengan variabel placeholder"
                 >
-                  <span>📄 Buka Template</span>
+                  <span>📄 Template Mentah</span>
                 </button>
 
                 <button
