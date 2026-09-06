@@ -25,6 +25,11 @@ const INDICATOR_OPTIONS = [
   { value: "demografi-kemiskinan", label: "Demografi Persentase Penduduk Miskin" },
 ]
 
+const MONTH_NAMES = [
+  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+  "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+]
+
 export default function Analisis() {
   const [datasetSource, setDatasetSource] = useState("available") // "available" or "manual"
   const [selectedIndicators, setSelectedIndicators] = useState(["komoditas"])
@@ -601,76 +606,117 @@ function StepTwoAvailable(props) {
     })
   }
 
+  const currentCalendarMonth = new Date().getMonth();
+  const [selectedMonthIndex, setSelectedMonthIndex] = useState(currentCalendarMonth);
+  const monthNames = MONTH_NAMES;
+
+  const getCommodityMonthVal = (commodityData, monthIdx) => {
+    if (!commodityData || typeof commodityData !== "object") return "";
+    const mName = monthNames[monthIdx];
+    if (commodityData[mName] !== undefined && commodityData[mName] !== "") {
+      return String(commodityData[mName]);
+    }
+    if (commodityData[String(monthIdx)] !== undefined && commodityData[String(monthIdx)] !== "") {
+      return String(commodityData[String(monthIdx)]);
+    }
+    if (commodityData[String(monthIdx + 1)] !== undefined && commodityData[String(monthIdx + 1)] !== "") {
+      return String(commodityData[String(monthIdx + 1)]);
+    }
+    const keys = Object.keys(commodityData);
+    const month2Digits = String(monthIdx + 1).padStart(2, "0");
+    const matchedKey = keys.find(k => k.endsWith(month2Digits) || k.endsWith(String(monthIdx + 1)));
+    if (matchedKey && commodityData[matchedKey] !== undefined && commodityData[matchedKey] !== "") {
+      return String(commodityData[matchedKey]);
+    }
+    if (keys[monthIdx] !== undefined && commodityData[keys[monthIdx]] !== undefined && commodityData[keys[monthIdx]] !== "") {
+      return String(commodityData[keys[monthIdx]]);
+    }
+    return "";
+  };
+
+  const setCommodityMonthVal = (commodityData, monthIdx, val) => {
+    const nextData = { ...(commodityData || {}) };
+    const keys = Object.keys(nextData);
+    const mName = monthNames[monthIdx];
+    const month2Digits = String(monthIdx + 1).padStart(2, "0");
+    const matchedKey = keys.find(k => k.endsWith(month2Digits) || k.endsWith(String(monthIdx + 1)));
+    const keyToUse = matchedKey || (keys[monthIdx] !== undefined ? keys[monthIdx] : mName);
+    nextData[keyToUse] = val;
+    return nextData;
+  };
+
   const handleSave = () => {
     const nextStepIndex = datasetSource === "available" ? 3 : 2;
     const combinedParsedData = [];
 
-    if (isCommodity) {
-      let monthIndex = 0;
-      for (let i = 11; i >= 0; i--) {
-        if (activeDataInflasi[i] && activeDataInflasi[i].value !== undefined && activeDataInflasi[i].value !== "") {
-          monthIndex = i;
-          break;
-        }
-      }
+    const monthIndex = selectedMonthIndex;
+    const targetYear = yearInflasiUmum === "now" ? currentYear : yearInflasiUmum === "prev" ? prevYear : prev2Year;
+    const targetMonthName = monthNames[monthIndex];
 
-      const infValue = activeDataInflasi?.[monthIndex]?.value || "0.00";
-      const yValue = inflasiData.yoy?.data?.[monthIndex]?.value || "0.00";
-      const ytdValue = inflasiData.ytd?.data?.[monthIndex]?.value || "0.00";
-      const iValue = activeDataIhk?.[monthIndex]?.value || "100.00";
-      const prevIhkValue = (monthIndex > 0 && activeDataIhk?.[monthIndex - 1]?.value) ? String(activeDataIhk[monthIndex - 1].value) : iValue;
+    if (isCommodity) {
+      const infValue = activeDataInflasiMoM?.[monthIndex]?.value !== undefined && activeDataInflasiMoM[monthIndex].value !== ""
+        ? String(activeDataInflasiMoM[monthIndex].value)
+        : "0.00";
+      const yValue = activeDataInflasiYoY?.[monthIndex]?.value !== undefined && activeDataInflasiYoY[monthIndex].value !== ""
+        ? String(activeDataInflasiYoY[monthIndex].value)
+        : "0.00";
+      const ytdValue = activeDataInflasiYtd?.[monthIndex]?.value !== undefined && activeDataInflasiYtd[monthIndex].value !== ""
+        ? String(activeDataInflasiYtd[monthIndex].value)
+        : "0.00";
+      const iValue = activeDataIhk?.[monthIndex]?.value !== undefined && activeDataIhk[monthIndex].value !== ""
+        ? String(activeDataIhk[monthIndex].value)
+        : "100.00";
+      const prevIhkValue = (monthIndex > 0 && activeDataIhk?.[monthIndex - 1]?.value !== undefined && activeDataIhk[monthIndex - 1].value !== "")
+        ? String(activeDataIhk[monthIndex - 1].value)
+        : iValue;
 
       const norm = (s) => String(s || "").toLowerCase().replace(/,/g, "").replace(/\s+/g, " ").trim();
 
       const divisions = komoditasList.map(c => {
-        const dataKeys = Object.keys(c.data || {});
-        const targetKey = dataKeys[monthIndex];
-        const wVal = commodityWeights[c.label] !== undefined ? commodityWeights[c.label] : "10";
+        const wVal = commodityWeights[c.label] !== undefined ? commodityWeights[c.label] : (100 / (komoditasList.length || 11)).toFixed(2);
+
+        // MoM value from c.data (which was updated by handleKomoditasChange)
+        const mtmVal = getCommodityMonthVal(c.data, monthIndex) || "0.00";
+        const mtmInf = parseFloat(mtmVal) || 0;
 
         // Match IHK
         const matchedIhk = (komoditasIhkList || []).find(item => norm(item.label) === norm(c.label) || norm(item.label).includes(norm(c.label)) || norm(c.label).includes(norm(item.label)));
-        const ihkKeys = Object.keys(matchedIhk?.data || {});
-        const ihkTargetKey = ihkKeys[monthIndex];
-        const ihkVal = matchedIhk && ihkTargetKey ? String(matchedIhk.data[ihkTargetKey]) : "100";
-        const prevTargetKey = monthIndex > 0 ? ihkKeys[monthIndex - 1] : null;
-        const ihkLalu = matchedIhk && prevTargetKey ? String(matchedIhk.data[prevTargetKey]) : ihkVal;
+        const ihkVal = getCommodityMonthVal(matchedIhk?.data, monthIndex) || "100.00";
+        const prevIhkVal = monthIndex > 0 ? (getCommodityMonthVal(matchedIhk?.data, monthIndex - 1) || ihkVal) : ihkVal;
 
         // Match YoY
         const matchedYoy = (komoditasData.yoy?.hierarki || []).find(item => norm(item.label) === norm(c.label) || norm(item.label).includes(norm(c.label)) || norm(c.label).includes(norm(item.label)));
-        const yoyKeys = Object.keys(matchedYoy?.data || {});
-        const yoyTargetKey = yoyKeys[monthIndex];
-        const yoyVal = matchedYoy && yoyTargetKey ? String(matchedYoy.data[yoyTargetKey]) : "0.00";
+        const yoyVal = getCommodityMonthVal(matchedYoy?.data, monthIndex) || "0.00";
 
         // Match YtD
         const matchedYtd = (komoditasData.ytd?.hierarki || []).find(item => norm(item.label) === norm(c.label) || norm(item.label).includes(norm(c.label)) || norm(c.label).includes(norm(item.label)));
-        const ytdKeys = Object.keys(matchedYtd?.data || {});
-        const ytdTargetKey = ytdKeys[monthIndex];
-        const ytdVal = matchedYtd && ytdTargetKey ? String(matchedYtd.data[ytdTargetKey]) : "0.00";
+        const ytdVal = getCommodityMonthVal(matchedYtd?.data, monthIndex) || "0.00";
 
-        const mtmInf = parseFloat(c.data?.[targetKey]) || 0;
         const andilMtm = ((parseFloat(wVal) * mtmInf) / 100).toFixed(2);
+        const andilYoy = ((parseFloat(wVal) * (parseFloat(yoyVal) || 0)) / 100).toFixed(2);
 
         return {
           name: c.label,
           weight: wVal,
-          ihkLalu: ihkLalu,
+          ihkLalu: prevIhkVal,
           ihk: ihkVal,
-          inflasi: mtmInf,
+          inflasi: mtmVal,
           ytd: ytdVal,
           yoy: yoyVal,
-          andil: andilMtm
+          andil: andilMtm,
+          andilYoy: andilYoy
         };
       });
 
       combinedParsedData.push(
         ["Tahun", "Bulan", "Kode Kota", "Nama Kota", "Kode Komoditas", "Nama Komoditas", "Timbangan", "IHK Lalu", "IHK", "Inflasi", "Inflasi YtD", "Inflasi YoY", "Andil"],
-        [currentYear, monthIndex + 1, "1872", userCityName, "0", "UMUM", "100", prevIhkValue, iValue, infValue, ytdValue, yValue, infValue]
+        [targetYear, monthIndex + 1, "1872", userCityName, "0", "UMUM", "100", prevIhkValue, iValue, infValue, ytdValue, yValue, infValue]
       );
 
       divisions.forEach((div, idx) => {
         const code = String(idx + 1).padStart(2, "0");
         combinedParsedData.push([
-          currentYear,
+          targetYear,
           monthIndex + 1,
           "1872",
           userCityName,
@@ -687,7 +733,6 @@ function StepTwoAvailable(props) {
       });
     }
 
-
     nonCommodityIndicators.forEach((key) => {
       const itemData = pdrbDemoMap[key];
       if (itemData && itemData.data) {
@@ -700,8 +745,8 @@ function StepTwoAvailable(props) {
 
         itemData.data.forEach((row, rIdx) => {
           combinedParsedData.push([
-            currentYear,
-            1,
+            targetYear,
+            selectedMonthIndex + 1,
             "1872",
             cityName,
             String(rIdx + 1),
@@ -721,7 +766,7 @@ function StepTwoAvailable(props) {
     if (combinedParsedData.length === 0) {
       combinedParsedData.push(
         ["Tahun", "Bulan", "Kode Kota", "Nama Kota", "Kode Komoditas", "Nama Komoditas", "Timbangan", "IHK Lalu", "IHK", "Inflasi", "Inflasi YtD", "Inflasi YoY", "Andil"],
-        [currentYear, 1, "1872", userCityName || "KOTA METRO", "0", "UMUM", "100", "100", "100", "0", "0", "0", "0"]
+        [targetYear, selectedMonthIndex + 1, "1872", userCityName || "KOTA METRO", "0", "UMUM", "100", "100", "100", "0", "0", "0", "0"]
       );
     }
 
@@ -736,9 +781,9 @@ function StepTwoAvailable(props) {
       },
       context: {
         city: userCityName || user?.location?.name || "KOTA METRO",
-        period: analysisTitle || "Analisis BPS",
-        monthIndex: 0,
-        year: currentYear,
+        period: `${targetMonthName} ${targetYear}`,
+        monthIndex: selectedMonthIndex,
+        year: targetYear,
         title: analysisTitle
       },
       structure: "BPS Multi-Indikator",
@@ -899,43 +944,6 @@ function StepTwoAvailable(props) {
     }, 0)
     return sum.toFixed(2)
   }, [komoditasList, commodityWeights])
-
-  const monthNames = [
-    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-  ]
-
-  const getCommodityMonthVal = (commodityData, monthIndex) => {
-    if (!commodityData || typeof commodityData !== "object") return ""
-    const mName = monthNames[monthIndex]
-    if (commodityData[mName] !== undefined && commodityData[mName] !== "") {
-      return String(commodityData[mName])
-    }
-    if (commodityData[String(monthIndex)] !== undefined && commodityData[String(monthIndex)] !== "") {
-      return String(commodityData[String(monthIndex)])
-    }
-    const keys = Object.keys(commodityData)
-    const month2Digits = String(monthIndex + 1).padStart(2, "0")
-    const matchedKey = keys.find(k => k.endsWith(month2Digits))
-    if (matchedKey && commodityData[matchedKey] !== undefined) {
-      return String(commodityData[matchedKey])
-    }
-    if (keys[monthIndex] !== undefined && commodityData[keys[monthIndex]] !== undefined) {
-      return String(commodityData[keys[monthIndex]])
-    }
-    return ""
-  }
-
-  const setCommodityMonthVal = (commodityData, monthIndex, val) => {
-    const nextData = { ...(commodityData || {}) }
-    const keys = Object.keys(nextData)
-    const mName = monthNames[monthIndex]
-    const month2Digits = String(monthIndex + 1).padStart(2, "0")
-    const matchedKey = keys.find(k => k.endsWith(month2Digits))
-    const keyToUse = matchedKey || (keys[monthIndex] !== undefined ? keys[monthIndex] : mName)
-    nextData[keyToUse] = val
-    return nextData
-  }
 
   const handleInflasiMetricChange = (metricName, index, val) => {
     setInflasiData(prev => {
@@ -1441,6 +1449,71 @@ function StepTwoAvailable(props) {
       {/* ─── SECTION KOMODITAS & INFLASI ─── */}
       {isCommodity && (
         <>
+          {/* ─── PERIODE ANALISIS BRS SELECTOR ─── */}
+          <Wrapper>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                <div>
+                  <p className={styles.sectionTitle} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>📅</span> Periode Laporan BRS (Target Analisis Step 4)
+                  </p>
+                  <p style={{ margin: '4px 0 0 0', fontSize: 13, color: 'rgba(255, 255, 255, 0.6)' }}>
+                    Pilih bulan & tahun data yang akan dianalisis dan dicetak pada dokumen Berita Resmi Statistik (BRS).
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(52, 179, 74, 0.12)', padding: '6px 14px', borderRadius: '8px', border: '1px solid rgba(52, 179, 74, 0.35)' }}>
+                  <span style={{ fontSize: 13, color: 'rgba(255, 255, 255, 0.7)' }}>Periode Aktif BRS:</span>
+                  <span style={{ fontSize: 14, fontWeight: 'bold', color: '#34B34A' }}>
+                    {monthNames[selectedMonthIndex]} {yearInflasiUmum === "now" ? currentYear : yearInflasiUmum === "prev" ? prevYear : prev2Year}
+                  </span>
+                </div>
+              </div>
+
+              {/* Month Pills */}
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: 4 }}>
+                {monthNames.map((mName, mIdx) => {
+                  const isCurrentCalMonth = mIdx === new Date().getMonth();
+                  const isSelected = mIdx === selectedMonthIndex;
+                  return (
+                    <button
+                      key={mIdx}
+                      type="button"
+                      onClick={() => setSelectedMonthIndex(mIdx)}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        fontSize: 13,
+                        fontWeight: isSelected ? 600 : 400,
+                        cursor: 'pointer',
+                        border: isSelected ? '1px solid #34B34A' : '1px solid rgba(255, 255, 255, 0.12)',
+                        background: isSelected ? '#34B34A' : 'rgba(255, 255, 255, 0.04)',
+                        color: isSelected ? '#FFFFFF' : 'rgba(255, 255, 255, 0.8)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {mName}
+                      {isCurrentCalMonth && (
+                        <span style={{
+                          fontSize: 9,
+                          padding: '1px 5px',
+                          borderRadius: '4px',
+                          background: isSelected ? 'rgba(255, 255, 255, 0.25)' : 'rgba(52, 179, 74, 0.25)',
+                          color: isSelected ? '#fff' : '#34B34A',
+                          fontWeight: 'bold'
+                        }}>
+                          Bulan Ini
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </Wrapper>
+
           {/* ─── 1. TABEL KOMODITAS INFLASI ─── */}
           <Wrapper>
             <div className={styles.editHeader}>
@@ -1516,9 +1589,21 @@ function StepTwoAvailable(props) {
                       </tr>
                     </thead>
                     <tbody>
-                      {monthNames.map((mName, index) => (
-                        <tr key={index}>
-                          <td className={styles.monthCol}>{mName}</td>
+                      {monthNames.map((mName, index) => {
+                        const isTarget = index === selectedMonthIndex;
+                        return (
+                        <tr
+                          key={index}
+                          style={isTarget ? { background: 'rgba(52, 179, 74, 0.09)', outline: '1px solid rgba(52, 179, 74, 0.35)' } : undefined}
+                        >
+                          <td className={styles.monthCol}>
+                            {mName}
+                            {isTarget && (
+                              <span style={{ marginLeft: 6, fontSize: 10, padding: '2px 6px', background: '#34B34A', color: '#fff', borderRadius: 4, fontWeight: 'bold' }}>
+                                Target BRS
+                              </span>
+                            )}
+                          </td>
                           {komoditasList.map((cItem, cIndex) => {
                             const val = getCommodityMonthVal(cItem.data, index)
                             return (
@@ -1533,7 +1618,7 @@ function StepTwoAvailable(props) {
                             )
                           })}
                         </tr>
-                      ))}
+                      )})}
                     </tbody>
                   </>
                 ) : (
@@ -1547,9 +1632,21 @@ function StepTwoAvailable(props) {
                       </tr>
                     </thead>
                     <tbody>
-                      {monthNames.map((mName, index) => (
-                        <tr key={index}>
-                          <td className={styles.monthCol}>{mName}</td>
+                      {monthNames.map((mName, index) => {
+                        const isTarget = index === selectedMonthIndex;
+                        return (
+                        <tr
+                          key={index}
+                          style={isTarget ? { background: 'rgba(52, 179, 74, 0.09)', outline: '1px solid rgba(52, 179, 74, 0.35)' } : undefined}
+                        >
+                          <td className={styles.monthCol}>
+                            {mName}
+                            {isTarget && (
+                              <span style={{ marginLeft: 6, fontSize: 10, padding: '2px 6px', background: '#34B34A', color: '#fff', borderRadius: 4, fontWeight: 'bold' }}>
+                                Target BRS
+                              </span>
+                            )}
+                          </td>
                           {subList.map((subItem, sIndex) => {
                             const val = getCommodityMonthVal(subItem.data, index)
                             return (
@@ -1564,7 +1661,7 @@ function StepTwoAvailable(props) {
                             )
                           })}
                         </tr>
-                      ))}
+                      )})}
                     </tbody>
                   </>
                 )}
@@ -1839,9 +1936,21 @@ function StepTwoAvailable(props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {monthNames.map((mName, index) => (
-                    <tr key={index}>
-                      <td className={styles.monthCol}>{mName}</td>
+                  {monthNames.map((mName, index) => {
+                    const isTarget = index === selectedMonthIndex;
+                    return (
+                    <tr
+                      key={index}
+                      style={isTarget ? { background: 'rgba(52, 179, 74, 0.09)', outline: '1px solid rgba(52, 179, 74, 0.35)' } : undefined}
+                    >
+                      <td className={styles.monthCol}>
+                        {mName}
+                        {isTarget && (
+                          <span style={{ marginLeft: 6, fontSize: 10, padding: '2px 6px', background: '#34B34A', color: '#fff', borderRadius: 4, fontWeight: 'bold' }}>
+                            Target BRS
+                          </span>
+                        )}
+                      </td>
                       <td>
                         <Input
                           type="text"
@@ -1867,7 +1976,7 @@ function StepTwoAvailable(props) {
                         />
                       </td>
                     </tr>
-                  ))}
+                  )})}
                 </tbody>
               </table>
             </div>
@@ -2453,8 +2562,9 @@ function StepThree(props) {
     setError("");
     try {
       const token = localStorage.getItem("token");
+      const currentCalPeriod = `${MONTH_NAMES[new Date().getMonth()]} ${new Date().getFullYear()}`;
       const targetCity = uploadedDataset?.context?.city || "Kota Metro";
-      const targetPeriod = uploadedDataset?.context?.period || "November 2025";
+      const targetPeriod = uploadedDataset?.context?.period || currentCalPeriod;
       const reportTitle = uploadedDataset?.context?.title || analysisTitle || "Berita Resmi Statistik";
 
       const res = await axios.post(
@@ -2498,8 +2608,9 @@ function StepThree(props) {
   // Helper: Open document in MS Word Editor iframe
   const loadDocInEditor = (templateFile = "BERITA_FILLED.docx") => {
     if (!editorIframeRef.current?.contentWindow) return;
+    const currentCalPeriod = `${MONTH_NAMES[new Date().getMonth()]}_${new Date().getFullYear()}`;
     const targetCity = (uploadedDataset?.context?.city || "Kota Metro").replace(/[^a-zA-Z0-9]/g, "_");
-    const targetPeriod = (uploadedDataset?.context?.period || "November_2025").replace(/[^a-zA-Z0-9]/g, "_");
+    const targetPeriod = (uploadedDataset?.context?.period || currentCalPeriod).replace(/[^a-zA-Z0-9]/g, "_");
     const docUrl = `${process.env.REACT_APP_URL_SERVER}/word-editor/template/${templateFile}`;
 
     editorIframeRef.current.contentWindow.postMessage(
@@ -2784,7 +2895,7 @@ function StepThree(props) {
                   MS Word Editor
                 </span>
                 <span style={{ color: "#94a3b8", fontSize: "13px" }}>
-                  {uploadedDataset?.context?.city || "Kota Metro"} • {uploadedDataset?.context?.period || "November 2025"}
+                  {uploadedDataset?.context?.city || "Kota Metro"} • {uploadedDataset?.context?.period || `${MONTH_NAMES[new Date().getMonth()]} ${new Date().getFullYear()}`}
                 </span>
                 {!editorReady ? (
                   <span style={{ fontSize: "11px", color: "#f59e0b", background: "rgba(245,158,11,0.1)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
