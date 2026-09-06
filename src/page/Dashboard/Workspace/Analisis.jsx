@@ -607,7 +607,7 @@ function StepTwoAvailable(props) {
   }
 
   const currentCalendarMonth = new Date().getMonth();
-  const [selectedMonthIndex, setSelectedMonthIndex] = useState(currentCalendarMonth);
+  const selectedMonthIndex = currentCalendarMonth;
   const monthNames = MONTH_NAMES;
 
   const getCommodityMonthVal = (commodityData, monthIdx) => {
@@ -1449,71 +1449,6 @@ function StepTwoAvailable(props) {
       {/* ─── SECTION KOMODITAS & INFLASI ─── */}
       {isCommodity && (
         <>
-          {/* ─── PERIODE ANALISIS BRS SELECTOR ─── */}
-          <Wrapper>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                <div>
-                  <p className={styles.sectionTitle} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span>📅</span> Periode Laporan BRS (Target Analisis Step 4)
-                  </p>
-                  <p style={{ margin: '4px 0 0 0', fontSize: 13, color: 'rgba(255, 255, 255, 0.6)' }}>
-                    Pilih bulan & tahun data yang akan dianalisis dan dicetak pada dokumen Berita Resmi Statistik (BRS).
-                  </p>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(52, 179, 74, 0.12)', padding: '6px 14px', borderRadius: '8px', border: '1px solid rgba(52, 179, 74, 0.35)' }}>
-                  <span style={{ fontSize: 13, color: 'rgba(255, 255, 255, 0.7)' }}>Periode Aktif BRS:</span>
-                  <span style={{ fontSize: 14, fontWeight: 'bold', color: '#34B34A' }}>
-                    {monthNames[selectedMonthIndex]} {yearInflasiUmum === "now" ? currentYear : yearInflasiUmum === "prev" ? prevYear : prev2Year}
-                  </span>
-                </div>
-              </div>
-
-              {/* Month Pills */}
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: 4 }}>
-                {monthNames.map((mName, mIdx) => {
-                  const isCurrentCalMonth = mIdx === new Date().getMonth();
-                  const isSelected = mIdx === selectedMonthIndex;
-                  return (
-                    <button
-                      key={mIdx}
-                      type="button"
-                      onClick={() => setSelectedMonthIndex(mIdx)}
-                      style={{
-                        padding: '6px 12px',
-                        borderRadius: '6px',
-                        fontSize: 13,
-                        fontWeight: isSelected ? 600 : 400,
-                        cursor: 'pointer',
-                        border: isSelected ? '1px solid #34B34A' : '1px solid rgba(255, 255, 255, 0.12)',
-                        background: isSelected ? '#34B34A' : 'rgba(255, 255, 255, 0.04)',
-                        color: isSelected ? '#FFFFFF' : 'rgba(255, 255, 255, 0.8)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      {mName}
-                      {isCurrentCalMonth && (
-                        <span style={{
-                          fontSize: 9,
-                          padding: '1px 5px',
-                          borderRadius: '4px',
-                          background: isSelected ? 'rgba(255, 255, 255, 0.25)' : 'rgba(52, 179, 74, 0.25)',
-                          color: isSelected ? '#fff' : '#34B34A',
-                          fontWeight: 'bold'
-                        }}>
-                          Bulan Ini
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </Wrapper>
-
           {/* ─── 1. TABEL KOMODITAS INFLASI ─── */}
           <Wrapper>
             <div className={styles.editHeader}>
@@ -1589,21 +1524,9 @@ function StepTwoAvailable(props) {
                       </tr>
                     </thead>
                     <tbody>
-                      {monthNames.map((mName, index) => {
-                        const isTarget = index === selectedMonthIndex;
-                        return (
-                        <tr
-                          key={index}
-                          style={isTarget ? { background: 'rgba(52, 179, 74, 0.09)', outline: '1px solid rgba(52, 179, 74, 0.35)' } : undefined}
-                        >
-                          <td className={styles.monthCol}>
-                            {mName}
-                            {isTarget && (
-                              <span style={{ marginLeft: 6, fontSize: 10, padding: '2px 6px', background: '#34B34A', color: '#fff', borderRadius: 4, fontWeight: 'bold' }}>
-                                Target BRS
-                              </span>
-                            )}
-                          </td>
+                      {monthNames.map((mName, index) => (
+                        <tr key={index}>
+                          <td className={styles.monthCol}>{mName}</td>
                           {komoditasList.map((cItem, cIndex) => {
                             const val = getCommodityMonthVal(cItem.data, index)
                             return (
@@ -1618,7 +1541,7 @@ function StepTwoAvailable(props) {
                             )
                           })}
                         </tr>
-                      )})}
+                      ))}
                     </tbody>
                   </>
                 ) : (
@@ -1632,21 +1555,9 @@ function StepTwoAvailable(props) {
                       </tr>
                     </thead>
                     <tbody>
-                      {monthNames.map((mName, index) => {
-                        const isTarget = index === selectedMonthIndex;
-                        return (
-                        <tr
-                          key={index}
-                          style={isTarget ? { background: 'rgba(52, 179, 74, 0.09)', outline: '1px solid rgba(52, 179, 74, 0.35)' } : undefined}
-                        >
-                          <td className={styles.monthCol}>
-                            {mName}
-                            {isTarget && (
-                              <span style={{ marginLeft: 6, fontSize: 10, padding: '2px 6px', background: '#34B34A', color: '#fff', borderRadius: 4, fontWeight: 'bold' }}>
-                                Target BRS
-                              </span>
-                            )}
-                          </td>
+                      {monthNames.map((mName, index) => (
+                        <tr key={index}>
+                          <td className={styles.monthCol}>{mName}</td>
                           {subList.map((subItem, sIndex) => {
                             const val = getCommodityMonthVal(subItem.data, index)
                             return (
@@ -1661,7 +1572,7 @@ function StepTwoAvailable(props) {
                             )
                           })}
                         </tr>
-                      )})}
+                      ))}
                     </tbody>
                   </>
                 )}
@@ -1936,21 +1847,9 @@ function StepTwoAvailable(props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {monthNames.map((mName, index) => {
-                    const isTarget = index === selectedMonthIndex;
-                    return (
-                    <tr
-                      key={index}
-                      style={isTarget ? { background: 'rgba(52, 179, 74, 0.09)', outline: '1px solid rgba(52, 179, 74, 0.35)' } : undefined}
-                    >
-                      <td className={styles.monthCol}>
-                        {mName}
-                        {isTarget && (
-                          <span style={{ marginLeft: 6, fontSize: 10, padding: '2px 6px', background: '#34B34A', color: '#fff', borderRadius: 4, fontWeight: 'bold' }}>
-                            Target BRS
-                          </span>
-                        )}
-                      </td>
+                  {monthNames.map((mName, index) => (
+                    <tr key={index}>
+                      <td className={styles.monthCol}>{mName}</td>
                       <td>
                         <Input
                           type="text"
@@ -1976,7 +1875,7 @@ function StepTwoAvailable(props) {
                         />
                       </td>
                     </tr>
-                  )})}
+                  ))}
                 </tbody>
               </table>
             </div>
