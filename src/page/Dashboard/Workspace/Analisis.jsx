@@ -2336,10 +2336,14 @@ function StepTwoAvailable(props) {
 
 function StepThree(props) {
   const { setStep, datasetSource, uploadedDataset, analysisTitle } = props
+  const editorIframeRef = React.useRef(null)
   const [loadingSummary, setLoadingSummary] = useState(false)
   const [aiSummary, setAiSummary] = useState(null)
-  const [generatingBRS, setGeneratingBRS] = useState(false)
+  const [editorReady, setEditorReady] = useState(false)
+  const [savingToDb, setSavingToDb] = useState(false)
   const [savedHistoryId, setSavedHistoryId] = useState(null)
+  const [savedDocxUrl, setSavedDocxUrl] = useState(null)
+  const [savedPdfUrl, setSavedPdfUrl] = useState(null)
   const [error, setError] = useState("")
 
   // Parameters extracted from manual dataset
@@ -2414,80 +2418,189 @@ function StepThree(props) {
     }
   }, [uploadedDataset, datasetSource, aiSummary, inflasiValue, yoyValue, ihkValue, pendorong, divisionData]);
 
-  const handleSaveAndGenerate = async () => {
-    if (!aiSummary) return;
-    setGeneratingBRS(true);
+  // Helper: Open document in MS Word Editor iframe
+  const loadDocInEditor = (templateFile = "BERITA_FILLED.docx") => {
+    if (!editorIframeRef.current?.contentWindow) return;
+    const targetCity = (uploadedDataset?.context?.city || "Kota Metro").replace(/[^a-zA-Z0-9]/g, "_");
+    const targetPeriod = (uploadedDataset?.context?.period || "November_2025").replace(/[^a-zA-Z0-9]/g, "_");
+    const docUrl = `${process.env.REACT_APP_URL_SERVER}/word-editor/template/${templateFile}`;
+
+    editorIframeRef.current.contentWindow.postMessage(
+      {
+        type: "document:open-url",
+        payload: {
+          url: docUrl,
+          fileName: `BERITA_${targetCity}_${targetPeriod}.docx`,
+        },
+      },
+      "*"
+    );
+  };
+
+  // Listen to iframe embed events
+  useEffect(() => {
+    const handleEditorMessage = (event) => {
+      const data = event.data;
+      if (!data || typeof data !== "object") return;
+
+      if (data.type === "document:ready") {
+        setEditorReady(true);
+        // Automatically open the official BRS template
+        loadDocInEditor("BERITA_FILLED.docx");
+      }
+    };
+
+    window.addEventListener("message", handleEditorMessage);
+    return () => {
+      window.removeEventListener("message", handleEditorMessage);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uploadedDataset]);
+
+  // Helper: Convert File to Base64
+  const fileToBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (err) => reject(err);
+    });
+
+  // Helper: Request save from Word Editor iframe and return exported File
+  const requestIframeSave = (ext) => {
+    return new Promise((resolve, reject) => {
+      if (!editorIframeRef.current?.contentWindow) {
+        return reject(new Error("Editor iframe belum siap"));
+      }
+
+      const timeout = setTimeout(() => {
+        window.removeEventListener("message", messageHandler);
+        reject(new Error(`Batas waktu ekspor dokumen ${ext} habis`));
+      }, 30000);
+
+      const messageHandler = (event) => {
+        const d = event.data;
+        if (!d || typeof d !== "object") return;
+
+        if (d.type === "document:saved" && d.payload?.file) {
+          clearTimeout(timeout);
+          window.removeEventListener("message", messageHandler);
+          resolve(d.payload.file);
+        } else if (d.type === "document:error") {
+          clearTimeout(timeout);
+          window.removeEventListener("message", messageHandler);
+          reject(new Error(d.payload?.message || "Gagal mengekspor dokumen dari editor"));
+        }
+      };
+
+      window.addEventListener("message", messageHandler);
+
+      editorIframeRef.current.contentWindow.postMessage(
+        {
+          type: "document:save",
+          payload: { targetExt: ext.toUpperCase() },
+        },
+        "*"
+      );
+    });
+  };
+
+  // Main Action: Save Word Analysis (DOCX & PDF) to Database
+  const handleSaveToDatabase = async () => {
+    setSavingToDb(true);
     setError("");
     try {
       const token = localStorage.getItem("token");
       const reportTitle = uploadedDataset?.context?.title || analysisTitle || "Analisis BPS Kota Metro";
+      const targetCity = uploadedDataset?.context?.city || "Kota Metro";
+      const targetPeriod = uploadedDataset?.context?.period || "November 2025";
+
+      // 1. Export DOCX from editor
+      const docxBlob = await requestIframeSave("DOCX");
+      const docxBase64 = await fileToBase64(docxBlob);
+
+      // 2. Export PDF from editor
+      let pdfBase64 = "";
+      try {
+        const pdfBlob = await requestIframeSave("PDF");
+        pdfBase64 = await fileToBase64(pdfBlob);
+      } catch (pdfErr) {
+        console.warn("Gagal mengekspor PDF secara otomatis:", pdfErr.message);
+      }
+
+      // 3. Post to backend
       const res = await axios.post(
-        `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/generate-and-save-brs`,
+        `${process.env.REACT_APP_URL_SERVER}/api/analisis/word/save`,
         {
           title: reportTitle,
-          analysisTitle: reportTitle,
-          city: uploadedDataset.context.city,
-          monthIndex: uploadedDataset.context.monthIndex,
-          year: uploadedDataset.context.year,
-          inflasiMoM: inflasiValue,
-          inflasiYoY: yoyValue,
-          ihkNow: ihkValue,
-          komoditasPendorong: pendorong,
-          aiSummary: aiSummary.sections,
-          divisionData: divisionData,
-          editedData: uploadedDataset?.editedData,
-          parsedData: uploadedDataset?.parsedData
+          city: targetCity,
+          periode: targetPeriod,
+          docxBase64,
+          pdfBase64,
         },
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setSavedHistoryId(res.data.historyId);
+
+      if (res.data?.success) {
+        setSavedHistoryId(res.data.historyId);
+        setSavedDocxUrl(res.data.docxUrl);
+        setSavedPdfUrl(res.data.pdfUrl);
+      }
     } catch (err) {
-      console.error("Error generating/saving BRS report:", err.message);
-      setError("Gagal men-generate BRS: " + (err.response?.data?.message || err.message));
+      console.error("Gagal menyimpan ke database:", err.message);
+      setError("Gagal menyimpan analisis: " + (err.response?.data?.message || err.message));
     } finally {
-      setGeneratingBRS(false);
+      setSavingToDb(false);
     }
   };
 
-  const handleDownloadIDML = async () => {
-    if (!savedHistoryId) return;
+  // Download DOCX handler
+  const handleDownloadDocx = async () => {
+    if (savedDocxUrl) {
+      const link = document.createElement("a");
+      link.href = `${process.env.REACT_APP_URL_SERVER}${savedDocxUrl}`;
+      link.download = `Laporan_BRS_${(uploadedDataset?.context?.city || "Kota_Metro").replace(/\s+/g, '_')}.docx`;
+      link.click();
+      return;
+    }
+
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `${process.env.REACT_APP_URL_SERVER}/api/users/analysis/${savedHistoryId}/download`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: 'blob'
-        }
-      );
-      const blob = new Blob([response.data], { type: 'application/octet-stream' });
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = `perkembanganIHK_${uploadedDataset.context.city.replace(/\s+/g, '_')}_${uploadedDataset.context.period.replace(/\s+/g, '_')}.idml`;
+      const docxFile = await requestIframeSave("DOCX");
+      const url = window.URL.createObjectURL(docxFile);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Laporan_BRS_${(uploadedDataset?.context?.city || "Kota_Metro").replace(/\s+/g, '_')}.docx`;
       link.click();
     } catch (err) {
-      console.error("Gagal mengunduh IDML:", err.message);
-      if (err.response && err.response.data instanceof Blob) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          try {
-            const errorObj = JSON.parse(reader.result);
-            setError(`Gagal mengunduh file IDML: ${errorObj.message || "Terjadi kesalahan"}`);
-          } catch (e) {
-            setError("Gagal mengunduh file IDML.");
-          }
-        };
-        reader.readAsText(err.response.data);
-      } else {
-        setError("Gagal mengunduh file IDML.");
-      }
+      setError("Gagal mengunduh file DOCX: " + err.message);
     }
   };
-  // Unified AI summary and BRS report generation flow for both sources
 
-  // Manual Dataset branch
+  // Download PDF handler
+  const handleDownloadPdf = async () => {
+    if (savedPdfUrl) {
+      const link = document.createElement("a");
+      link.href = `${process.env.REACT_APP_URL_SERVER}${savedPdfUrl}`;
+      link.download = `Laporan_BRS_${(uploadedDataset?.context?.city || "Kota_Metro").replace(/\s+/g, '_')}.pdf`;
+      link.click();
+      return;
+    }
+
+    try {
+      const pdfFile = await requestIframeSave("PDF");
+      const url = window.URL.createObjectURL(pdfFile);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Laporan_BRS_${(uploadedDataset?.context?.city || "Kota_Metro").replace(/\s+/g, '_')}.pdf`;
+      link.click();
+    } catch (err) {
+      setError("Gagal mengunduh file PDF: " + err.message);
+    }
+  };
+
+  // Manual Dataset validation branch
   if (uploadedDataset && uploadedDataset.valid === "tidak") {
     return (
       <div className={styles.container}>
@@ -2508,7 +2621,6 @@ function StepThree(props) {
               onClick={() => setStep(1)}
               style={{
                 background: 'rgba(255,255,255,0.06)',
-
                 color: '#fff',
                 padding: '8px 16px',
                 borderRadius: '6px',
@@ -2528,10 +2640,11 @@ function StepThree(props) {
     <div className={styles.container}>
       {loadingSummary ? (
         <Wrapper>
-          <AILoader text="Menganalisis data & membuat ringkasan AI..." minHeight="220px" />
+          <AILoader text="Menganalisis data & memuat editor laporan BRS..." minHeight="220px" />
         </Wrapper>
       ) : (
         <>
+          {/* Ringkasan AI */}
           {aiSummary && (
             <Wrapper>
               <div className={styles.sectionWrapper}>
@@ -2541,9 +2654,9 @@ function StepThree(props) {
                   </svg>
                 </div>
                 <div>
-                  <p className={styles.sectionTitle}>Ringkasan AI</p>
+                  <p className={styles.sectionTitle}>Ringkasan Eksekutif BRS</p>
                   <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: 13, marginBottom: '16px', fontStyle: "italic" }}>
-                    Berikut adalah butir-butir ringkasan kondisi perekonomian wilayah Anda yang dihasilkan oleh AI:
+                    Kondisi perekonomian daerah {uploadedDataset?.context?.city || "Kota Metro"} hasil kompilasi indikator BPS:
                   </p>
                 </div>
               </div>
@@ -2559,155 +2672,161 @@ function StepThree(props) {
             </Wrapper>
           )}
 
-          {/* {divisionData.length > 0 && (
-            <Wrapper>
-              <p className={styles.sectionTitle}>Visualisasi Inflasi per Kelompok Pengeluaran (%)</p>
-              <div style={{ width: '100%', height: 320, marginTop: '20px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={divisionData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
-                    <XAxis 
-                      dataKey="name" 
-                      stroke="rgba(255,255,255,0.4)" 
-                      fontSize={10} 
-                      tickLine={false} 
-                      interval={0} 
-                      angle={-25} 
-                      textAnchor="end"
-                    />
-                    <YAxis 
-                      stroke="rgba(255,255,255,0.4)" 
-                      fontSize={11} 
-                      tickLine={false} 
-                      axisLine={false}
-                    />
-                    <Tooltip 
-                      contentStyle={{ background: '#121a21',  borderRadius: '6px' }}
-                      labelStyle={{ color: '#fff', fontWeight: 600 }}
-                    />
-                    <Bar dataKey="inflasi" fill="#34B34A" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </Wrapper>
-          )} */}
-
+          {/* Key Parameters Cards */}
           <Wrapper>
             <p className={styles.sectionTitle}>Ringkasan Parameter Data Utama</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginTop: '16px' }}>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px', }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px' }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>IHK Terakhir</span>
                 <span style={{ fontSize: 16, color: '#fff', fontWeight: 600 }}>{ihkValue}</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px', }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px' }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Inflasi MoM</span>
                 <span style={{ fontSize: 16, color: '#34B34A', fontWeight: 600 }}>{inflasiValue}%</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px', }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px' }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Inflasi YoY</span>
                 <span style={{ fontSize: 16, color: '#34B34A', fontWeight: 600 }}>{yoyValue}%</span>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px', }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px' }}>
                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Komoditas Pendorong</span>
                 <span style={{ fontSize: 15, color: '#fff', fontWeight: 600 }}>{pendorong}</span>
               </div>
             </div>
+          </Wrapper>
 
-            {error && <p style={{ color: '#ef4444', marginTop: 16, fontSize: 14 }}>{error}</p>}
+          {/* MS WORD EDITOR CARD */}
+          <div className={styles.wordEditorCard}>
+            <div className={styles.wordEditorToolbar}>
+              <div className={styles.wordEditorInfo}>
+                <span className={styles.wordEditorBadge}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
+                  MS Word Editor
+                </span>
+                <span style={{ color: "#94a3b8", fontSize: "13px" }}>
+                  {uploadedDataset?.context?.city || "Kota Metro"} • {uploadedDataset?.context?.period || "November 2025"}
+                </span>
+                {!editorReady && (
+                  <span style={{ fontSize: "11px", color: "#f59e0b", background: "rgba(245,158,11,0.1)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                    ● Menghubungkan Editor...
+                  </span>
+                )}
+              </div>
 
-            {!savedHistoryId && (
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
+              <div className={styles.wordEditorActions}>
                 <button
-                  onClick={handleSaveAndGenerate}
-                  disabled={generatingBRS || !aiSummary}
-                  style={{
-                    background: generatingBRS ? '#1f6a2c' : '#34B34A',
-                    color: '#fff',
-                    padding: '12px 28px',
-                    borderRadius: '8px',
-                    fontSize: 15,
-                    fontWeight: 600,
-                    cursor: generatingBRS ? 'not-allowed' : 'pointer',
-                    border: 'none',
-                    boxShadow: '0 4px 14px rgba(52, 179, 74, 0.4)',
-                    transition: 'transform 0.2s, background 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    width: "100%",
-                    justifyContent: "center"
-                  }}
+                  onClick={() => loadDocInEditor("BERITA_FILLED.docx")}
+                  className={styles.wordEditorBtnSecondary}
+                  title="Muat ulang template BERITA dengan data riil"
                 >
-                  {generatingBRS ? (
+                  <span>✨ Buka Data Riil</span>
+                </button>
+                <button
+                  onClick={() => loadDocInEditor("BERITA.docx")}
+                  className={styles.wordEditorBtnSecondary}
+                  title="Muat template standar BERITA.docx"
+                >
+                  <span>📄 Buka Template</span>
+                </button>
+
+                <button
+                  onClick={handleDownloadDocx}
+                  className={styles.wordEditorBtnSecondary}
+                  title="Unduh dokumen dalam format Word (.docx)"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  Unduh DOCX
+                </button>
+
+                <button
+                  onClick={handleDownloadPdf}
+                  className={styles.wordEditorBtnSecondary}
+                  title="Unduh dokumen dalam format PDF"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                  </svg>
+                  Unduh PDF
+                </button>
+
+                <button
+                  onClick={handleSaveToDatabase}
+                  disabled={savingToDb}
+                  className={styles.wordEditorBtnPrimary}
+                  title="Simpan dokumen Word dan PDF ke database"
+                >
+                  {savingToDb ? (
                     <>
                       <div style={{
-                        width: '18px',
-                        height: '18px',
-
+                        width: '14px',
+                        height: '14px',
+                        border: '2px solid rgba(255,255,255,0.3)',
                         borderTopColor: '#fff',
                         borderRadius: '50%',
                         animation: 'spin 1s linear infinite',
                       }} />
-                      Men-generate Laporan BRS...
+                      Menyimpan...
                     </>
                   ) : (
                     <>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12" />
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                        <polyline points="7 3 7 8 15 8"/>
                       </svg>
-                      Setujui & Generate Laporan BRS
+                      Simpan ke Database (PDF & DOCX)
                     </>
                   )}
                 </button>
               </div>
-            )}
-          </Wrapper>
+            </div>
 
+            {/* Embedded OnlyOffice-powered Word Editor Iframe */}
+            <iframe
+              ref={editorIframeRef}
+              src={`${process.env.REACT_APP_URL_SERVER}/word-editor/index.html?embed=true`}
+              className={styles.wordEditorIframe}
+              title="MS Word Editor Engine"
+            />
+          </div>
+
+          {error && <p style={{ color: '#ef4444', marginTop: 16, fontSize: 14 }}>{error}</p>}
+
+          {/* Success Card when saved */}
           {savedHistoryId && (
-            <Wrapper style={{ marginTop: '24px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '30px 20px', textAlign: 'center', gap: '16px' }}>
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#34B34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-                <p style={{ fontSize: 22, color: '#fff', fontWeight: 600, margin: 0 }}>
-                  Dokumen BRS IDML Berhasil Digenerate!
+            <div className={styles.wordSuccessCard}>
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#34B34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+              <div>
+                <p style={{ fontSize: 20, color: '#fff', fontWeight: 600, margin: '0 0 6px' }}>
+                  Dokumen BRS Berhasil Disimpan ke Database!
                 </p>
-                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: 0, maxWidth: '480px' }}>
-                  Laporan Berita Resmi Statistik (BRS) untuk Kota {uploadedDataset?.context?.city} periode {uploadedDataset?.context?.period} telah berhasil diperbarui menggunakan data Anda dan disimpan di riwayat analisis.
+                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: 0 }}>
+                  Laporan analisis untuk {uploadedDataset?.context?.city || "Kota Metro"} periode {uploadedDataset?.context?.period} tersimpan dalam format <strong>DOCX</strong> dan <strong>PDF</strong>.
                 </p>
-                <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginTop: '12px' }}>
-                  <button
-                    onClick={handleDownloadIDML}
-                    style={{
-                      background: '#34B34A',
-                      border: 'none',
-                      color: '#fff',
-                      padding: '12px 32px',
-                      borderRadius: '8px',
-                      fontSize: 15,
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      boxShadow: '0 4px 14px rgba(52, 179, 74, 0.4)',
-                      transition: 'background 0.2s',
-                      width: "100%",
-                      justifyContent: "center"
-                    }}
-                    onMouseOver={(e) => e.currentTarget.style.background = '#2da140'}
-                    onMouseOut={(e) => e.currentTarget.style.background = '#34B34A'}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="7 10 12 15 17 10" />
-                      <line x1="12" y1="15" x2="12" y2="3" />
-                    </svg>
-                    Unduh File IDML
-                  </button>
-                </div>
               </div>
-            </Wrapper>
+
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <button onClick={handleDownloadDocx} className={styles.wordEditorBtnSecondary}>
+                  📄 Unduh Berkas DOCX
+                </button>
+                <button onClick={handleDownloadPdf} className={styles.wordEditorBtnPrimary}>
+                  📑 Unduh Berkas PDF
+                </button>
+              </div>
+            </div>
           )}
         </>
       )}

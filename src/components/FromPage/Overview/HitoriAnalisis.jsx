@@ -31,6 +31,29 @@ export default function HitoriAnalisis({ onLoad }) {
     fetchHistory();
   }, []);
 
+  const handleDownload = async (id, title, format = "docx") => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `${process.env.REACT_APP_URL_SERVER}/api/users/analysis/${id}/download/${format}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: 'blob'
+        }
+      );
+      const ext = format.toLowerCase();
+      const mimeType = ext === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      const blob = new Blob([response.data], { type: mimeType });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}.${ext}`;
+      link.click();
+    } catch (err) {
+      console.error(`Gagal mengunduh ${format.toUpperCase()}:`, err.message);
+      alert(`Gagal mengunduh file ${format.toUpperCase()}.`);
+    }
+  };
+
   const handleDownloadIDML = async (id, title) => {
     try {
       const token = localStorage.getItem("token");
@@ -48,20 +71,7 @@ export default function HitoriAnalisis({ onLoad }) {
       link.click();
     } catch (err) {
       console.error("Gagal mengunduh IDML:", err.message);
-      if (err.response && err.response.data instanceof Blob) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          try {
-            const errorObj = JSON.parse(reader.result);
-            alert(`Gagal mengunduh file IDML: ${errorObj.message || "Terjadi kesalahan"}`);
-          } catch (e) {
-            alert("Gagal mengunduh file IDML.");
-          }
-        };
-        reader.readAsText(err.response.data);
-      } else {
-        alert("Gagal mengunduh file IDML.");
-      }
+      alert("Gagal mengunduh file IDML.");
     }
   };
 
@@ -97,38 +107,77 @@ export default function HitoriAnalisis({ onLoad }) {
                 <th>Judul</th>
                 <th>Periode</th>
                 <th>Tanggal Dibuat</th>
-                <th style={{ textAlign: "center", width: "100px" }}>Aksi</th>
+                <th style={{ textAlign: "center", width: "140px" }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {historyList.slice(0, 5).map((item, index) => (
-                <tr key={item._id || index}>
-                  <td className={styles.noCol}>{index + 1}</td>
-                  <td>{item.title}</td>
-                  <td>{item.periode}</td>
-                  <td>{formatTanggal(item.createdAt)}</td>
-                  <td style={{ textAlign: "center" }}>
-                    <button
-                      onClick={() => handleDownloadIDML(item._id, item.title)}
-                      style={{
-                        background: 'transparent',
-                        
-                        color: '#34B34A',
-                        padding: '6px 12px',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        transition: 'background 0.2s'
-                      }}
-                      onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(52,179,74,0.1)'; }}
-                      onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                    >
-                      IDML
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {historyList.slice(0, 5).map((item, index) => {
+                const isLegacyIdml = item.analysisFile && item.analysisFile.endsWith(".idml") && !item.docxFile;
+                return (
+                  <tr key={item._id || index}>
+                    <td className={styles.noCol}>{index + 1}</td>
+                    <td>{item.title}</td>
+                    <td>{item.periode}</td>
+                    <td>{formatTanggal(item.createdAt)}</td>
+                    <td style={{ textAlign: "center" }}>
+                      <div style={{ display: "flex", justifyContent: "center", gap: "6px" }}>
+                        {isLegacyIdml ? (
+                          <button
+                            onClick={() => handleDownloadIDML(item._id, item.title)}
+                            style={{
+                              background: 'transparent',
+                              color: '#34B34A',
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              border: '1px solid rgba(52,179,74,0.4)',
+                            }}
+                          >
+                            IDML
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleDownload(item._id, item.title, "docx")}
+                              style={{
+                                background: 'rgba(59, 130, 246, 0.12)',
+                                border: '1px solid rgba(59, 130, 246, 0.4)',
+                                color: '#60a5fa',
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                fontSize: '11px',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                              }}
+                              title="Unduh DOCX"
+                            >
+                              DOCX
+                            </button>
+                            <button
+                              onClick={() => handleDownload(item._id, item.title, "pdf")}
+                              style={{
+                                background: 'rgba(239, 68, 68, 0.12)',
+                                border: '1px solid rgba(239, 68, 68, 0.4)',
+                                color: '#f87171',
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                fontSize: '11px',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                              }}
+                              title="Unduh PDF"
+                            >
+                              PDF
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -663,3 +663,117 @@
   font-size: 11px;
   font-weight: 500;
 }
+
+/* ================= MS WORD EDITOR STYLES ================= */
+.wordEditorCard {
+  width: 100%;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  margin-top: 16px;
+}
+
+.wordEditorToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  background: #1e293b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.wordEditorInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wordEditorBadge {
+  background: rgba(52, 179, 74, 0.15);
+  color: #34B34A;
+  border: 1px solid rgba(52, 179, 74, 0.3);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wordEditorActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.wordEditorBtnPrimary {
+  background: #34B34A;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.wordEditorBtnPrimary:hover:not(:disabled) {
+  background: #2da140;
+}
+
+.wordEditorBtnPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.wordEditorBtnSecondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 8px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.wordEditorBtnSecondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.wordEditorIframe {
+  width: 100%;
+  height: 820px;
+  border: none;
+  background: #ffffff;
+  display: block;
+}
+
+.wordSuccessCard {
+  background: rgba(52, 179, 74, 0.08);
+  border: 1px solid rgba(52, 179, 74, 0.3);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
