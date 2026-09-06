@@ -606,8 +606,6 @@ function StepTwoAvailable(props) {
     })
   }
 
-  const currentCalendarMonth = new Date().getMonth();
-  const selectedMonthIndex = currentCalendarMonth;
   const monthNames = MONTH_NAMES;
 
   const getCommodityMonthVal = (commodityData, monthIdx) => {
@@ -645,11 +643,30 @@ function StepTwoAvailable(props) {
     return nextData;
   };
 
+  // Otomatis cari bulan terakhir yang memiliki data riil di tabel (bukan bulan sekarang)
+  const latestDataMonthIndex = useMemo(() => {
+    const isValidVal = (v) => v !== undefined && v !== null && String(v).trim() !== "" && String(v).trim() !== "0" && String(v).trim() !== "0.00";
+    for (let i = 11; i >= 0; i--) {
+      const mom = activeDataInflasiMoM?.[i]?.value;
+      const yoy = activeDataInflasiYoY?.[i]?.value;
+      const ytd = activeDataInflasiYtd?.[i]?.value;
+      const ihk = activeDataIhk?.[i]?.value;
+      if (isValidVal(mom) || isValidVal(yoy) || isValidVal(ytd) || (ihk !== undefined && ihk !== null && String(ihk).trim() !== "")) {
+        return i;
+      }
+      const hasComm = (komoditasList || []).some(c => isValidVal(getCommodityMonthVal(c?.data, i)));
+      if (hasComm) return i;
+    }
+    return 0; // Default ke Januari jika seluruh bulan kosong
+  }, [activeDataInflasiMoM, activeDataInflasiYoY, activeDataInflasiYtd, activeDataIhk, komoditasList]);
+
+  const selectedMonthIndex = latestDataMonthIndex;
+
   const handleSave = () => {
     const nextStepIndex = datasetSource === "available" ? 3 : 2;
     const combinedParsedData = [];
 
-    const monthIndex = selectedMonthIndex;
+    const monthIndex = latestDataMonthIndex;
     const targetYear = yearInflasiUmum === "now" ? currentYear : yearInflasiUmum === "prev" ? prevYear : prev2Year;
     const targetMonthName = monthNames[monthIndex];
 
