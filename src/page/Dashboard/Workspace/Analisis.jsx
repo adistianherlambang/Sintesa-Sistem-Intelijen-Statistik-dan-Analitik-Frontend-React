@@ -803,23 +803,24 @@ function StepTwoAvailable(props) {
         if (res?.data) {
           const d = res.data
           setInflasiData({
-            mom: d.inflasi?.mom || d.inflasiMom || null,
-            yoy: d.inflasi?.yoy || d.inflasiYoy || null,
-            ytd: d.inflasi?.ytd || d.inflasiYtd || null,
+            mom: d.inflasi?.mom || null,
+            yoy: d.inflasi?.yoy || null,
+            ytd: d.inflasi?.ytd || null,
           })
           setIhkData(d.ihk || null)
           setKomoditasData({
-            mom: d.komoditas?.mom || d.komoditasMom || null,
-            yoy: d.komoditas?.yoy || d.komoditasYoy || null,
-            ytd: d.komoditas?.ytd || d.komoditasYtd || null,
+            mom: d.komoditasInflasi?.mom || d.komoditas?.mom || null,
+            yoy: d.komoditasInflasi?.yoy || d.komoditas?.yoy || null,
+            ytd: d.komoditasInflasi?.ytd || d.komoditas?.ytd || null,
           })
-          setKomoditasIhkData(d.komoditasIhk || null)
+          setKomoditasIhkData(d.komoditasIHK || d.komoditasIhk || null)
           if (d.forecast) {
             setAnnForecastResult(d.forecast)
           }
-          if (d.bobot?.bobot && Array.isArray(d.bobot.bobot)) {
+          const bobotList = Array.isArray(d.bobot) ? d.bobot : d.bobot?.bobot
+          if (bobotList && Array.isArray(bobotList)) {
             const map = {}
-            d.bobot.bobot.forEach((item) => {
+            bobotList.forEach((item) => {
               map[normalizeGroupName(item.kelompok)] = String(item.bobot)
             })
             setBackendBobotMap(map)
