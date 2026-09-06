@@ -616,28 +616,55 @@ function StepTwoAvailable(props) {
 
       const infValue = activeDataInflasi?.[monthIndex]?.value || "0.00";
       const yValue = inflasiData.yoy?.data?.[monthIndex]?.value || "0.00";
+      const ytdValue = inflasiData.ytd?.data?.[monthIndex]?.value || "0.00";
       const iValue = activeDataIhk?.[monthIndex]?.value || "100.00";
+      const prevIhkValue = (monthIndex > 0 && activeDataIhk?.[monthIndex - 1]?.value) ? String(activeDataIhk[monthIndex - 1].value) : iValue;
+
+      const norm = (s) => String(s || "").toLowerCase().replace(/,/g, "").replace(/\s+/g, " ").trim();
 
       const divisions = komoditasList.map(c => {
         const dataKeys = Object.keys(c.data || {});
         const targetKey = dataKeys[monthIndex];
         const wVal = commodityWeights[c.label] !== undefined ? commodityWeights[c.label] : "10";
-        const matchedIhk = komoditasIhkList.find(item => item.label === c.label);
+
+        // Match IHK
+        const matchedIhk = (komoditasIhkList || []).find(item => norm(item.label) === norm(c.label) || norm(item.label).includes(norm(c.label)) || norm(c.label).includes(norm(item.label)));
         const ihkKeys = Object.keys(matchedIhk?.data || {});
         const ihkTargetKey = ihkKeys[monthIndex];
         const ihkVal = matchedIhk && ihkTargetKey ? String(matchedIhk.data[ihkTargetKey]) : "100";
+        const prevTargetKey = monthIndex > 0 ? ihkKeys[monthIndex - 1] : null;
+        const ihkLalu = matchedIhk && prevTargetKey ? String(matchedIhk.data[prevTargetKey]) : ihkVal;
+
+        // Match YoY
+        const matchedYoy = (komoditasData.yoy?.hierarki || []).find(item => norm(item.label) === norm(c.label) || norm(item.label).includes(norm(c.label)) || norm(c.label).includes(norm(item.label)));
+        const yoyKeys = Object.keys(matchedYoy?.data || {});
+        const yoyTargetKey = yoyKeys[monthIndex];
+        const yoyVal = matchedYoy && yoyTargetKey ? String(matchedYoy.data[yoyTargetKey]) : "0.00";
+
+        // Match YtD
+        const matchedYtd = (komoditasData.ytd?.hierarki || []).find(item => norm(item.label) === norm(c.label) || norm(item.label).includes(norm(c.label)) || norm(c.label).includes(norm(item.label)));
+        const ytdKeys = Object.keys(matchedYtd?.data || {});
+        const ytdTargetKey = ytdKeys[monthIndex];
+        const ytdVal = matchedYtd && ytdTargetKey ? String(matchedYtd.data[ytdTargetKey]) : "0.00";
+
+        const mtmInf = parseFloat(c.data?.[targetKey]) || 0;
+        const andilMtm = ((parseFloat(wVal) * mtmInf) / 100).toFixed(2);
 
         return {
           name: c.label,
           weight: wVal,
+          ihkLalu: ihkLalu,
           ihk: ihkVal,
-          inflasi: parseFloat(c.data?.[targetKey]) || 0
+          inflasi: mtmInf,
+          ytd: ytdVal,
+          yoy: yoyVal,
+          andil: andilMtm
         };
       });
 
       combinedParsedData.push(
         ["Tahun", "Bulan", "Kode Kota", "Nama Kota", "Kode Komoditas", "Nama Komoditas", "Timbangan", "IHK Lalu", "IHK", "Inflasi", "Inflasi YtD", "Inflasi YoY", "Andil"],
-        [currentYear, monthIndex + 1, "1872", userCityName, "0", "UMUM", "100", "100", iValue, infValue, "0", yValue, "0"]
+        [currentYear, monthIndex + 1, "1872", userCityName, "0", "UMUM", "100", prevIhkValue, iValue, infValue, ytdValue, yValue, infValue]
       );
 
       divisions.forEach((div, idx) => {
@@ -650,12 +677,12 @@ function StepTwoAvailable(props) {
           code,
           div.name,
           String(div.weight),
-          "10",
+          String(div.ihkLalu),
           String(div.ihk),
           String(div.inflasi),
-          "0",
-          "0",
-          String(div.inflasi)
+          String(div.ytd),
+          String(div.yoy),
+          String(div.andil)
         ]);
       });
     }
