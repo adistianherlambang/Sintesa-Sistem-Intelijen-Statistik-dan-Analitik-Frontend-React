@@ -12,6 +12,7 @@ import MainButton from '../../../components/MainButton/MainButton'
 import Input from '../../../components/Input/Input'
 import Skeleton from '../../../components/Skeleton/Skeleton'
 import AILoader from '../../../components/AILoader/AILoader'
+import WordEditor from '../../../word/WordEditor'
 
 const INDICATOR_OPTIONS = [
   { value: "komoditas", label: "Komoditas & Inflasi (IHK)" },
@@ -2388,16 +2389,8 @@ function StepTwoAvailable(props) {
 
 function StepThree(props) {
   const { setStep, datasetSource, uploadedDataset, analysisTitle } = props
-  const editorIframeRef = React.useRef(null)
   const [loadingSummary, setLoadingSummary] = useState(false)
   const [aiSummary, setAiSummary] = useState(null)
-  const [editorReady, setEditorReady] = useState(false)
-  const [generatingDoc, setGeneratingDoc] = useState(false)
-  const [populatedDocUrl, setPopulatedDocUrl] = useState(null)
-  const [savingToDb, setSavingToDb] = useState(false)
-  const [savedHistoryId, setSavedHistoryId] = useState(null)
-  const [savedDocxUrl, setSavedDocxUrl] = useState(null)
-  const [savedPdfUrl, setSavedPdfUrl] = useState(null)
   const [error, setError] = useState("")
 
   // Parameters extracted from manual dataset
@@ -2753,8 +2746,8 @@ function StepThree(props) {
             <Wrapper>
               <div className={styles.sectionWrapper}>
                 <div className={styles.iconWrapper}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M18.2778 0C17.3848 3.22733 16.2346 4.32988 13.0556 5.22222C16.2346 6.11457 17.3848 7.21711 18.2778 10.4444C19.1708 7.21711 20.321 6.11457 23.5 5.22222C20.321 4.32988 19.1708 3.22733 18.2778 0ZM9.13889 5.22222C7.57549 10.8694 5.56428 12.7997 0 14.3611C5.56428 15.9226 7.57549 17.8528 9.13889 23.5C10.7023 17.8528 12.7135 15.9226 18.2778 14.3611C12.7135 12.7997 10.7023 10.8694 9.13889 5.22222Z" fill="#34B34A" />
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34B34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                   </svg>
                 </div>
                 <div>
@@ -2799,160 +2792,15 @@ function StepThree(props) {
             </div>
           </Wrapper>
 
-          {/* MS WORD EDITOR CARD */}
-          <div className={styles.wordEditorCard}>
-            <div className={styles.wordEditorToolbar}>
-              <div className={styles.wordEditorInfo}>
-                <span className={styles.wordEditorBadge}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                  </svg>
-                  MS Word Editor
-                </span>
-                <span style={{ color: "#94a3b8", fontSize: "13px" }}>
-                  {uploadedDataset?.context?.city || "Kota Metro"} • {uploadedDataset?.context?.period || `${MONTH_NAMES[new Date().getMonth()]} ${new Date().getFullYear()}`}
-                </span>
-                {!editorReady ? (
-                  <span style={{ fontSize: "11px", color: "#f59e0b", background: "rgba(245,158,11,0.1)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                    ● Menghubungkan Editor...
-                  </span>
-                ) : generatingDoc ? (
-                  <span style={{ fontSize: "11px", color: "#38bdf8", background: "rgba(56,189,248,0.1)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                    ● Mengisi Variabel dari Step 3...
-                  </span>
-                ) : (
-                  <span style={{ fontSize: "11px", color: "#34D399", background: "rgba(52,211,153,0.1)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                    ● Data Step 3 Terisi
-                  </span>
-                )}
-              </div>
-
-              <div className={styles.wordEditorActions}>
-                <button
-                  onClick={generatePopulatedWordDoc}
-                  disabled={generatingDoc}
-                  className={styles.wordEditorBtnSecondary}
-                  title="Isi ulang semua variabel template dengan data riil dari Step 3"
-                  style={{ borderColor: "#38bdf8", color: "#38bdf8" }}
-                >
-                  {generatingDoc ? (
-                    <span>⏳ Memproses...</span>
-                  ) : (
-                    <span>🔄 Isi Data Step 3</span>
-                  )}
-                </button>
-                <button
-                  onClick={() => loadDocInEditor("BERITA_FILLED.docx")}
-                  className={styles.wordEditorBtnSecondary}
-                  title="Muat template standar BERITA_FILLED.docx"
-                >
-                  <span>✨ Data Sampel</span>
-                </button>
-                <button
-                  onClick={() => loadDocInEditor("BERITA.docx")}
-                  className={styles.wordEditorBtnSecondary}
-                  title="Muat template mentah BERITA.docx dengan variabel placeholder"
-                >
-                  <span>📄 Template Mentah</span>
-                </button>
-
-                <button
-                  onClick={handleDownloadDocx}
-                  className={styles.wordEditorBtnSecondary}
-                  title="Unduh dokumen dalam format Word (.docx)"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                  </svg>
-                  Unduh DOCX
-                </button>
-
-                <button
-                  onClick={handleDownloadPdf}
-                  className={styles.wordEditorBtnSecondary}
-                  title="Unduh dokumen dalam format PDF"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
-                  </svg>
-                  Unduh PDF
-                </button>
-
-                <button
-                  onClick={handleSaveToDatabase}
-                  disabled={savingToDb}
-                  className={styles.wordEditorBtnPrimary}
-                  title="Simpan dokumen Word dan PDF ke database"
-                >
-                  {savingToDb ? (
-                    <>
-                      <div style={{
-                        width: '14px',
-                        height: '14px',
-                        border: '2px solid rgba(255,255,255,0.3)',
-                        borderTopColor: '#fff',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite',
-                      }} />
-                      Menyimpan...
-                    </>
-                  ) : (
-                    <>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                        <polyline points="17 21 17 13 7 13 7 21"/>
-                        <polyline points="7 3 7 8 15 8"/>
-                      </svg>
-                      Simpan ke Database (PDF & DOCX)
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Embedded OnlyOffice-powered Word Editor Iframe */}
-            <iframe
-              ref={editorIframeRef}
-              src={`${process.env.REACT_APP_URL_SERVER}/word-editor/index.html?embed=true`}
-              className={styles.wordEditorIframe}
-              title="MS Word Editor Engine"
-            />
-          </div>
+          {/* REUSABLE MS WORD EDITOR COMPONENT */}
+          <WordEditor
+            uploadedDataset={uploadedDataset}
+            analysisTitle={analysisTitle}
+            serverUrl={process.env.REACT_APP_URL_SERVER}
+            editorBasePath="/word-editor"
+          />
 
           {error && <p style={{ color: '#ef4444', marginTop: 16, fontSize: 14 }}>{error}</p>}
-
-          {/* Success Card when saved */}
-          {savedHistoryId && (
-            <div className={styles.wordSuccessCard}>
-              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#34B34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                <polyline points="22 4 12 14.01 9 11.01" />
-              </svg>
-              <div>
-                <p style={{ fontSize: 20, color: '#fff', fontWeight: 600, margin: '0 0 6px' }}>
-                  Dokumen BRS Berhasil Disimpan ke Database!
-                </p>
-                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: 0 }}>
-                  Laporan analisis untuk {uploadedDataset?.context?.city || "Kota Metro"} periode {uploadedDataset?.context?.period} tersimpan dalam format <strong>DOCX</strong> dan <strong>PDF</strong>.
-                </p>
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <button onClick={handleDownloadDocx} className={styles.wordEditorBtnSecondary}>
-                  📄 Unduh Berkas DOCX
-                </button>
-                <button onClick={handleDownloadPdf} className={styles.wordEditorBtnPrimary}>
-                  📑 Unduh Berkas PDF
-                </button>
-              </div>
-            </div>
-          )}
         </>
       )}
     </div>
