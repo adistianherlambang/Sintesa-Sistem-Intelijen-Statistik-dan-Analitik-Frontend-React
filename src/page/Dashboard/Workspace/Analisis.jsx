@@ -690,25 +690,43 @@ function StepTwoAvailable(props) {
 
       const norm = (s) => String(s || "").toLowerCase().replace(/,/g, "").replace(/\s+/g, " ").trim();
 
+      const momHierarkiList = komoditasData.mom?.hierarki || komoditasList || [];
       const divisions = komoditasList.map(c => {
         const wVal = commodityWeights[c.label] !== undefined ? commodityWeights[c.label] : (100 / (komoditasList.length || 11)).toFixed(2);
 
-        // MoM value from c.data (which was updated by handleKomoditasChange)
-        const mtmVal = getCommodityMonthVal(c.data, monthIndex) || "0.00";
+        // Match MoM hierarki explicitly
+        const matchedMom = (momHierarkiList || []).find(item => norm(item.label) === norm(c.label) || norm(item.label).includes(norm(c.label)) || norm(c.label).includes(norm(item.label)));
+        let mtmVal = getCommodityMonthVal(matchedMom?.data || c.data, monthIndex);
+        if (!mtmVal && matchedMom?.value !== undefined && matchedMom?.value !== null && matchedMom?.value !== "") {
+          mtmVal = String(matchedMom.value);
+        }
+        if (!mtmVal) mtmVal = "0.00";
         const mtmInf = parseFloat(mtmVal) || 0;
 
         // Match IHK
         const matchedIhk = (komoditasIhkList || []).find(item => norm(item.label) === norm(c.label) || norm(item.label).includes(norm(c.label)) || norm(c.label).includes(norm(item.label)));
-        const ihkVal = getCommodityMonthVal(matchedIhk?.data, monthIndex) || "100.00";
+        let ihkVal = getCommodityMonthVal(matchedIhk?.data, monthIndex);
+        if (!ihkVal && matchedIhk?.value !== undefined && matchedIhk?.value !== null && matchedIhk?.value !== "") {
+          ihkVal = String(matchedIhk.value);
+        }
+        if (!ihkVal) ihkVal = "100.00";
         const prevIhkVal = monthIndex > 0 ? (getCommodityMonthVal(matchedIhk?.data, monthIndex - 1) || ihkVal) : ihkVal;
 
         // Match YoY
         const matchedYoy = (komoditasData.yoy?.hierarki || []).find(item => norm(item.label) === norm(c.label) || norm(item.label).includes(norm(c.label)) || norm(c.label).includes(norm(item.label)));
-        const yoyVal = getCommodityMonthVal(matchedYoy?.data, monthIndex) || "0.00";
+        let yoyVal = getCommodityMonthVal(matchedYoy?.data, monthIndex);
+        if (!yoyVal && matchedYoy?.value !== undefined && matchedYoy?.value !== null && matchedYoy?.value !== "") {
+          yoyVal = String(matchedYoy.value);
+        }
+        if (!yoyVal) yoyVal = "0.00";
 
         // Match YtD
         const matchedYtd = (komoditasData.ytd?.hierarki || []).find(item => norm(item.label) === norm(c.label) || norm(item.label).includes(norm(c.label)) || norm(c.label).includes(norm(item.label)));
-        const ytdVal = getCommodityMonthVal(matchedYtd?.data, monthIndex) || "0.00";
+        let ytdVal = getCommodityMonthVal(matchedYtd?.data, monthIndex);
+        if (!ytdVal && matchedYtd?.value !== undefined && matchedYtd?.value !== null && matchedYtd?.value !== "") {
+          ytdVal = String(matchedYtd.value);
+        }
+        if (!ytdVal) ytdVal = "0.00";
 
         const andilMtm = ((parseFloat(wVal) * mtmInf) / 100).toFixed(2);
         const andilYoy = ((parseFloat(wVal) * (parseFloat(yoyVal) || 0)) / 100).toFixed(2);
