@@ -17,9 +17,10 @@ export default function WordEditor({
   analysisTitle = "Berita Resmi Statistik",
   onSaved,
   serverUrl = process.env.REACT_APP_URL_SERVER || "",
-  editorBasePath = "/word-editor"
+  editorBasePath = ""
 }) {
   const editorIframeRef = useRef(null);
+  const editorUrl = editorBasePath || `${serverUrl}/word-editor`;
   const [editorReady, setEditorReady] = useState(false);
   const [generatingDoc, setGeneratingDoc] = useState(false);
   const [, setPopulatedDocUrl] = useState(null);
@@ -386,10 +387,10 @@ export default function WordEditor({
           </div>
         </div>
 
-        {/* Embedded OnlyOffice Word Editor Engine from frontend/public/word-editor */}
+        {/* Embedded Document Editor Engine */}
         <iframe
           ref={editorIframeRef}
-          src={`${editorBasePath}/index.html?embed=true`}
+          src={`${editorUrl}/index.html?embed=true`}
           className={styles.wordEditorIframe}
           title="MS Word Editor Engine"
         />

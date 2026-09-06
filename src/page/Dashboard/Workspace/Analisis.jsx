@@ -2565,7 +2565,6 @@ function StepThree(props) {
             uploadedDataset={uploadedDataset}
             analysisTitle={analysisTitle}
             serverUrl={process.env.REACT_APP_URL_SERVER}
-            editorBasePath="/word-editor"
           />
 
           {error && <p style={{ color: '#ef4444', marginTop: 16, fontSize: 14 }}>{error}</p>}
