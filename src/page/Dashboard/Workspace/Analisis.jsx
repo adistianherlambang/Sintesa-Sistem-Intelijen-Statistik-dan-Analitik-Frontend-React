@@ -786,6 +786,8 @@ function StepTwoAvailable(props) {
   }, [komoditasLabelsKey, komoditasData])
 
   useEffect(() => {
+    if (!isCommodity) return
+
     const fetchData = async () => {
       try {
         const userCity = user?.location?.name || ""
@@ -794,58 +796,41 @@ function StepTwoAvailable(props) {
           return str.toLowerCase().replace(/,/g, "").replace(/\s+/g, " ").trim()
         }
 
-        const [
-          resInflasiMom,
-          resInflasiYoy,
-          resInflasiYtd,
-          resIhk,
-          resKomoditasMom,
-          resKomoditasYoy,
-          resKomoditasYtd,
-          resKomoditasIhk,
-          resForecast,
-          resBobot,
-        ] = await Promise.all([
-          axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi`, { kota: userCity }).catch(() => ({ data: null })),
-          axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi/yoy`, { kota: userCity }).catch(() => ({ data: null })),
-          axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi/ytd`, { kota: userCity }).catch(() => ({ data: null })),
-          axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/ihk`, { kota: userCity }).catch(() => ({ data: null })),
-          axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi/komoditas`, { kota: userCity }).catch(() => ({ data: null })),
-          axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi/komoditas/yoy`, { kota: userCity }).catch(() => ({ data: null })),
-          axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/inflasi/komoditas/ytd`, { kota: userCity }).catch(() => ({ data: null })),
-          axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/ihk/komoditas`, { kota: userCity }).catch(() => ({ data: null })),
-          axios.get(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/forecast/${encodeURIComponent(userCity)}`).catch(() => ({ data: null })),
-          axios.get(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/bobot`).catch(() => ({ data: null })),
-        ])
+        const res = await axios
+          .post(`${process.env.REACT_APP_URL_SERVER}/api/analisis/inflasi-ihk`, { kota: userCity })
+          .catch(() => ({ data: null }))
 
-        setInflasiData({
-          mom: resInflasiMom.data,
-          yoy: resInflasiYoy.data,
-          ytd: resInflasiYtd.data,
-        })
-        setIhkData(resIhk.data)
-        setKomoditasData({
-          mom: resKomoditasMom.data,
-          yoy: resKomoditasYoy.data,
-          ytd: resKomoditasYtd.data,
-        })
-        setKomoditasIhkData(resKomoditasIhk.data)
-        if (resForecast?.data) {
-          setAnnForecastResult(resForecast.data)
-        }
-        if (resBobot?.data?.bobot && Array.isArray(resBobot.data.bobot)) {
-          const map = {}
-          resBobot.data.bobot.forEach((item) => {
-            map[normalizeGroupName(item.kelompok)] = String(item.bobot)
+        if (res?.data) {
+          const d = res.data
+          setInflasiData({
+            mom: d.inflasi?.mom || d.inflasiMom || null,
+            yoy: d.inflasi?.yoy || d.inflasiYoy || null,
+            ytd: d.inflasi?.ytd || d.inflasiYtd || null,
           })
-          setBackendBobotMap(map)
+          setIhkData(d.ihk || null)
+          setKomoditasData({
+            mom: d.komoditas?.mom || d.komoditasMom || null,
+            yoy: d.komoditas?.yoy || d.komoditasYoy || null,
+            ytd: d.komoditas?.ytd || d.komoditasYtd || null,
+          })
+          setKomoditasIhkData(d.komoditasIhk || null)
+          if (d.forecast) {
+            setAnnForecastResult(d.forecast)
+          }
+          if (d.bobot?.bobot && Array.isArray(d.bobot.bobot)) {
+            const map = {}
+            d.bobot.bobot.forEach((item) => {
+              map[normalizeGroupName(item.kelompok)] = String(item.bobot)
+            })
+            setBackendBobotMap(map)
+          }
         }
       } catch (err) {
-        console.error(err.message)
+        console.error("Gagal mengambil data inflasi & IHK:", err.message)
       }
     }
     fetchData()
-  }, [user])
+  }, [user, isCommodity])
 
   const normalizeGroupName = (str) => {
     if (!str) return ""
