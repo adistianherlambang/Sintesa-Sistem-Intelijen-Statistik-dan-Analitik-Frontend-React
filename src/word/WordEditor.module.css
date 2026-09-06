@@ -1,118 +1,65 @@
-.wordEditorCard {
+/* WordEditor.module.css - Styled identically to Kanva / Infografis */
+
+.editorLayout {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 78vh;
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   background: #0f172a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  color: #d5d5d5;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  margin-top: 16px;
+}
+
+.editorIframe {
+  flex: 1;
   width: 100%;
-}
-
-.wordEditorToolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 18px;
-  background: #1e293b;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.wordEditorInfo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.wordEditorBadge {
-  background: rgba(52, 179, 74, 0.15);
-  color: #34B34A;
-  border: 1px solid rgba(52, 179, 74, 0.3);
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.wordEditorActions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.wordEditorBtnPrimary {
-  background: #34B34A;
-  color: #ffffff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 7px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: background 0.2s, transform 0.1s;
-}
-
-.wordEditorBtnPrimary:hover:not(:disabled) {
-  background: #2da140;
-}
-
-.wordEditorBtnPrimary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.wordEditorBtnSecondary {
-  background: rgba(255, 255, 255, 0.08);
-  color: #f1f5f9;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 8px 14px;
-  border-radius: 7px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s;
-}
-
-.wordEditorBtnSecondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.wordEditorIframe {
-  width: 100%;
-  height: 820px;
+  height: 100%;
   border: none;
   background: #ffffff;
   display: block;
 }
 
-.wordSuccessCard {
-  background: rgba(52, 179, 74, 0.08);
-  border: 1px solid rgba(52, 179, 74, 0.3);
-  border-radius: 12px;
-  padding: 24px;
-  text-align: center;
+.toast {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  background: rgba(16, 185, 129, 0.95);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 100;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 16px;
-  margin-top: 20px;
+  gap: 6px;
+  animation: fadeIn 0.2s ease;
 }
 
-.errorText {
-  color: #ef4444;
-  margin-top: 16px;
-  font-size: 14px;
+.errorToast {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  background: rgba(239, 68, 68, 0.95);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
 }

@@ -21,7 +21,7 @@ export default function WordEditor({
 }) {
   const editorIframeRef = useRef(null);
   const editorUrl = editorBasePath || `${serverUrl}/word-editor`;
-  const [editorReady, setEditorReady] = useState(false);
+  const [, setEditorReady] = useState(false);
   const [generatingDoc, setGeneratingDoc] = useState(false);
   const [, setPopulatedDocUrl] = useState(null);
   const [savingToDb, setSavingToDb] = useState(false);
@@ -155,8 +155,15 @@ export default function WordEditor({
 
       if (data.type === "document:ready") {
         setEditorReady(true);
-        // Automatically generate & populate Word document with real Step 3 data!
         generatePopulatedWordDoc();
+      } else if (data.type === "analisis:reload") {
+        generatePopulatedWordDoc();
+      } else if (data.type === "analisis:download-docx") {
+        handleDownloadDocx();
+      } else if (data.type === "analisis:download-pdf") {
+        handleDownloadPdf();
+      } else if (data.type === "analisis:save") {
+        handleSaveToDatabase();
       }
     };
 
@@ -165,7 +172,20 @@ export default function WordEditor({
       window.removeEventListener("message", handleEditorMessage);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uploadedDataset]);
+  }, [uploadedDataset, savedDocxUrl, savedPdfUrl, reportTitle, targetCity, targetPeriod]);
+
+  // Sync state (generating, saving) to buttons in OnlyOffice header
+  useEffect(() => {
+    try {
+      editorIframeRef.current?.contentWindow?.postMessage(
+        {
+          type: "analisis:state",
+          payload: { generating: generatingDoc, saving: savingToDb },
+        },
+        "*"
+      );
+    } catch {}
+  }, [generatingDoc, savingToDb]);
 
   // Main Action: Save Word Analysis (DOCX & PDF) to Database
   const handleSaveToDatabase = async () => {
@@ -263,165 +283,24 @@ export default function WordEditor({
   };
 
   return (
-    <div style={{ width: "100%" }}>
-      {/* MS WORD EDITOR CARD */}
-      <div className={styles.wordEditorCard}>
-        <div className={styles.wordEditorToolbar}>
-          <div className={styles.wordEditorInfo}>
-            <span className={styles.wordEditorBadge}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                <polyline points="14 2 14 8 20 8"/>
-              </svg>
-              MS Word Editor
-            </span>
-            <span style={{ color: "#94a3b8", fontSize: "13px" }}>
-              {targetCity} • {targetPeriod}
-            </span>
-            {!editorReady ? (
-              <span style={{ fontSize: "11px", color: "#f59e0b", background: "rgba(245,158,11,0.1)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                ● Menghubungkan Editor...
-              </span>
-            ) : generatingDoc ? (
-              <span style={{ fontSize: "11px", color: "#38bdf8", background: "rgba(56,189,248,0.1)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                ● Mengisi Variabel dari Step 3...
-              </span>
-            ) : (
-              <span style={{ fontSize: "11px", color: "#34D399", background: "rgba(52,211,153,0.1)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                ● Data Step 3 Terisi
-              </span>
-            )}
-          </div>
+    <div className={styles.editorLayout}>
+      {/* Embedded Document Editor Engine - Full Height */}
+      <iframe
+        ref={editorIframeRef}
+        src={`${editorUrl}/index.html?embed=true`}
+        className={styles.editorIframe}
+        title="Document Editor Engine"
+      />
 
-          <div className={styles.wordEditorActions}>
-            <button
-              type="button"
-              onClick={generatePopulatedWordDoc}
-              disabled={generatingDoc}
-              className={styles.wordEditorBtnSecondary}
-              title="Isi ulang semua variabel template dengan data riil dari Step 3"
-              style={{ borderColor: "#38bdf8", color: "#38bdf8" }}
-            >
-              {generatingDoc ? (
-                <span>⏳ Memproses...</span>
-              ) : (
-                <span>🔄 Isi Data Step 3</span>
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={() => loadDocInEditor("BERITA_FILLED.docx")}
-              className={styles.wordEditorBtnSecondary}
-              title="Muat template standar BERITA_FILLED.docx"
-            >
-              <span>✨ Data Sampel</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => loadDocInEditor("BERITA.docx")}
-              className={styles.wordEditorBtnSecondary}
-              title="Muat template mentah BERITA.docx dengan variabel placeholder"
-            >
-              <span>📄 Template Mentah</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleDownloadDocx}
-              className={styles.wordEditorBtnSecondary}
-              title="Unduh dokumen dalam format Word (.docx)"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              Unduh DOCX
-            </button>
-
-            <button
-              type="button"
-              onClick={handleDownloadPdf}
-              className={styles.wordEditorBtnSecondary}
-              title="Unduh dokumen dalam format PDF"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-              </svg>
-              Unduh PDF
-            </button>
-
-            <button
-              type="button"
-              onClick={handleSaveToDatabase}
-              disabled={savingToDb}
-              className={styles.wordEditorBtnPrimary}
-              title="Simpan dokumen Word dan PDF ke database"
-            >
-              {savingToDb ? (
-                <>
-                  <div style={{
-                    width: "14px",
-                    height: "14px",
-                    border: "2px solid rgba(255,255,255,0.3)",
-                    borderTopColor: "#fff",
-                    borderRadius: "50%",
-                    animation: "spin 1s linear infinite",
-                  }} />
-                  Menyimpan...
-                </>
-              ) : (
-                <>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                    <polyline points="17 21 17 13 7 13 7 21"/>
-                    <polyline points="7 3 7 8 15 8"/>
-                  </svg>
-                  Simpan ke Database (PDF & DOCX)
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Embedded Document Editor Engine */}
-        <iframe
-          ref={editorIframeRef}
-          src={`${editorUrl}/index.html?embed=true`}
-          className={styles.wordEditorIframe}
-          title="MS Word Editor Engine"
-        />
-      </div>
-
-      {error && <p className={styles.errorText}>{error}</p>}
-
-      {/* Success Card when saved */}
+      {/* Toast Feedback */}
       {savedHistoryId && (
-        <div className={styles.wordSuccessCard}>
-          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#34B34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-            <polyline points="22 4 12 14.01 9 11.01" />
-          </svg>
-          <div>
-            <p style={{ fontSize: 20, color: "#fff", fontWeight: 600, margin: "0 0 6px" }}>
-              Dokumen BRS Berhasil Disimpan ke Database!
-            </p>
-            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", margin: 0 }}>
-              Laporan analisis untuk {uploadedDataset?.context?.city || "Kota Metro"} periode {uploadedDataset?.context?.period} tersimpan dalam format <strong>DOCX</strong> dan <strong>PDF</strong>.
-            </p>
-          </div>
-
-          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center" }}>
-            <button type="button" onClick={handleDownloadDocx} className={styles.wordEditorBtnSecondary}>
-              📄 Unduh Berkas DOCX
-            </button>
-            <button type="button" onClick={handleDownloadPdf} className={styles.wordEditorBtnPrimary}>
-              📑 Unduh Berkas PDF
-            </button>
-          </div>
+        <div className={styles.toast}>
+          ✓ Dokumen BRS berhasil disimpan ke database
+        </div>
+      )}
+      {error && (
+        <div className={styles.errorToast}>
+          ⚠ {error}
         </div>
       )}
     </div>

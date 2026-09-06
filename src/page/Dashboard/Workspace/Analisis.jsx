@@ -2508,68 +2508,13 @@ function StepThree(props) {
           <AILoader text="Menganalisis data & memuat editor laporan BRS..." minHeight="220px" />
         </Wrapper>
       ) : (
-        <>
-          {/* Ringkasan AI */}
-          {aiSummary && (
-            <Wrapper>
-              <div className={styles.sectionWrapper}>
-                <div className={styles.iconWrapper}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34B34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                  </svg>
-                </div>
-                <div>
-                  <p className={styles.sectionTitle}>Ringkasan Eksekutif BRS</p>
-                  <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: 13, marginBottom: '16px', fontStyle: "italic" }}>
-                    Kondisi perekonomian daerah {uploadedDataset?.context?.city || "Kota Metro"} hasil kompilasi indikator BPS:
-                  </p>
-                </div>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {aiSummary.sections?.map((section, idx) => (
-                  <Wrapper key={idx}>
-                    <p style={{ color: 'rgba(255, 255, 255, 0.8)', margin: 0, fontSize: '14px', lineHeight: 1.5 }}>
-                      {section.content}
-                    </p>
-                  </Wrapper>
-                ))}
-              </div>
-            </Wrapper>
-          )}
-
-          {/* Key Parameters Cards */}
-          <Wrapper>
-            <p className={styles.sectionTitle}>Ringkasan Parameter Data Utama</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginTop: '16px' }}>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px' }}>
-                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>IHK Terakhir</span>
-                <span style={{ fontSize: 16, color: '#fff', fontWeight: 600 }}>{ihkValue}</span>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px' }}>
-                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Inflasi MoM</span>
-                <span style={{ fontSize: 16, color: '#34B34A', fontWeight: 600 }}>{inflasiValue}%</span>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px' }}>
-                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Inflasi YoY</span>
-                <span style={{ fontSize: 16, color: '#34B34A', fontWeight: 600 }}>{yoyValue}%</span>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px' }}>
-                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Komoditas Pendorong</span>
-                <span style={{ fontSize: 15, color: '#fff', fontWeight: 600 }}>{pendorong}</span>
-              </div>
-            </div>
-          </Wrapper>
-
-          {/* REUSABLE MS WORD EDITOR COMPONENT */}
-          <WordEditor
-            uploadedDataset={uploadedDataset}
-            analysisTitle={analysisTitle}
-            serverUrl={process.env.REACT_APP_URL_SERVER}
-          />
-
-          {error && <p style={{ color: '#ef4444', marginTop: 16, fontSize: 14 }}>{error}</p>}
-        </>
+        <WordEditor
+          uploadedDataset={uploadedDataset}
+          analysisTitle={analysisTitle}
+          serverUrl={process.env.REACT_APP_URL_SERVER}
+        />
       )}
+      {error && <p style={{ color: '#ef4444', marginTop: 16, fontSize: 14 }}>{error}</p>}
     </div>
   )
 }
