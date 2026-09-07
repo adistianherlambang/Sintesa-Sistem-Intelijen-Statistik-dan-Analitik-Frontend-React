@@ -21,7 +21,6 @@ export default function SignUp() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetchingCities, setFetchingCities] = useState(true);
-  const [registrationAllowed, setRegistrationAllowed] = useState(true);
 
   const navigate = useNavigate();
   const login = userStore((state) => state.login);
@@ -29,21 +28,6 @@ export default function SignUp() {
   const [searchQuery, setSearchQuery] = useState("");
   const dropdownRef = useRef(null);
   const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000";
-
-  useEffect(() => {
-    const fetchPublicFeatures = async () => {
-      try {
-        const res = await axios.get(`${serverUrl}/api/features/public`);
-        if (res.data?.features && res.data.features.userRegistration === false) {
-          setRegistrationAllowed(false);
-          setError("Pendaftaran akun baru saat ini sedang dinonaktifkan oleh administrator.");
-        }
-      } catch (err) {
-        console.warn("Gagal mengecek status pendaftaran:", err.message);
-      }
-    };
-    fetchPublicFeatures();
-  }, [serverUrl]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -265,13 +249,9 @@ export default function SignUp() {
               <div className={styles.buttonWrapper}>
                 <MainButton
                   onClick={handleSubmitForm}
-                  disabled={loading || !registrationAllowed}
+                  disabled={loading}
                 >
-                  {loading
-                    ? "Memproses..."
-                    : !registrationAllowed
-                    ? "Pendaftaran Ditutup"
-                    : "Daftar Akun"}
+                  {loading ? "Memproses..." : "Daftar Akun"}
                 </MainButton>
               </div>
             </form>

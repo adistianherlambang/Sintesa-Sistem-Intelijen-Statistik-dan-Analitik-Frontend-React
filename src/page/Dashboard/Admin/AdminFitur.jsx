@@ -77,7 +77,7 @@ export default function AdminFitur() {
       <div>
         <h1 className={styles.tabTitle}>Kontrol &amp; Sakelar Fitur</h1>
         <p className={styles.subText}>
-          Matikan atau hidupkan fitur sistem secara terpusat untuk seluruh pengguna platform.
+          Matikan atau hidupkan akses halaman serta tombol tab (Workspace Analisis, Bot WhatsApp, Infografis) pada akun pengguna (role user).
         </p>
       </div>
 
@@ -98,7 +98,7 @@ export default function AdminFitur() {
         <div>
           <h4 className={styles.alertTitle}>Peringatan Kontrol Global</h4>
           <p className={styles.alertDesc}>
-            Menonaktifkan fitur di halaman ini akan segera menutup akses fitur tersebut bagi semua pengguna umum di platform. Pastikan perubahan telah sesuai dengan jadwal pemeliharaan atau kebijakan layanan.
+            Menonaktifkan sakelar di bawah ini akan secara instan men-disable tombol tab di sidebar dan mengunci halaman terkait bagi seluruh pengguna umum (role user).
           </p>
         </div>
       </div>

@@ -227,9 +227,6 @@
 
 .statusPaid {
   color: #34B34A;
-  background: rgba(52, 179, 74, 0.15);
-  padding: 3px 8px;
-  border-radius: 4px;
   font-weight: 600;
   font-size: 12px;
   display: inline-block;
@@ -237,10 +234,77 @@
 
 .statusPending {
   color: #f59e0b;
-  background: rgba(245, 158, 11, 0.15);
-  padding: 3px 8px;
-  border-radius: 4px;
   font-weight: 600;
   font-size: 12px;
   display: inline-block;
+}
+
+/* Feature Checkboxes in Card */
+.featuresChecklist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.featureCheckboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #e5e5e5;
+  cursor: pointer;
+  user-select: none;
+}
+
+.featureCheckboxLabel input[type="checkbox"] {
+  accent-color: #34B34A;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Modal Add Package */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 16px;
+}
+
+.modalBox {
+  background: #141414;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 16px 0;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
 }

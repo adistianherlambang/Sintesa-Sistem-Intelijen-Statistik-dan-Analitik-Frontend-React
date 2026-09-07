@@ -13,7 +13,6 @@ import Input from '../../../components/Input/Input'
 import Skeleton from '../../../components/Skeleton/Skeleton'
 import AILoader from '../../../components/AILoader/AILoader'
 import WordEditor from '../../../word/WordEditor'
-import FeatureDisabled from '../../../components/FeatureDisabled/FeatureDisabled'
 import { BannerExporter } from '../../../kanva/components/Banner'
 
 const INDICATOR_OPTIONS = [
@@ -38,27 +37,6 @@ export default function Analisis() {
   const [analysisTitle, setAnalysisTitle] = useState("Analisis BPS Kota Metro")
   const [uploadedDataset, setUploadedDataset] = useState(null)
   const [brsPreview, setBrsPreview] = useState(null)
-  const [features, setFeatures] = useState({
-    aiForecasting: true,
-    whatsappBot: true,
-    wordExport: true,
-    infografis: true,
-    userRegistration: true,
-  })
-
-  useEffect(() => {
-    const fetchPublicFeatures = async () => {
-      try {
-        const res = await axios.get(`${process.env.REACT_APP_URL_SERVER || "http://localhost:5000"}/api/features/public`)
-        if (res.data?.features) {
-          setFeatures(res.data.features)
-        }
-      } catch (err) {
-        console.warn("Could not fetch features in Analisis:", err.message)
-      }
-    }
-    fetchPublicFeatures()
-  }, [])
 
   const item = [
     {
@@ -83,7 +61,6 @@ export default function Analisis() {
           analysisTitle={analysisTitle}
           uploadedDataset={uploadedDataset}
           setUploadedDataset={setUploadedDataset}
-          features={features}
         />
       )
     },
@@ -97,7 +74,6 @@ export default function Analisis() {
           uploadedDataset={uploadedDataset}
           brsPreview={brsPreview}
           setBrsPreview={setBrsPreview}
-          features={features}
         />
       )
     },
@@ -442,8 +418,7 @@ function StepTwoAvailable(props) {
     setUploadedDataset,
     datasetSource = "available",
     selectedIndicators = ["komoditas"],
-    analysisTitle = "Analisis BPS Kota Metro",
-    features = { aiForecasting: true, wordExport: true }
+    analysisTitle = "Analisis BPS Kota Metro"
   } = props
   const user = userStore((state) => state.user)
 
@@ -2058,30 +2033,19 @@ function StepTwoAvailable(props) {
               <p className={styles.forecastingDesc}>
                 Aktifkan untuk menghasilkan prediksi indikator periode berikutnya menggunakan model Machine Learning / ANN.
               </p>
-              {features?.aiForecasting === false && (
-                <p style={{ fontSize: "12px", color: "#ef4444", margin: "6px 0 0 0", fontWeight: 500 }}>
-                  (Fitur forecasting sedang dinonaktifkan oleh administrator)
-                </p>
-              )}
             </div>
             <div className={styles.sliderToggle}>
               <div
                 className={`${styles.sliderTrack} ${forecastingEnabled ? styles.sliderTrackActive : ""}`}
                 role="group"
                 aria-label="Pilih opsi forecasting"
-                onClick={() => {
-                  if (features?.aiForecasting !== false) {
-                    setForecastingEnabled(prev => !prev);
-                  }
-                }}
-                style={features?.aiForecasting === false ? { opacity: 0.4, cursor: "not-allowed" } : {}}
+                onClick={() => setForecastingEnabled(prev => !prev)}
               >
                 <span
                   className={`${styles.sliderPill} ${forecastingEnabled ? styles.sliderPillRight : styles.sliderPillLeft}`}
                 />
                 <button
                   type="button"
-                  disabled={features?.aiForecasting === false}
                   onClick={(e) => { e.stopPropagation(); setForecastingEnabled(false) }}
                   className={`${styles.sliderBtn} ${!forecastingEnabled ? styles.sliderBtnActiveTidak : ""}`}
                   aria-pressed={forecastingEnabled}
@@ -2090,13 +2054,7 @@ function StepTwoAvailable(props) {
                 </button>
                 <button
                   type="button"
-                  disabled={features?.aiForecasting === false}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (features?.aiForecasting !== false) {
-                      setForecastingEnabled(true);
-                    }
-                  }}
+                  onClick={(e) => { e.stopPropagation(); setForecastingEnabled(true) }}
                   className={`${styles.sliderBtn} ${forecastingEnabled ? styles.sliderBtnActiveYa : ""}`}
                   aria-pressed={!forecastingEnabled}
                 >
@@ -2458,16 +2416,11 @@ function StepTwoAvailable(props) {
         </MainButton>
         <MainButton
           onClick={handleSave}
-          disabled={isExportingBanner || features?.wordExport === false}
+          disabled={isExportingBanner}
           style={{ width: 'auto', padding: '10px 24px' }}
         >
           {isExportingBanner ? "Memproses Gambar Banner..." : "Simpan & Lanjutkan"}
         </MainButton>
-        {features?.wordExport === false && (
-          <span style={{ fontSize: "13px", color: "#ef4444", fontWeight: 500 }}>
-            (Fitur Ekspor Dokumen BRS sedang dinonaktifkan oleh administrator)
-          </span>
-        )}
       </div>
     </div>
   )
@@ -2478,8 +2431,7 @@ function StepThree(props) {
     setStep,
     datasetSource,
     uploadedDataset,
-    analysisTitle,
-    features = { wordExport: true }
+    analysisTitle
   } = props
   const [loadingSummary, setLoadingSummary] = useState(false)
   const [aiSummary, setAiSummary] = useState(null)
@@ -2529,7 +2481,7 @@ function StepThree(props) {
 
   // Fetch structured JSON AI summary on mount/load
   useEffect(() => {
-    if (uploadedDataset && uploadedDataset.valid === "ya" && !aiSummary && features?.wordExport !== false) {
+    if (uploadedDataset && uploadedDataset.valid === "ya" && !aiSummary) {
       const fetchSummary = async () => {
         setLoadingSummary(true);
         setError("");
@@ -2555,19 +2507,7 @@ function StepThree(props) {
       };
       fetchSummary();
     }
-  }, [uploadedDataset, datasetSource, aiSummary, inflasiValue, yoyValue, ihkValue, pendorong, divisionData, features?.wordExport]);
-
-  if (features?.wordExport === false) {
-    return (
-      <div className={styles.container}>
-        <FeatureDisabled
-          featureName="Ekspor Dokumen BRS (Word)"
-          onBack={() => setStep(1)}
-          backText="Kembali ke Edit Data"
-        />
-      </div>
-    );
-  }
+  }, [uploadedDataset, datasetSource, aiSummary, inflasiValue, yoyValue, ihkValue, pendorong, divisionData]);
 
   // Manual Dataset validation branch
   if (uploadedDataset && uploadedDataset.valid === "tidak") {

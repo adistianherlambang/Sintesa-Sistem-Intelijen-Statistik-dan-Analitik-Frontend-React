@@ -17,11 +17,9 @@ export default function Dashboard() {
   const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000";
 
   const [features, setFeatures] = useState({
-    aiForecasting: true,
-    whatsappBot: true,
-    wordExport: true,
+    analisis: true,
+    bot: true,
     infografis: true,
-    userRegistration: true,
   });
 
   useEffect(() => {
@@ -74,7 +72,9 @@ export default function Dashboard() {
   // Check if current page is disabled for regular user
   let disabledFeatureName = null;
   if (!isAdmin) {
-    if (location.pathname.includes("/bot/") && !features.whatsappBot) {
+    if (location.pathname.includes("/workspace/") && !features.analisis) {
+      disabledFeatureName = "Workspace Analisis";
+    } else if (location.pathname.includes("/bot/") && !features.bot) {
       disabledFeatureName = "Bot WhatsApp";
     } else if (location.pathname.includes("/infografis/") && !features.infografis) {
       disabledFeatureName = "Infografis";
@@ -150,8 +150,18 @@ export default function Dashboard() {
             <div className={styles.leftContainer}>
               <p>WORKSPACE</p>
               <div className={styles.leftWrapper}>
-                <NavButton keyword="analisis" tab="workspace" />
-                <NavButton keyword="histori" tab="workspace" />
+                <NavButton
+                  keyword="analisis"
+                  tab="workspace"
+                  disabled={!features.analisis}
+                  disabledMessage="Fitur Analisis sedang dinonaktifkan oleh administrator."
+                />
+                <NavButton
+                  keyword="histori"
+                  tab="workspace"
+                  disabled={!features.analisis}
+                  disabledMessage="Fitur Histori Analisis sedang dinonaktifkan oleh administrator."
+                />
               </div>
             </div>
             <div className={styles.leftContainer}>
@@ -177,13 +187,13 @@ export default function Dashboard() {
                 <NavButton
                   keyword="sambungkanAkun"
                   tab="bot"
-                  disabled={!features.whatsappBot}
+                  disabled={!features.bot}
                   disabledMessage="Fitur Bot WhatsApp sedang dinonaktifkan oleh administrator."
                 />
                 <NavButton
                   keyword="botKnowledge"
                   tab="bot"
-                  disabled={!features.whatsappBot}
+                  disabled={!features.bot}
                   disabledMessage="Fitur Bot WhatsApp sedang dinonaktifkan oleh administrator."
                 />
               </div>

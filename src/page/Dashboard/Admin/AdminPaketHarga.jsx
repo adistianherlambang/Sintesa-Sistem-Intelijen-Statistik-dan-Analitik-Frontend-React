@@ -4,6 +4,12 @@ import Wrapper from "../../../components/Wrapper/Wrapper";
 import MainButton from "../../../components/MainButton/MainButton";
 import styles from "./AdminPaketHarga.module.css";
 
+const AVAILABLE_FEATURES = [
+  { id: "analisis", label: "Workspace Analisis BRS" },
+  { id: "bot", label: "Bot WhatsApp" },
+  { id: "infografis", label: "Infografis BRS" },
+];
+
 export default function AdminPaketHarga() {
   const [stats, setStats] = useState({
     activeSubscribers: 0,
@@ -17,6 +23,20 @@ export default function AdminPaketHarga() {
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [savingPlanId, setSavingPlanId] = useState("");
+  const [deletingPlanId, setDeletingPlanId] = useState("");
+
+  // Add Package Modal State
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [creatingPkg, setCreatingPkg] = useState(false);
+  const [newPkgForm, setNewPkgForm] = useState({
+    name: "",
+    planId: "",
+    amount: 50000,
+    quota: 30,
+    durationDays: 30,
+    isActive: true,
+    features: ["analisis", "bot"]
+  });
 
   const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000";
 
@@ -54,7 +74,8 @@ export default function AdminPaketHarga() {
             editName: p.name || "",
             editAmount: p.amount ?? p.price ?? 0,
             editQuota: p.quota ?? 30,
-            editIsActive: p.isActive !== false
+            editIsActive: p.isActive !== false,
+            editFeatures: Array.isArray(p.features) ? p.features : []
           }))
         );
       }
@@ -79,6 +100,19 @@ export default function AdminPaketHarga() {
     );
   };
 
+  const handleTogglePackageFeature = (planId, featureId) => {
+    setPackages((prev) =>
+      prev.map((p) => {
+        if (p.planId !== planId) return p;
+        const currentFeats = p.editFeatures || [];
+        const nextFeats = currentFeats.includes(featureId)
+          ? currentFeats.filter((f) => f !== featureId)
+          : [...currentFeats, featureId];
+        return { ...p, editFeatures: nextFeats };
+      })
+    );
+  };
+
   const handleSavePackageDirect = async (pkg) => {
     try {
       setSavingPlanId(pkg.planId);
@@ -92,7 +126,8 @@ export default function AdminPaketHarga() {
           amount: Number(pkg.editAmount),
           price: Number(pkg.editAmount),
           quota: Number(pkg.editQuota),
-          isActive: Boolean(pkg.editIsActive)
+          isActive: Boolean(pkg.editIsActive),
+          features: pkg.editFeatures || []
         },
         getHeaders()
       );
@@ -110,6 +145,92 @@ export default function AdminPaketHarga() {
     }
   };
 
+  const handleDeletePackage = async (pkg) => {
+    const confirmMsg = `PERINGATAN: Apakah Anda yakin ingin menghapus paket "${pkg.name || pkg.editName}" (${pkg.planId})?`;
+    if (!window.confirm(confirmMsg)) return;
+
+    try {
+      setDeletingPlanId(pkg.planId);
+      setError("");
+      setSuccessMsg("");
+
+      const res = await axios.delete(
+        `${serverUrl}/api/admin/packages/${pkg.planId}`,
+        getHeaders()
+      );
+
+      if (res.data?.success) {
+        setSuccessMsg(`Paket "${pkg.name || pkg.editName}" berhasil dihapus.`);
+        setTimeout(() => setSuccessMsg(""), 4000);
+        fetchData();
+      }
+    } catch (err) {
+      console.error("Gagal menghapus paket:", err);
+      setError(err.response?.data?.message || "Gagal menghapus paket.");
+    } finally {
+      setDeletingPlanId("");
+    }
+  };
+
+  const handleCreatePackage = async (e) => {
+    e.preventDefault();
+    if (!newPkgForm.name.trim()) {
+      alert("Nama paket wajib diisi!");
+      return;
+    }
+
+    try {
+      setCreatingPkg(true);
+      setError("");
+      setSuccessMsg("");
+
+      const res = await axios.post(
+        `${serverUrl}/api/admin/packages`,
+        {
+          name: newPkgForm.name.trim(),
+          planId: newPkgForm.planId.trim() || undefined,
+          amount: Number(newPkgForm.amount),
+          quota: Number(newPkgForm.quota),
+          durationDays: Number(newPkgForm.durationDays),
+          isActive: Boolean(newPkgForm.isActive),
+          features: newPkgForm.features
+        },
+        getHeaders()
+      );
+
+      if (res.data?.success) {
+        setSuccessMsg(`Paket baru "${newPkgForm.name}" berhasil ditambahkan!`);
+        setTimeout(() => setSuccessMsg(""), 4000);
+        setIsAddModalOpen(false);
+        setNewPkgForm({
+          name: "",
+          planId: "",
+          amount: 50000,
+          quota: 30,
+          durationDays: 30,
+          isActive: true,
+          features: ["analisis", "bot"]
+        });
+        fetchData();
+      }
+    } catch (err) {
+      console.error("Gagal membuat paket:", err);
+      alert(err.response?.data?.message || "Gagal membuat paket baru.");
+    } finally {
+      setCreatingPkg(false);
+    }
+  };
+
+  const handleToggleNewPkgFeature = (featureId) => {
+    setNewPkgForm((prev) => {
+      const current = prev.features || [];
+      const updated = current.includes(featureId)
+        ? current.filter((f) => f !== featureId)
+        : [...current, featureId];
+      return { ...prev, features: updated };
+    });
+  };
+
   const formatRupiah = (num) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -123,7 +244,7 @@ export default function AdminPaketHarga() {
       <div>
         <h1 className={styles.tabTitle}>Monitor Paket &amp; Harga</h1>
         <p className={styles.subText}>
-          Input langsung konfigurasi harga langganan, kuota, serta pantau transaksi dan langganan aktif pengguna.
+          Kelola paket langganan, besaran harga, kuota, serta pilih fitur apa saja yang aktif saat pengguna berlangganan.
         </p>
       </div>
 
@@ -165,19 +286,33 @@ export default function AdminPaketHarga() {
         </div>
       </div>
 
-      {/* KONFIGURASI PAKET (LANGSUNG INPUT) */}
+      {/* KONFIGURASI PAKET (LANGSUNG INPUT & KELOLA FITUR) */}
       <Wrapper>
-        <h2 className={styles.sectionTitle}>Konfigurasi Paket &amp; Harga (Input Langsung)</h2>
-        <p className={styles.subText}>
-          Ubah besaran harga (Rp) dan kuota interaksi / dokumen yang berlaku pada masing-masing paket.
-        </p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "12px" }}>
+          <div>
+            <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
+              Konfigurasi Paket &amp; Harga
+            </h2>
+            <p className={styles.subText} style={{ margin: "4px 0 0 0" }}>
+              Atur harga, kuota, dan centang fitur yang aktif ketika pengguna berlangganan paket terkait.
+            </p>
+          </div>
+          <MainButton
+            onClick={() => setIsAddModalOpen(true)}
+            style={{ width: "auto", padding: "8px 18px", fontSize: "13px" }}
+          >
+            + Tambah Paket Baru
+          </MainButton>
+        </div>
 
         {loading ? (
-          <p style={{ color: "#888" }}>Memuat daftar paket...</p>
+          <p style={{ color: "#888", marginTop: "16px" }}>Memuat daftar paket...</p>
         ) : (
-          <div className={styles.packagesGrid}>
+          <div className={styles.packagesGrid} style={{ marginTop: "16px" }}>
             {packages.map((pkg) => {
               const isSaving = savingPlanId === pkg.planId;
+              const isDeleting = deletingPlanId === pkg.planId;
+
               return (
                 <div key={pkg._id || pkg.planId} className={styles.packageCard}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -245,19 +380,195 @@ export default function AdminPaketHarga() {
                     </div>
                   </div>
 
-                  <MainButton
-                    onClick={() => handleSavePackageDirect(pkg)}
-                    disabled={isSaving}
-                    style={{ padding: "10px 16px", fontSize: "13px", marginTop: "8px" }}
-                  >
-                    {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
-                  </MainButton>
+                  {/* CHECKLIST FITUR YANG ON SAAT BERLANGGANAN */}
+                  <div className={styles.inputGroup}>
+                    <label className={styles.inputLabel}>
+                      Fitur yang Aktif (ON) Saat Berlangganan:
+                    </label>
+                    <div className={styles.featuresChecklist}>
+                      {AVAILABLE_FEATURES.map((feat) => {
+                        const isChecked = (pkg.editFeatures || []).includes(feat.id);
+                        return (
+                          <label key={feat.id} className={styles.featureCheckboxLabel}>
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => handleTogglePackageFeature(pkg.planId, feat.id)}
+                            />
+                            <span>{feat.label}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* ACTION BUTTONS */}
+                  <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+                    <MainButton
+                      onClick={() => handleSavePackageDirect(pkg)}
+                      disabled={isSaving || isDeleting}
+                      style={{ padding: "8px 14px", fontSize: "13px", flex: 1 }}
+                    >
+                      {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+                    </MainButton>
+
+                    <MainButton
+                      onClick={() => handleDeletePackage(pkg)}
+                      disabled={isSaving || isDeleting}
+                      style={{
+                        width: "auto",
+                        padding: "8px 12px",
+                        fontSize: "13px",
+                        background: "rgba(239, 68, 68, 0.15)",
+                        color: "#ef4444",
+                        border: "1px solid rgba(239, 68, 68, 0.3)",
+                        boxShadow: "none"
+                      }}
+                    >
+                      {isDeleting ? "..." : "Hapus"}
+                    </MainButton>
+                  </div>
                 </div>
               );
             })}
           </div>
         )}
       </Wrapper>
+
+      {/* MODAL TAMBAH PAKET BARU */}
+      {isAddModalOpen && (
+        <div className={styles.modalOverlay} onClick={() => setIsAddModalOpen(false)}>
+          <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.modalTitle}>Tambah Paket Langganan Baru</h3>
+
+            <form onSubmit={handleCreatePackage} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div className={styles.inputGroup}>
+                <label className={styles.inputLabel}>Nama Paket *</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: Paket Komplit Statistik"
+                  className={styles.cardInput}
+                  value={newPkgForm.name}
+                  onChange={(e) => setNewPkgForm({ ...newPkgForm, name: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label className={styles.inputLabel}>ID Paket (Opsional, otomatis jika kosong)</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: paket_komplit_tahunan"
+                  className={styles.cardInput}
+                  value={newPkgForm.planId}
+                  onChange={(e) => setNewPkgForm({ ...newPkgForm, planId: e.target.value })}
+                />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div className={styles.inputGroup}>
+                  <label className={styles.inputLabel}>Harga Paket (Rp) *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className={styles.cardInput}
+                    value={newPkgForm.amount}
+                    onChange={(e) => setNewPkgForm({ ...newPkgForm, amount: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className={styles.inputGroup}>
+                  <label className={styles.inputLabel}>Kuota (Dokumen/Pesan)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    className={styles.cardInput}
+                    value={newPkgForm.quota}
+                    onChange={(e) => setNewPkgForm({ ...newPkgForm, quota: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div className={styles.inputGroup}>
+                  <label className={styles.inputLabel}>Durasi (Hari)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    className={styles.cardInput}
+                    value={newPkgForm.durationDays}
+                    onChange={(e) => setNewPkgForm({ ...newPkgForm, durationDays: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className={styles.inputGroup}>
+                  <label className={styles.inputLabel}>Status Layanan</label>
+                  <select
+                    className={styles.cardSelect}
+                    value={newPkgForm.isActive ? "true" : "false"}
+                    onChange={(e) => setNewPkgForm({ ...newPkgForm, isActive: e.target.value === "true" })}
+                  >
+                    <option value="true">Aktif</option>
+                    <option value="false">Nonaktif</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* CHECKLIST FITUR YANG ON KETIKA USER BERLANGGANAN */}
+              <div className={styles.inputGroup}>
+                <label className={styles.inputLabel}>
+                  Pilih Fitur yang Aktif (ON) Saat Berlangganan:
+                </label>
+                <div className={styles.featuresChecklist}>
+                  {AVAILABLE_FEATURES.map((feat) => {
+                    const isChecked = newPkgForm.features.includes(feat.id);
+                    return (
+                      <label key={feat.id} className={styles.featureCheckboxLabel}>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => handleToggleNewPkgFeature(feat.id)}
+                        />
+                        <span>{feat.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className={styles.modalActions}>
+                <MainButton
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  disabled={creatingPkg}
+                  style={{
+                    width: "auto",
+                    padding: "8px 16px",
+                    fontSize: "13px",
+                    background: "transparent",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    boxShadow: "none"
+                  }}
+                >
+                  Batal
+                </MainButton>
+                <MainButton
+                  type="submit"
+                  disabled={creatingPkg}
+                  style={{
+                    width: "auto",
+                    padding: "8px 20px",
+                    fontSize: "13px"
+                  }}
+                >
+                  {creatingPkg ? "Menyimpan..." : "Simpan Paket"}
+                </MainButton>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* RIWAYAT TRANSAKSI TERAKHIR */}
       <Wrapper>
