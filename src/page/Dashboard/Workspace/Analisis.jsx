@@ -667,6 +667,8 @@ function StepTwoAvailable(props) {
     return 0; // Default ke Januari jika seluruh bulan kosong
   }, [activeDataInflasiMoM, activeDataInflasiYoY, activeDataInflasiYtd, activeDataIhk, komoditasList]);
 
+  const selectedMonthIndex = latestDataMonthIndex;
+
   const handleSave = async () => {
     setIsExportingBanner(true);
     let finalImages = bannerImages;
@@ -2435,6 +2437,7 @@ function StepThree(props) {
   const [loadingSummary, setLoadingSummary] = useState(false)
   const [aiSummary, setAiSummary] = useState(null)
   const [error, setError] = useState("")
+  const [activeTab, setActiveTab] = useState("word") // "word", "infografis", "chart"
 
   // Parameters extracted from manual dataset
   const dataRows = useMemo(() => {
@@ -2543,8 +2546,6 @@ function StepThree(props) {
       </div>
     )
   }
-
-  const [activeTab, setActiveTab] = useState("word"); // "word", "infografis", "chart"
 
   return (
     <div className={styles.container}>
