@@ -159,7 +159,7 @@ const dummy = listMonth
 
 const banners = [
     {
-        name: `Infografis ${locationName} ${month} ${year}`,
+        name: `Infografis`,
         type: "banner",
         w: 1200,
         h: 1700,
@@ -560,7 +560,7 @@ const banners = [
         children: []
     },
     {
-        name: `Grouped Chart Banner`,
+        name: `Chart BRS`,
         type: "banner",
         w: 669,
         h: 370,
