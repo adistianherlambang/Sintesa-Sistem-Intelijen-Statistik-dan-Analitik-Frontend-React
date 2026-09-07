@@ -13,6 +13,7 @@ import Input from '../../../components/Input/Input'
 import Skeleton from '../../../components/Skeleton/Skeleton'
 import AILoader from '../../../components/AILoader/AILoader'
 import WordEditor from '../../../word/WordEditor'
+import { BannerExporter } from '../../../kanva/components/Banner'
 
 const INDICATOR_OPTIONS = [
   { value: "komoditas", label: "Komoditas & Inflasi (IHK)" },
@@ -482,6 +483,11 @@ function StepTwoAvailable(props) {
   const [pdrbDemoMap, setPdrbDemoMap] = useState({})
   const [loadingPdrbDemo, setLoadingPdrbDemo] = useState(false)
 
+  // Banner exporter state
+  const bannerExporterRef = React.useRef(null)
+  const [bannerImages, setBannerImages] = useState({})
+  const [isExportingBanner, setIsExportingBanner] = useState(false)
+
   const [metricType, setMetricType] = useState("mom") // "mom", "yoy", "ytd"
   const [yearKomoditasInflasi, setYearKomoditasInflasi] = useState("now") // "now", "prev", "prev2"
   const [yearKomoditasIhk, setYearKomoditasIhk] = useState("now") // "now", "prev", "prev2"
@@ -661,9 +667,16 @@ function StepTwoAvailable(props) {
     return 0; // Default ke Januari jika seluruh bulan kosong
   }, [activeDataInflasiMoM, activeDataInflasiYoY, activeDataInflasiYtd, activeDataIhk, komoditasList]);
 
-  const selectedMonthIndex = latestDataMonthIndex;
-
-  const handleSave = () => {
+  const handleSave = async () => {
+    setIsExportingBanner(true);
+    let finalImages = bannerImages;
+    if (!finalImages || (!finalImages["Chart BRS"] && !finalImages["Infografis"])) {
+      try {
+        finalImages = await bannerExporterRef.current?.exportImages();
+      } catch (err) {
+        console.warn("Gagal mengekspor banner:", err);
+      }
+    }
     const nextStepIndex = datasetSource === "available" ? 3 : 2;
     const combinedParsedData = [];
 
@@ -821,7 +834,7 @@ function StepTwoAvailable(props) {
       context: {
         city: userCityName || user?.location?.name || "KOTA METRO",
         period: `${targetMonthName} ${targetYear}`,
-        monthIndex: selectedMonthIndex,
+        monthIndex: monthIndex,
         year: targetYear,
         title: analysisTitle,
         indicator: chosenIndicator,
@@ -831,9 +844,11 @@ function StepTwoAvailable(props) {
       structure: "BPS Indikator",
       columns: combinedParsedData[0],
       parsedData: combinedParsedData,
+      images: finalImages || {},
       editedData: { inflasiData, ihkData, komoditasData, komoditasIhkData, pdrbDemoMap, forecast: annForecastResult?.forecast || null }
     });
 
+    setIsExportingBanner(false);
     setStep(nextStepIndex);
   };
 
@@ -2406,7 +2421,11 @@ function StepTwoAvailable(props) {
         </div>
       </Wrapper>
 
-      <MainButton onClick={handleSave}>Simpan & Lanjutkan</MainButton>
+      <BannerExporter ref={bannerExporterRef} onReady={setBannerImages} />
+
+      <MainButton onClick={handleSave} disabled={isExportingBanner}>
+        {isExportingBanner ? "Memproses Gambar Banner..." : "Simpan & Lanjutkan"}
+      </MainButton>
     </div>
   )
 }
@@ -2525,11 +2544,146 @@ function StepThree(props) {
     )
   }
 
+  const [activeTab, setActiveTab] = useState("word"); // "word", "infografis", "chart"
+
   return (
     <div className={styles.container}>
+      {/* Tab Navigation for Step 4 Preview */}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '18px', flexWrap: 'wrap' }}>
+        <button
+          type="button"
+          onClick={() => setActiveTab("word")}
+          style={{
+            padding: '10px 18px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontWeight: 600,
+            fontSize: '13px',
+            background: activeTab === 'word' ? '#2563eb' : 'rgba(255,255,255,0.08)',
+            color: '#ffffff',
+            border: activeTab === 'word' ? '1px solid #3b82f6' : '1px solid rgba(255,255,255,0.12)',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          📄 Dokumen BRS (Word Editor)
+        </button>
+
+        {uploadedDataset?.images?.["Infografis"] && (
+          <button
+            type="button"
+            onClick={() => setActiveTab("infografis")}
+            style={{
+              padding: '10px 18px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '13px',
+              background: activeTab === 'infografis' ? '#2563eb' : 'rgba(255,255,255,0.08)',
+              color: '#ffffff',
+              border: activeTab === 'infografis' ? '1px solid #3b82f6' : '1px solid rgba(255,255,255,0.12)',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            🎨 Banner Infografis
+          </button>
+        )}
+
+        {uploadedDataset?.images?.["Chart BRS"] && (
+          <button
+            type="button"
+            onClick={() => setActiveTab("chart")}
+            style={{
+              padding: '10px 18px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '13px',
+              background: activeTab === 'chart' ? '#2563eb' : 'rgba(255,255,255,0.08)',
+              color: '#ffffff',
+              border: activeTab === 'chart' ? '1px solid #3b82f6' : '1px solid rgba(255,255,255,0.12)',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            📊 Banner Chart BRS
+          </button>
+        )}
+      </div>
+
       {loadingSummary ? (
         <Wrapper>
           <AILoader text="Menganalisis data & memuat editor laporan BRS..." minHeight="220px" />
+        </Wrapper>
+      ) : activeTab === "infografis" && uploadedDataset?.images?.["Infografis"] ? (
+        <Wrapper>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', padding: '24px 12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', maxWidth: '850px', alignItems: 'center' }}>
+              <span style={{ fontSize: '15px', fontWeight: 600, color: '#f8fafc' }}>
+                Banner Infografis BRS (1200×1700 px)
+              </span>
+              <a
+                href={uploadedDataset.images["Infografis"]}
+                download={`Infografis_${(uploadedDataset?.context?.city || "Kota_Metro").replace(/\s+/g, "_")}.png`}
+                style={{
+                  background: '#2563eb',
+                  color: '#ffffff',
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                }}
+              >
+                Unduh PNG
+              </a>
+            </div>
+            <img
+              src={uploadedDataset.images["Infografis"]}
+              alt="Infografis BRS"
+              style={{
+                width: '100%',
+                maxWidth: '850px',
+                borderRadius: '8px',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                border: '1px solid rgba(255,255,255,0.1)'
+              }}
+            />
+          </div>
+        </Wrapper>
+      ) : activeTab === "chart" && uploadedDataset?.images?.["Chart BRS"] ? (
+        <Wrapper>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', padding: '24px 12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', maxWidth: '750px', alignItems: 'center' }}>
+              <span style={{ fontSize: '15px', fontWeight: 600, color: '#f8fafc' }}>
+                Banner Chart BRS (669×370 px)
+              </span>
+              <a
+                href={uploadedDataset.images["Chart BRS"]}
+                download={`Chart_BRS_${(uploadedDataset?.context?.city || "Kota_Metro").replace(/\s+/g, "_")}.png`}
+                style={{
+                  background: '#2563eb',
+                  color: '#ffffff',
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                }}
+              >
+                Unduh PNG
+              </a>
+            </div>
+            <img
+              src={uploadedDataset.images["Chart BRS"]}
+              alt="Chart BRS"
+              style={{
+                width: '100%',
+                maxWidth: '750px',
+                borderRadius: '8px',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                border: '1px solid rgba(255,255,255,0.1)'
+              }}
+            />
+          </div>
         </Wrapper>
       ) : (
         <WordEditor

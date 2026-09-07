@@ -612,6 +612,84 @@ function KonvaImg({ el }) {
     return img ? <KonvaImage image={img} {...el} /> : null;
 }
 
+export { banners, KonvaImg };
+
+export const BannerExporter = React.forwardRef(({ onReady }, ref) => {
+    const stageRefs = useRef([]);
+
+    const captureImages = () => {
+        const result = {};
+        banners?.forEach((bnr, i) => {
+            if (bnr?.name && bnr.name !== "blank" && stageRefs.current[i]) {
+                try {
+                    const dataUrl = stageRefs.current[i].toDataURL({ pixelRatio: 2 });
+                    if (dataUrl && dataUrl.startsWith("data:image")) {
+                        result[bnr.name] = dataUrl;
+                    }
+                } catch (err) {
+                    console.warn(`[BannerExporter] Gagal export banner ${bnr.name}:`, err.message);
+                }
+            }
+        });
+        return result;
+    };
+
+    React.useImperativeHandle(ref, () => ({
+        exportImages: async () => {
+            let res = captureImages();
+            if (res["Chart BRS"] || res["Infografis"]) {
+                return res;
+            }
+            await new Promise((r) => setTimeout(r, 400));
+            return captureImages();
+        }
+    }));
+
+    useEffect(() => {
+        const t = setTimeout(() => {
+            const res = captureImages();
+            if (onReady) onReady(res);
+        }, 500);
+        return () => clearTimeout(t);
+    }, []);
+
+    return (
+        <div style={{ position: "fixed", left: "-9999px", top: "-9999px", width: "1200px", height: "1700px", pointerEvents: "none", opacity: 0, zIndex: -100 }}>
+            {banners?.map((bnr, i) => (
+                <Stage
+                    key={i}
+                    width={bnr.w || 900}
+                    height={bnr.h || 500}
+                    ref={(el) => (stageRefs.current[i] = el)}
+                >
+                    <Layer>
+                        <Rect
+                            x={0}
+                            y={0}
+                            width={bnr.w || 900}
+                            height={bnr.h || 500}
+                            fill={bnr.background || "#ffffff"}
+                        />
+                        {bnr?.children.map((el) => (
+                            <React.Fragment key={el.id}>
+                                {el.type === "rect" ? (
+                                    <Rect {...el} />
+                                ) : el.type === "text" ? (
+                                    <Text {...el} />
+                                ) : el.type === "image" ? (
+                                    <KonvaImg el={el} />
+                                ) : el.type === "chart" ? (
+                                    <SelectableChart shape={el} selected={false} />
+                                ) : null}
+                            </React.Fragment>
+                        ))}
+                    </Layer>
+                </Stage>
+            ))}
+        </div>
+    );
+});
+
 
 export default function BannerList({ setPagesWithHistory }) {
     const dispatch = useDispatch();
