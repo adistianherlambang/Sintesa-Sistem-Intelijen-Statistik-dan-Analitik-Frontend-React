@@ -68,6 +68,7 @@ export default function WordEditor({
           periode: targetPeriod,
           title: reportTitle,
           uploadedDataset: uploadedDataset,
+          images: uploadedDataset?.images || uploadedDataset?.banners,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
