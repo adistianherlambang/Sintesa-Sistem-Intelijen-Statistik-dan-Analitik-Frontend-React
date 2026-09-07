@@ -61,6 +61,12 @@ export default function WordEditor({
     try {
       const token = localStorage.getItem("token");
 
+      const isForecastActive = uploadedDataset?.context?.forecastingEnabled ?? 
+        uploadedDataset?.context?.isForecastOn ?? 
+        uploadedDataset?.editedData?.forecastingEnabled ?? 
+        uploadedDataset?.editedData?.isForecastOn ?? 
+        Boolean(uploadedDataset?.editedData?.forecast);
+
       const res = await axios.post(
         `${serverUrl}/api/analisis/word/generate`,
         {
@@ -69,6 +75,7 @@ export default function WordEditor({
           title: reportTitle,
           uploadedDataset: uploadedDataset,
           images: uploadedDataset?.images || uploadedDataset?.banners,
+          forecastEnabled: isForecastActive,
         },
         {
           headers: { Authorization: `Bearer ${token}` },

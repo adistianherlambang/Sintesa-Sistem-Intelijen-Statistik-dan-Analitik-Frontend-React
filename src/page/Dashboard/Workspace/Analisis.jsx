@@ -841,13 +841,27 @@ function StepTwoAvailable(props) {
         title: analysisTitle,
         indicator: chosenIndicator,
         selectedIndicator: chosenIndicator,
-        selectedIndicators: [chosenIndicator]
+        selectedIndicators: [chosenIndicator],
+        forecastingEnabled: Boolean(forecastingEnabled),
+        isForecastOn: Boolean(forecastingEnabled),
       },
       structure: "BPS Indikator",
       columns: combinedParsedData[0],
       parsedData: combinedParsedData,
       images: finalImages || {},
-      editedData: { inflasiData, ihkData, komoditasData, komoditasIhkData, pdrbDemoMap, forecast: annForecastResult?.forecast || null }
+      editedData: { 
+        inflasiData, 
+        ihkData, 
+        komoditasData, 
+        komoditasIhkData, 
+        pdrbDemoMap, 
+        forecastingEnabled: Boolean(forecastingEnabled),
+        isForecastOn: Boolean(forecastingEnabled),
+        forecast: forecastingEnabled ? (annForecastResult?.forecast || null) : null,
+        forecastPoints: forecastingEnabled ? forecastChartData.filter(d => d.isForecast) : null,
+        forecastIhkPoints: forecastingEnabled ? forecastIhkChartData.filter(d => d.isForecast) : null,
+        forecastKomoditasList: forecastingEnabled ? forecastKomoditasList : null
+      }
     });
 
     setIsExportingBanner(false);
