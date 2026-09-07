@@ -13,7 +13,10 @@ import {
   BotKnowledgeIcon,
   TentangAkunIcon,
   LanggananBillingIcon,
-  LogoutIcon
+  LogoutIcon,
+  PaketHargaIcon,
+  KontrolFiturIcon,
+  ManajemenUserIcon
 } from "../../Icon/Icon";
 
 export default function NavButton({ keyword, tab, onClick }) {
@@ -38,7 +41,10 @@ export default function NavButton({ keyword, tab, onClick }) {
     botKnowledge: BotKnowledgeIcon,
     tentangAkun: TentangAkunIcon,
     langgananDanBilling: LanggananBillingIcon,
-    logout: LogoutIcon
+    logout: LogoutIcon,
+    paketDanHarga: PaketHargaIcon,
+    kontrolFitur: KontrolFiturIcon,
+    manajemenUser: ManajemenUserIcon,
   };
 
   const IconComponent = arr[keyword];

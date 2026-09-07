@@ -22,6 +22,9 @@ const SambungkanAkun = lazy(() => import('./page/Dashboard/Bot/SambungkanAkun'))
 const BotKnowledge = lazy(() => import('./page/Dashboard/Bot/BotKnowledge'));
 const BuatInfografis = lazy(() => import('./page/Dashboard/Infografis/BuatInfografis'));
 const HistoriInfografisPage = lazy(() => import('./page/Dashboard/Infografis/HistoriInfografisPage'));
+const AdminPaketHarga = lazy(() => import('./page/Dashboard/Admin/AdminPaketHarga'));
+const AdminFitur = lazy(() => import('./page/Dashboard/Admin/AdminFitur'));
+const AdminManageUser = lazy(() => import('./page/Dashboard/Admin/AdminManageUser'));
 
 // Global Axios interceptor to handle expired/invalid session tokens (401 Unauthorized)
 axios.interceptors.response.use(
@@ -201,6 +204,9 @@ export default function App() {
             <Route path='infografis/buatInfografis' element={<BuatInfografis />} />
             <Route path='akun/tentangAkun' element={<TentangAkun />} />
             <Route path='akun/langgananDanBilling' element={<Billing />} />
+            <Route path='admin/paketDanHarga' element={<AdminPaketHarga />} />
+            <Route path='admin/kontrolFitur' element={<AdminFitur />} />
+            <Route path='admin/manajemenUser' element={<AdminManageUser />} />
           </Route>
           <Route path='*' element={<Navigate to="/" replace />} />
         </Routes>

@@ -8,7 +8,9 @@ import NavButton from '../../components/Button/NavButton/NavButton'
 import { userStore } from '../../logic/state/store'
 
 export default function Dashboard() {
+  const user = userStore((state) => state.user);
   const logout = userStore((state) => state.logout);
+  const isAdmin = user?.role === "admin";
 
   const handleLogout = () => {
     if (window.confirm("Apakah Anda yakin ingin keluar dari akun?")) {
@@ -77,40 +79,78 @@ export default function Dashboard() {
         <div className={`${styles.leftLogo} ${isSidebarOpen ? styles.leftLogoOpen : ''}`}>
           <Logo />
         </div>
-        <div className={styles.leftContainer}>
-          <p>DASHBOARD</p>
-          <div className={styles.leftWrapper}>
-            <NavButton keyword="overview" />
-          </div>
-        </div>
-        <div className={styles.leftContainer}>
-          <p>WORKSPACE</p>
-          <div className={styles.leftWrapper}>
-            <NavButton keyword="analisis" tab="workspace" />
-            <NavButton keyword="histori" tab="workspace" />
-          </div>
-        </div>
-        <div className={styles.leftContainer}>
-          <p>INFOGRAFIS</p>
-          <div className={styles.leftWrapper}>
-            <NavButton keyword="buatInfografis" tab="infografis" />
-            <NavButton keyword="histori" tab="infografis" />
-          </div>
-        </div>
-        <div className={styles.leftContainer}>
-          <p>BOT WHATSAPP</p>
-          <div className={styles.leftWrapper}>
-            <NavButton keyword="sambungkanAkun" tab="bot" />
-            <NavButton keyword="botKnowledge" tab="bot" />
-          </div>
-        </div>
-        <div className={styles.leftContainer}>
-          <p>INFORMASI AKUN</p>
-          <div className={styles.leftWrapper}>
-            <NavButton keyword="tentangAkun" tab="akun" />
-            <NavButton keyword="langgananDanBilling" tab="akun" />
-          </div>
-        </div>
+
+        {isAdmin ? (
+          <>
+            <div className={styles.leftContainer}>
+              <p>DASHBOARD</p>
+              <div className={styles.leftWrapper}>
+                <NavButton keyword="overview" />
+              </div>
+            </div>
+            <div className={styles.leftContainer}>
+              <p>MONITORING</p>
+              <div className={styles.leftWrapper}>
+                <NavButton keyword="paketDanHarga" tab="admin" />
+              </div>
+            </div>
+            <div className={styles.leftContainer}>
+              <p>KONTROL SISTEM</p>
+              <div className={styles.leftWrapper}>
+                <NavButton keyword="kontrolFitur" tab="admin" />
+              </div>
+            </div>
+            <div className={styles.leftContainer}>
+              <p>PENGGUNA</p>
+              <div className={styles.leftWrapper}>
+                <NavButton keyword="manajemenUser" tab="admin" />
+              </div>
+            </div>
+            <div className={styles.leftContainer}>
+              <p>INFORMASI AKUN</p>
+              <div className={styles.leftWrapper}>
+                <NavButton keyword="tentangAkun" tab="akun" />
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={styles.leftContainer}>
+              <p>DASHBOARD</p>
+              <div className={styles.leftWrapper}>
+                <NavButton keyword="overview" />
+              </div>
+            </div>
+            <div className={styles.leftContainer}>
+              <p>WORKSPACE</p>
+              <div className={styles.leftWrapper}>
+                <NavButton keyword="analisis" tab="workspace" />
+                <NavButton keyword="histori" tab="workspace" />
+              </div>
+            </div>
+            <div className={styles.leftContainer}>
+              <p>INFOGRAFIS</p>
+              <div className={styles.leftWrapper}>
+                <NavButton keyword="buatInfografis" tab="infografis" />
+                <NavButton keyword="histori" tab="infografis" />
+              </div>
+            </div>
+            <div className={styles.leftContainer}>
+              <p>BOT WHATSAPP</p>
+              <div className={styles.leftWrapper}>
+                <NavButton keyword="sambungkanAkun" tab="bot" />
+                <NavButton keyword="botKnowledge" tab="bot" />
+              </div>
+            </div>
+            <div className={styles.leftContainer}>
+              <p>INFORMASI AKUN</p>
+              <div className={styles.leftWrapper}>
+                <NavButton keyword="tentangAkun" tab="akun" />
+                <NavButton keyword="langgananDanBilling" tab="akun" />
+              </div>
+            </div>
+          </>
+        )}
 
         <NavButton keyword="logout" onClick={handleLogout} />
 
