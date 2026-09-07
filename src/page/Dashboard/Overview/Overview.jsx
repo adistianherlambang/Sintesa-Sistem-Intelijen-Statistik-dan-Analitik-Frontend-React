@@ -15,8 +15,16 @@ import AISummary from '../../../components/FromPage/Overview/AISummary'
 import HitoriAnalisis from '../../../components/FromPage/Overview/HitoriAnalisis'
 import HistoriInfografis from '../../../components/FromPage/Overview/HistoriInfografis'
 import { BotStatusOverview, BotKnowledgeOverview } from '../../../components/FromPage/Overview/BotOverview'
+import { userStore } from '../../../logic/state/store'
+import AdminOverview from '../Admin/AdminOverview'
 
 export default function Overview() {
+  const user = userStore((state) => state.user);
+
+  if (user?.role === "admin") {
+    return <AdminOverview />;
+  }
+
   return (
     <>
       <div className={styles.container}>

@@ -1,0 +1,188 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding-bottom: 5rem;
+  box-sizing: border-box;
+}
+
+.tabTitle {
+  font-size: 36px;
+  font-weight: bold;
+  line-height: 1;
+  color: #D5D5D5;
+  margin: 0;
+}
+
+.subText {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #D5D5D5;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* KPI Grid */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kpiCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kpiLabel {
+  font-size: 12px;
+  color: #888888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpiValue {
+  font-size: 26px;
+  font-weight: 700;
+  color: #34B34A;
+  margin: 0;
+}
+
+.kpiSub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* 2-Column Split */
+.splitGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+}
+
+@media (max-width: 800px) {
+  .splitGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dataset Status Items */
+.datasetList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.datasetItem {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.datasetName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 2px 0;
+}
+
+.datasetDesc {
+  font-size: 12px;
+  color: #888888;
+  margin: 0;
+}
+
+.badgeActive {
+  background: rgba(52, 179, 74, 0.15);
+  color: #34B34A;
+  border: 1px solid rgba(52, 179, 74, 0.3);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Quick Action Link */
+.quickLinkBtn {
+  background: rgba(52, 179, 74, 0.15);
+  border: 1px solid rgba(52, 179, 74, 0.4);
+  color: #34B34A;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.quickLinkBtn:hover {
+  background: #34B34A;
+  color: #fff;
+}
+
+/* Table styling */
+.tableResponsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.customTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.customTable th {
+  background: rgba(255, 255, 255, 0.04);
+  color: #888888;
+  text-align: left;
+  padding: 10px 14px;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+}
+
+.customTable td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #d5d5d5;
+}
+
+.customTable tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}

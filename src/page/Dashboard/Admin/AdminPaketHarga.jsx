@@ -6,6 +6,7 @@ import styles from "./AdminPaketHarga.module.css";
 export default function AdminPaketHarga() {
   const [stats, setStats] = useState({
     activeSubscribers: 0,
+    activeSubscriptions: 0,
     totalRevenue: 0,
     totalUsers: 0,
     recentTransactions: []
@@ -13,20 +14,10 @@ export default function AdminPaketHarga() {
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+  const [savingPlanId, setSavingPlanId] = useState("");
 
-  // Edit Modal state
-  const [selectedPkg, setSelectedPkg] = useState(null);
-  const [editForm, setEditForm] = useState({
-    name: "",
-    price: 0,
-    billingPeriod: "monthly",
-    quotaWord: 0,
-    quotaPdf: 0,
-    description: "",
-    isActive: true
-  });
-  const [saving, setSaving] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
+  const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000";
 
   const getHeaders = () => {
     const token = localStorage.getItem("token");
@@ -42,19 +33,36 @@ export default function AdminPaketHarga() {
       setLoading(true);
       setError("");
       const [statsRes, pkgsRes] = await Promise.all([
-        axios.get("/api/admin/stats", getHeaders()),
-        axios.get("/api/admin/packages", getHeaders())
+        axios.get(`${serverUrl}/api/admin/stats`, getHeaders()),
+        axios.get(`${serverUrl}/api/admin/packages`, getHeaders())
       ]);
 
-      if (statsRes.data?.data) {
-        setStats(statsRes.data.data);
+      const statsData = statsRes.data?.data || statsRes.data?.stats;
+      if (statsData) {
+        setStats({
+          ...statsData,
+          activeSubscribers: statsData.activeSubscribers ?? statsData.activeSubscriptions ?? 0
+        });
       }
-      if (pkgsRes.data?.data) {
-        setPackages(pkgsRes.data.data);
+
+      const pkgsData = pkgsRes.data?.data || pkgsRes.data?.packages;
+      if (Array.isArray(pkgsData)) {
+        setPackages(
+          pkgsData.map((p) => ({
+            ...p,
+            editName: p.name || "",
+            editAmount: p.amount ?? p.price ?? 0,
+            editQuota: p.quota ?? 30,
+            editIsActive: p.isActive !== false
+          }))
+        );
       }
     } catch (err) {
       console.error("Gagal memuat data paket & harga:", err);
-      setError(err.response?.data?.message || "Gagal memuat data. Pastikan Anda memiliki akses Admin.");
+      setError(
+        err.response?.data?.message ||
+        "Gagal memuat data. Pastikan Anda masuk sebagai akun Administrator."
+      );
     } finally {
       setLoading(false);
     }
@@ -64,56 +72,40 @@ export default function AdminPaketHarga() {
     fetchData();
   }, []);
 
-  const handleOpenEdit = (pkg) => {
-    setSelectedPkg(pkg);
-    setEditForm({
-      name: pkg.name || "",
-      price: pkg.price || 0,
-      billingPeriod: pkg.billingPeriod || "monthly",
-      quotaWord: pkg.quota?.word ?? 0,
-      quotaPdf: pkg.quota?.pdf ?? 0,
-      description: pkg.description || "",
-      isActive: pkg.isActive !== false
-    });
-    setModalMessage("");
+  const handlePackageFieldChange = (planId, field, val) => {
+    setPackages((prev) =>
+      prev.map((p) => (p.planId === planId ? { ...p, [field]: val } : p))
+    );
   };
 
-  const handleCloseEdit = () => {
-    setSelectedPkg(null);
-    setModalMessage("");
-  };
-
-  const handleSavePackage = async (e) => {
-    e.preventDefault();
-    if (!selectedPkg) return;
-
+  const handleSavePackageDirect = async (pkg) => {
     try {
-      setSaving(true);
-      setModalMessage("");
+      setSavingPlanId(pkg.planId);
+      setError("");
+      setSuccessMsg("");
+
       const res = await axios.put(
-        `/api/admin/packages/${selectedPkg.planId}`,
+        `${serverUrl}/api/admin/packages/${pkg.planId}`,
         {
-          name: editForm.name,
-          price: Number(editForm.price),
-          billingPeriod: editForm.billingPeriod,
-          quota: {
-            word: Number(editForm.quotaWord),
-            pdf: Number(editForm.quotaPdf)
-          },
-          description: editForm.description,
-          isActive: editForm.isActive
+          name: pkg.editName,
+          amount: Number(pkg.editAmount),
+          price: Number(pkg.editAmount),
+          quota: Number(pkg.editQuota),
+          isActive: Boolean(pkg.editIsActive)
         },
         getHeaders()
       );
 
       if (res.data?.success) {
-        handleCloseEdit();
+        setSuccessMsg(`Konfigurasi paket "${pkg.editName}" berhasil disimpan!`);
+        setTimeout(() => setSuccessMsg(""), 4000);
         fetchData();
       }
     } catch (err) {
-      setModalMessage(err.response?.data?.message || "Gagal memperbarui paket.");
+      console.error("Gagal update paket:", err);
+      setError(err.response?.data?.message || "Gagal memperbarui paket.");
     } finally {
-      setSaving(false);
+      setSavingPlanId("");
     }
   };
 
@@ -130,7 +122,7 @@ export default function AdminPaketHarga() {
       <div>
         <h1 className={styles.tabTitle}>Monitor Paket &amp; Harga</h1>
         <p className={styles.subText}>
-          Kelola harga paket langganan, kuota ekspor, serta pantau transaksi dan langganan aktif pengguna.
+          Input langsung konfigurasi harga langganan, kuota, serta pantau transaksi dan langganan aktif pengguna.
         </p>
       </div>
 
@@ -140,17 +132,23 @@ export default function AdminPaketHarga() {
         </Wrapper>
       )}
 
+      {successMsg && (
+        <Wrapper style={{ borderColor: "#34B34A", background: "rgba(52, 179, 74, 0.08)" }}>
+          <p style={{ color: "#34B34A", margin: 0, fontWeight: 600 }}>{successMsg}</p>
+        </Wrapper>
+      )}
+
       {/* METRIC OVERVIEW */}
       <div className={styles.metricGrid}>
         <div className={styles.metricCard}>
           <span className={styles.metricLabel}>Total Pengguna</span>
-          <h2 className={styles.metricValue}>{stats.totalUsers}</h2>
-          <span className={styles.metricSub}>Terdaftar di sistem</span>
+          <h2 className={styles.metricValue}>{stats.totalUsers || 0}</h2>
+          <span className={styles.metricSub}>Akun terdaftar</span>
         </div>
         <div className={styles.metricCard}>
           <span className={styles.metricLabel}>Langganan Aktif</span>
-          <h2 className={styles.metricValue}>{stats.activeSubscribers}</h2>
-          <span className={styles.metricSub}>Berlangganan saat ini</span>
+          <h2 className={styles.metricValue}>{stats.activeSubscribers || 0}</h2>
+          <span className={styles.metricSub}>Instansi aktif langganan</span>
         </div>
         <div className={styles.metricCard}>
           <span className={styles.metricLabel}>Total Pendapatan</span>
@@ -159,66 +157,102 @@ export default function AdminPaketHarga() {
         </div>
         <div className={styles.metricCard}>
           <span className={styles.metricLabel}>Status Paket</span>
-          <h2 className={styles.metricValue}>{packages.filter((p) => p.isActive).length} Aktif</h2>
+          <h2 className={styles.metricValue}>
+            {packages.filter((p) => p.isActive).length} Aktif
+          </h2>
           <span className={styles.metricSub}>Dari {packages.length} tier paket</span>
         </div>
       </div>
 
-      {/* DAFTAR PAKET */}
+      {/* KONFIGURASI PAKET (LANGSUNG INPUT) */}
       <Wrapper>
-        <h2 className={styles.sectionTitle}>Konfigurasi Paket &amp; Harga</h2>
+        <h2 className={styles.sectionTitle}>Konfigurasi Paket &amp; Harga (Input Langsung)</h2>
         <p className={styles.subText}>
-          Ubah besaran harga dan kuota ekspor (Word &amp; PDF) yang berlaku untuk pengguna.
+          Ubah besaran harga (Rp) dan kuota interaksi / dokumen yang berlaku pada masing-masing paket.
         </p>
 
         {loading ? (
           <p style={{ color: "#888" }}>Memuat daftar paket...</p>
         ) : (
           <div className={styles.packagesGrid}>
-            {packages.map((pkg) => (
-              <div key={pkg._id || pkg.planId} className={styles.packageCard}>
-                <span className={styles.packageBadge}>
-                  {pkg.isActive ? "Aktif" : "Nonaktif"}
-                </span>
-                <div>
-                  <h3 className={styles.packageName}>{pkg.name}</h3>
-                  <div className={styles.packageCategory}>{pkg.planId.toUpperCase()}</div>
-                  <p className={styles.packagePrice}>
-                    {pkg.price === 0 ? "Gratis" : formatRupiah(pkg.price)}
-                    {pkg.price > 0 && (
-                      <span className={styles.packagePeriod}> /{pkg.billingPeriod}</span>
-                    )}
-                  </p>
-                </div>
-
-                <div className={styles.packageMeta}>
-                  <div className={styles.metaRow}>
-                    <span className={styles.metaLabel}>Kuota Ekspor Word</span>
-                    <span className={styles.metaVal}>
-                      {pkg.quota?.word === -1 ? "Tak Terbatas" : `${pkg.quota?.word} / bln`}
+            {packages.map((pkg) => {
+              const isSaving = savingPlanId === pkg.planId;
+              return (
+                <div key={pkg._id || pkg.planId} className={styles.packageCard}>
+                  <div className={styles.packageHeader}>
+                    <span className={styles.planIdBadge}>{pkg.planId}</span>
+                    <span className={styles.subscribersBadge}>
+                      {pkg.activeSubscribers || 0} Pelanggan Aktif
                     </span>
                   </div>
-                  <div className={styles.metaRow}>
-                    <span className={styles.metaLabel}>Kuota Ekspor PDF</span>
-                    <span className={styles.metaVal}>
-                      {pkg.quota?.pdf === -1 ? "Tak Terbatas" : `${pkg.quota?.pdf} / bln`}
-                    </span>
-                  </div>
-                  <div className={styles.metaRow}>
-                    <span className={styles.metaLabel}>AI Forecasting</span>
-                    <span className={styles.metaVal}>Tersedia</span>
-                  </div>
-                </div>
 
-                <button
-                  type="button"
-                  className={styles.editBtn}
-                  onClick={() => handleOpenEdit(pkg)}
-                >
-                  Edit Paket &amp; Harga
-                </button>
-              </div>
-            ))}
+                  <div className={styles.inputGroup}>
+                    <label className={styles.inputLabel}>Nama Tampilan Paket</label>
+                    <input
+                      type="text"
+                      className={styles.cardInput}
+                      value={pkg.editName}
+                      onChange={(e) =>
+                        handlePackageFieldChange(pkg.planId, "editName", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label className={styles.inputLabel}>Harga Paket (Rp)</label>
+                    <input
+                      type="number"
+                      className={styles.cardInput}
+                      value={pkg.editAmount}
+                      min="0"
+                      onChange={(e) =>
+                        handlePackageFieldChange(pkg.planId, "editAmount", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Kuota Bulanan/Harian</label>
+                      <input
+                        type="number"
+                        className={styles.cardInput}
+                        value={pkg.editQuota}
+                        onChange={(e) =>
+                          handlePackageFieldChange(pkg.planId, "editQuota", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Status Layanan</label>
+                      <select
+                        className={styles.cardSelect}
+                        value={pkg.editIsActive ? "true" : "false"}
+                        onChange={(e) =>
+                          handlePackageFieldChange(
+                            pkg.planId,
+                            "editIsActive",
+                            e.target.value === "true"
+                          )
+                        }
+                      >
+                        <option value="true">Aktif</option>
+                        <option value="false">Nonaktif</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className={styles.saveBtn}
+                    onClick={() => handleSavePackageDirect(pkg)}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
       </Wrapper>
@@ -226,14 +260,14 @@ export default function AdminPaketHarga() {
       {/* RIWAYAT TRANSAKSI TERAKHIR */}
       <Wrapper>
         <h2 className={styles.sectionTitle}>Riwayat Transaksi Terbaru</h2>
-        <p className={styles.subText}>10 transaksi langganan terkini di seluruh platform.</p>
+        <p className={styles.subText}>Transaksi langganan terkini yang tercatat pada sistem.</p>
 
         <div className={styles.tableResponsive}>
           <table className={styles.customTable}>
             <thead>
               <tr>
-                <th>Order ID</th>
-                <th>Pengguna</th>
+                <th>Invoice / ID</th>
+                <th>Pengguna / Instansi</th>
                 <th>Paket</th>
                 <th>Jumlah</th>
                 <th>Tanggal</th>
@@ -245,18 +279,23 @@ export default function AdminPaketHarga() {
                 stats.recentTransactions.map((tx, idx) => (
                   <tr key={tx._id || idx}>
                     <td style={{ fontFamily: "monospace", color: "#34B34A" }}>
-                      {tx.orderId || "-"}
+                      {tx.invoiceId || tx.orderId || "-"}
                     </td>
-                    <td>{tx.userId?.email || tx.userId?.profile?.name || "User"}</td>
-                    <td>{tx.planId}</td>
-                    <td>{formatRupiah(tx.amount)}</td>
+                    <td>
+                      <div>{tx.userId?.profile?.name || tx.userId?.email || "Pengguna"}</div>
+                      <div style={{ fontSize: "11px", color: "#888" }}>
+                        {tx.userId?.location?.name || tx.userId?.email || ""}
+                      </div>
+                    </td>
+                    <td>{tx.subscriptionId?.subscriptionId || tx.subscriptionId || tx.planId || "-"}</td>
+                    <td style={{ fontWeight: 600 }}>{formatRupiah(tx.amount || tx.finalAmount)}</td>
                     <td>
                       {tx.createdAt ? new Date(tx.createdAt).toLocaleDateString("id-ID") : "-"}
                     </td>
                     <td>
                       <span
                         className={
-                          tx.status === "settlement" || tx.status === "capture"
+                          tx.status === "paid" || tx.status === "settlement" || tx.status === "capture"
                             ? styles.statusPaid
                             : styles.statusPending
                         }
@@ -269,7 +308,7 @@ export default function AdminPaketHarga() {
               ) : (
                 <tr>
                   <td colSpan="6" style={{ textAlign: "center", color: "#777", padding: "24px" }}>
-                    Belum ada transaksi terekam.
+                    Belum ada riwayat transaksi.
                   </td>
                 </tr>
               )}
@@ -277,110 +316,6 @@ export default function AdminPaketHarga() {
           </table>
         </div>
       </Wrapper>
-
-      {/* MODAL EDIT PAKET */}
-      {selectedPkg && (
-        <div className={styles.modalOverlay} onClick={handleCloseEdit}>
-          <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
-            <h3 className={styles.modalTitle}>Edit Paket: {selectedPkg.name}</h3>
-
-            {modalMessage && (
-              <p style={{ color: "#ef4444", margin: 0, fontSize: "13px" }}>{modalMessage}</p>
-            )}
-
-            <form onSubmit={handleSavePackage} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Nama Tampilan Paket</label>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  value={editForm.name}
-                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Harga Paket (Rp)</label>
-                <input
-                  type="number"
-                  className={styles.formInput}
-                  value={editForm.price}
-                  onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
-                  min="0"
-                  required
-                />
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Kuota Word (-1 = Tak Terbatas)</label>
-                  <input
-                    type="number"
-                    className={styles.formInput}
-                    value={editForm.quotaWord}
-                    onChange={(e) => setEditForm({ ...editForm, quotaWord: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Kuota PDF (-1 = Tak Terbatas)</label>
-                  <input
-                    type="number"
-                    className={styles.formInput}
-                    value={editForm.quotaPdf}
-                    onChange={(e) => setEditForm({ ...editForm, quotaPdf: e.target.value })}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Periode Tagihan</label>
-                <select
-                  className={styles.formInput}
-                  value={editForm.billingPeriod}
-                  onChange={(e) => setEditForm({ ...editForm, billingPeriod: e.target.value })}
-                >
-                  <option value="monthly">Bulanan (Monthly)</option>
-                  <option value="quarterly">3 Bulan (Quarterly)</option>
-                  <option value="yearly">Tahunan (Yearly)</option>
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Status Aktif</label>
-                <select
-                  className={styles.formInput}
-                  value={editForm.isActive ? "true" : "false"}
-                  onChange={(e) => setEditForm({ ...editForm, isActive: e.target.value === "true" })}
-                >
-                  <option value="true">Aktif (Bisa Dibeli User)</option>
-                  <option value="false">Nonaktif (Disembunyikan)</option>
-                </select>
-              </div>
-
-              <div className={styles.modalActions}>
-                <button
-                  type="button"
-                  className={styles.btnCancel}
-                  onClick={handleCloseEdit}
-                  disabled={saving}
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className={styles.btnSave}
-                  disabled={saving}
-                >
-                  {saving ? "Menyimpan..." : "Simpan Perubahan"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

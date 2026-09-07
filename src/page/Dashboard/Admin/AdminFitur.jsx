@@ -10,6 +10,8 @@ export default function AdminFitur() {
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
+  const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000";
+
   const getHeaders = () => {
     const token = localStorage.getItem("token");
     return {
@@ -23,9 +25,10 @@ export default function AdminFitur() {
     try {
       setLoading(true);
       setError("");
-      const res = await axios.get("/api/admin/features", getHeaders());
-      if (res.data?.data) {
-        setFeatures(res.data.data);
+      const res = await axios.get(`${serverUrl}/api/admin/features`, getHeaders());
+      const data = res.data?.data || res.data?.features;
+      if (Array.isArray(data)) {
+        setFeatures(data);
       }
     } catch (err) {
       console.error("Gagal mengambil data fitur:", err);
@@ -47,7 +50,7 @@ export default function AdminFitur() {
       setError("");
 
       const res = await axios.put(
-        `/api/admin/features/${featureId}/toggle`,
+        `${serverUrl}/api/admin/features/${featureId}/toggle`,
         { enabled: nextState },
         getHeaders()
       );

@@ -24,6 +24,8 @@ export default function AdminManageUser() {
   });
   const [savingSub, setSavingSub] = useState(false);
 
+  const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000";
+
   const getHeaders = () => {
     const token = localStorage.getItem("token");
     return {
@@ -43,15 +45,16 @@ export default function AdminManageUser() {
         search: search.trim(),
         role: roleFilter
       };
-      const res = await axios.get("/api/admin/users", {
+      const res = await axios.get(`${serverUrl}/api/admin/users`, {
         ...getHeaders(),
         params
       });
 
-      if (res.data?.data) {
-        setUsers(res.data.data.users || []);
-        setTotal(res.data.data.total || 0);
-        setTotalPages(res.data.data.totalPages || 1);
+      const payload = res.data?.data || res.data;
+      if (payload) {
+        setUsers(payload.users || res.data?.users || []);
+        setTotal(payload.total ?? payload.pagination?.total ?? 0);
+        setTotalPages(payload.totalPages ?? payload.pagination?.totalPages ?? 1);
       }
     } catch (err) {
       console.error("Gagal mengambil data pengguna:", err);
@@ -80,7 +83,7 @@ export default function AdminManageUser() {
       setMessage("");
       setError("");
       const res = await axios.put(
-        `/api/admin/users/${user._id}/role`,
+        `${serverUrl}/api/admin/users/${user._id || user.userId}/role`,
         { role: newRole },
         getHeaders()
       );
@@ -103,7 +106,7 @@ export default function AdminManageUser() {
     try {
       setMessage("");
       setError("");
-      const res = await axios.delete(`/api/admin/users/${user._id}`, getHeaders());
+      const res = await axios.delete(`${serverUrl}/api/admin/users/${user._id || user.userId}`, getHeaders());
       if (res.data?.success) {
         setMessage(`Pengguna ${user.email} berhasil dihapus.`);
         fetchUsers();
@@ -118,9 +121,9 @@ export default function AdminManageUser() {
   const handleOpenEditSub = (user) => {
     setSelectedUser(user);
     setSubForm({
-      plan: user.subscription?.plan || "free",
-      wordQuota: user.subscription?.quota?.word ?? 5,
-      pdfQuota: user.subscription?.quota?.pdf ?? 5,
+      plan: user.subscription?.plan || "wa_analisis_yearly",
+      wordQuota: user.subscription?.quota?.word ?? user.subscription?.quota ?? 30,
+      pdfQuota: user.subscription?.quota?.pdf ?? user.subscription?.quota ?? 30,
       status: user.subscription?.status || "active"
     });
   };
@@ -136,7 +139,7 @@ export default function AdminManageUser() {
     try {
       setSavingSub(true);
       const res = await axios.put(
-        `/api/admin/users/${selectedUser._id}/subscription`,
+        `${serverUrl}/api/admin/users/${selectedUser._id || selectedUser.userId}/subscription`,
         {
           plan: subForm.plan,
           status: subForm.status,
