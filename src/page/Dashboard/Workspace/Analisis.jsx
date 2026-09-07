@@ -13,6 +13,7 @@ import Input from '../../../components/Input/Input'
 import Skeleton from '../../../components/Skeleton/Skeleton'
 import AILoader from '../../../components/AILoader/AILoader'
 import WordEditor from '../../../word/WordEditor'
+import FeatureDisabled from '../../../components/FeatureDisabled/FeatureDisabled'
 import { BannerExporter } from '../../../kanva/components/Banner'
 
 const INDICATOR_OPTIONS = [
@@ -37,6 +38,27 @@ export default function Analisis() {
   const [analysisTitle, setAnalysisTitle] = useState("Analisis BPS Kota Metro")
   const [uploadedDataset, setUploadedDataset] = useState(null)
   const [brsPreview, setBrsPreview] = useState(null)
+  const [features, setFeatures] = useState({
+    aiForecasting: true,
+    whatsappBot: true,
+    wordExport: true,
+    infografis: true,
+    userRegistration: true,
+  })
+
+  useEffect(() => {
+    const fetchPublicFeatures = async () => {
+      try {
+        const res = await axios.get(`${process.env.REACT_APP_URL_SERVER || "http://localhost:5000"}/api/features/public`)
+        if (res.data?.features) {
+          setFeatures(res.data.features)
+        }
+      } catch (err) {
+        console.warn("Could not fetch features in Analisis:", err.message)
+      }
+    }
+    fetchPublicFeatures()
+  }, [])
 
   const item = [
     {
@@ -61,6 +83,7 @@ export default function Analisis() {
           analysisTitle={analysisTitle}
           uploadedDataset={uploadedDataset}
           setUploadedDataset={setUploadedDataset}
+          features={features}
         />
       )
     },
@@ -74,6 +97,7 @@ export default function Analisis() {
           uploadedDataset={uploadedDataset}
           brsPreview={brsPreview}
           setBrsPreview={setBrsPreview}
+          features={features}
         />
       )
     },
@@ -413,7 +437,14 @@ function StepTwoManual(props) {
 }
 
 function StepTwoAvailable(props) {
-  const { setStep, setUploadedDataset, datasetSource = "available", selectedIndicators = ["komoditas"], analysisTitle = "Analisis BPS Kota Metro" } = props
+  const {
+    setStep,
+    setUploadedDataset,
+    datasetSource = "available",
+    selectedIndicators = ["komoditas"],
+    analysisTitle = "Analisis BPS Kota Metro",
+    features = { aiForecasting: true, wordExport: true }
+  } = props
   const user = userStore((state) => state.user)
 
   const isCommodity = selectedIndicators.includes("komoditas")
@@ -2027,19 +2058,30 @@ function StepTwoAvailable(props) {
               <p className={styles.forecastingDesc}>
                 Aktifkan untuk menghasilkan prediksi indikator periode berikutnya menggunakan model Machine Learning / ANN.
               </p>
+              {features?.aiForecasting === false && (
+                <p style={{ fontSize: "12px", color: "#ef4444", margin: "6px 0 0 0", fontWeight: 500 }}>
+                  (Fitur forecasting sedang dinonaktifkan oleh administrator)
+                </p>
+              )}
             </div>
             <div className={styles.sliderToggle}>
               <div
                 className={`${styles.sliderTrack} ${forecastingEnabled ? styles.sliderTrackActive : ""}`}
                 role="group"
                 aria-label="Pilih opsi forecasting"
-                onClick={() => setForecastingEnabled(prev => !prev)}
+                onClick={() => {
+                  if (features?.aiForecasting !== false) {
+                    setForecastingEnabled(prev => !prev);
+                  }
+                }}
+                style={features?.aiForecasting === false ? { opacity: 0.4, cursor: "not-allowed" } : {}}
               >
                 <span
                   className={`${styles.sliderPill} ${forecastingEnabled ? styles.sliderPillRight : styles.sliderPillLeft}`}
                 />
                 <button
                   type="button"
+                  disabled={features?.aiForecasting === false}
                   onClick={(e) => { e.stopPropagation(); setForecastingEnabled(false) }}
                   className={`${styles.sliderBtn} ${!forecastingEnabled ? styles.sliderBtnActiveTidak : ""}`}
                   aria-pressed={forecastingEnabled}
@@ -2048,7 +2090,13 @@ function StepTwoAvailable(props) {
                 </button>
                 <button
                   type="button"
-                  onClick={(e) => { e.stopPropagation(); setForecastingEnabled(true) }}
+                  disabled={features?.aiForecasting === false}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (features?.aiForecasting !== false) {
+                      setForecastingEnabled(true);
+                    }
+                  }}
                   className={`${styles.sliderBtn} ${forecastingEnabled ? styles.sliderBtnActiveYa : ""}`}
                   aria-pressed={!forecastingEnabled}
                 >
@@ -2393,33 +2441,46 @@ function StepTwoAvailable(props) {
 
       <BannerExporter ref={bannerExporterRef} onReady={setBannerImages} />
 
-      <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center' }}>
-        <button
-          type="button"
+      <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+        <MainButton
           onClick={() => setStep(0)}
           style={{
-            padding: '12px 24px',
+            width: 'auto',
+            padding: '10px 20px',
             backgroundColor: 'transparent',
             border: '1px solid rgba(255, 255, 255, 0.2)',
             color: '#fff',
-            borderRadius: '6px',
-            cursor: 'pointer',
             fontSize: '14px',
             fontWeight: '500'
           }}
         >
           Kembali
-        </button>
-        <MainButton onClick={handleSave} disabled={isExportingBanner}>
+        </MainButton>
+        <MainButton
+          onClick={handleSave}
+          disabled={isExportingBanner || features?.wordExport === false}
+          style={{ width: 'auto', padding: '10px 24px' }}
+        >
           {isExportingBanner ? "Memproses Gambar Banner..." : "Simpan & Lanjutkan"}
         </MainButton>
+        {features?.wordExport === false && (
+          <span style={{ fontSize: "13px", color: "#ef4444", fontWeight: 500 }}>
+            (Fitur Ekspor Dokumen BRS sedang dinonaktifkan oleh administrator)
+          </span>
+        )}
       </div>
     </div>
   )
 }
 
 function StepThree(props) {
-  const { setStep, datasetSource, uploadedDataset, analysisTitle } = props
+  const {
+    setStep,
+    datasetSource,
+    uploadedDataset,
+    analysisTitle,
+    features = { wordExport: true }
+  } = props
   const [loadingSummary, setLoadingSummary] = useState(false)
   const [aiSummary, setAiSummary] = useState(null)
   const [error, setError] = useState("")
@@ -2468,7 +2529,7 @@ function StepThree(props) {
 
   // Fetch structured JSON AI summary on mount/load
   useEffect(() => {
-    if (uploadedDataset && uploadedDataset.valid === "ya" && !aiSummary) {
+    if (uploadedDataset && uploadedDataset.valid === "ya" && !aiSummary && features?.wordExport !== false) {
       const fetchSummary = async () => {
         setLoadingSummary(true);
         setError("");
@@ -2494,7 +2555,19 @@ function StepThree(props) {
       };
       fetchSummary();
     }
-  }, [uploadedDataset, datasetSource, aiSummary, inflasiValue, yoyValue, ihkValue, pendorong, divisionData]);
+  }, [uploadedDataset, datasetSource, aiSummary, inflasiValue, yoyValue, ihkValue, pendorong, divisionData, features?.wordExport]);
+
+  if (features?.wordExport === false) {
+    return (
+      <div className={styles.container}>
+        <FeatureDisabled
+          featureName="Ekspor Dokumen BRS (Word)"
+          onBack={() => setStep(1)}
+          backText="Kembali ke Edit Data"
+        />
+      </div>
+    );
+  }
 
   // Manual Dataset validation branch
   if (uploadedDataset && uploadedDataset.valid === "tidak") {
@@ -2513,19 +2586,18 @@ function StepThree(props) {
             <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: 0, maxWidth: '440px' }}>
               Dataset yang Anda unggah tidak dikenali oleh AI kami sebagai file data IHK atau inflasi BPS daerah yang sah. Silakan kembali dan unggah file yang terstruktur dengan kolom yang sesuai.
             </p>
-            <button
+            <MainButton
               onClick={() => setStep(1)}
               style={{
+                width: 'auto',
                 background: 'rgba(255,255,255,0.06)',
                 color: '#fff',
                 padding: '8px 16px',
-                borderRadius: '6px',
-                cursor: 'pointer',
                 marginTop: '12px'
               }}
             >
               Kembali
-            </button>
+            </MainButton>
           </div>
         </Wrapper>
       </div>

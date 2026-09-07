@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Wrapper from "../../../components/Wrapper/Wrapper";
+import MainButton from "../../../components/MainButton/MainButton";
 import styles from "./AdminOverview.module.css";
 
 export default function AdminOverview() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalUsers: 0,
     adminUsers: 0,
@@ -134,13 +136,16 @@ export default function AdminOverview() {
       <div className={styles.splitGrid}>
         {/* KONTROL PENGGUNA */}
         <Wrapper>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
             <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
               Kontrol Pengguna &amp; Instansi
             </h2>
-            <Link to="/dashboard/admin/manajemenUser" className={styles.quickLinkBtn}>
+            <MainButton
+              onClick={() => navigate("/dashboard/admin/manajemenUser")}
+              style={{ width: "auto", padding: "6px 14px", fontSize: "12px" }}
+            >
               Kelola Pengguna &rarr;
-            </Link>
+            </MainButton>
           </div>
 
           <div className={styles.tableResponsive}>
@@ -167,7 +172,7 @@ export default function AdminOverview() {
                       <td>
                         <span
                           style={{
-                            fontSize: "11px",
+                            fontSize: "12px",
                             fontWeight: 700,
                             color: u.role === "admin" ? "#ef4444" : "#34B34A",
                             textTransform: "uppercase"
@@ -177,7 +182,7 @@ export default function AdminOverview() {
                         </span>
                       </td>
                       <td>
-                        <span style={{ fontSize: "12px", color: u.subscription?.status === "active" ? "#34B34A" : "#888" }}>
+                        <span style={{ fontSize: "12px", fontWeight: 600, color: u.subscription?.status === "active" ? "#34B34A" : "#888" }}>
                           {u.subscription?.status === "active" ? "Aktif" : "Free / Inactive"}
                         </span>
                       </td>
@@ -201,7 +206,7 @@ export default function AdminOverview() {
             <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
               Kontrol Dataset &amp; Indikator BPS
             </h2>
-            <span className={styles.badgeActive}>API BPS Terhubung</span>
+            <span style={{ fontSize: "12px", color: "#34B34A", fontWeight: 600 }}>API BPS Terhubung</span>
           </div>
 
           <div className={styles.datasetList}>
@@ -212,7 +217,7 @@ export default function AdminOverview() {
                   Data BPS bulanan, pengelompokan 5 komoditas dominan, dan proyeksi AI Holt-Winters.
                 </p>
               </div>
-              <span className={styles.badgeActive}>Aktif</span>
+              <span style={{ fontSize: "12px", color: "#34B34A", fontWeight: 600 }}>Aktif</span>
             </div>
 
             <div className={styles.datasetItem}>
@@ -222,7 +227,7 @@ export default function AdminOverview() {
                   Data Susenas tahunan: Persentase (P0), Garis Kemiskinan (GK), &amp; Indeks Kedalaman.
                 </p>
               </div>
-              <span className={styles.badgeActive}>Aktif</span>
+              <span style={{ fontSize: "12px", color: "#34B34A", fontWeight: 600 }}>Aktif</span>
             </div>
 
             <div className={styles.datasetItem}>
@@ -232,7 +237,7 @@ export default function AdminOverview() {
                   Data agregat PDRB tahunan atas dasar harga konstan per wilayah instansi.
                 </p>
               </div>
-              <span className={styles.badgeActive}>Aktif</span>
+              <span style={{ fontSize: "12px", color: "#34B34A", fontWeight: 600 }}>Aktif</span>
             </div>
           </div>
         </Wrapper>
@@ -242,13 +247,16 @@ export default function AdminOverview() {
       <div className={styles.splitGrid}>
         {/* KONTROL REVENUE & TRANSAKSI */}
         <Wrapper>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
             <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
               Kontrol Pendapatan &amp; Transaksi
             </h2>
-            <Link to="/dashboard/admin/paketDanHarga" className={styles.quickLinkBtn}>
+            <MainButton
+              onClick={() => navigate("/dashboard/admin/paketDanHarga")}
+              style={{ width: "auto", padding: "6px 14px", fontSize: "12px" }}
+            >
               Monitor Paket &amp; Harga &rarr;
-            </Link>
+            </MainButton>
           </div>
 
           <div className={styles.tableResponsive}>
@@ -273,18 +281,13 @@ export default function AdminOverview() {
                       <td>
                         <span
                           style={{
-                            fontSize: "11px",
-                            padding: "2px 6px",
-                            borderRadius: "4px",
-                            background:
-                              tx.status === "paid" || tx.status === "settlement"
-                                ? "rgba(52, 179, 74, 0.15)"
-                                : "rgba(245, 158, 11, 0.15)",
+                            fontSize: "12px",
                             color:
                               tx.status === "paid" || tx.status === "settlement"
                                 ? "#34B34A"
                                 : "#f59e0b",
-                            fontWeight: 600
+                            fontWeight: 600,
+                            textTransform: "capitalize"
                           }}
                         >
                           {tx.status}
@@ -306,13 +309,16 @@ export default function AdminOverview() {
 
         {/* KONTROL SAKELAR FITUR */}
         <Wrapper>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
             <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
               Status Fitur Sistem ({stats.features?.active || 0}/{stats.features?.total || 5} Aktif)
             </h2>
-            <Link to="/dashboard/admin/kontrolFitur" className={styles.quickLinkBtn}>
+            <MainButton
+              onClick={() => navigate("/dashboard/admin/kontrolFitur")}
+              style={{ width: "auto", padding: "6px 14px", fontSize: "12px" }}
+            >
               Sakelar Fitur &rarr;
-            </Link>
+            </MainButton>
           </div>
 
           <div className={styles.datasetList}>
@@ -324,15 +330,12 @@ export default function AdminOverview() {
                 </div>
                 <span
                   style={{
-                    fontSize: "11px",
+                    fontSize: "12px",
                     fontWeight: 700,
-                    padding: "3px 8px",
-                    borderRadius: "4px",
-                    background: f.enabled ? "rgba(52, 179, 74, 0.15)" : "rgba(239, 68, 68, 0.15)",
                     color: f.enabled ? "#34B34A" : "#ef4444"
                   }}
                 >
-                  {f.enabled ? "AKTIF" : "NONAKTIF"}
+                  {f.enabled ? "Aktif" : "Nonaktif"}
                 </span>
               </div>
             ))}

@@ -1,10 +1,12 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { Outlet, Link, useLocation } from 'react-router-dom'
+import axios from 'axios'
 import styles from "./Dashboard.module.css"
 
 import Logo from '../../components/Logo/Logo'
 import NavButton from '../../components/Button/NavButton/NavButton'
+import FeatureDisabled from '../../components/FeatureDisabled/FeatureDisabled'
 import { userStore } from '../../logic/state/store'
 
 export default function Dashboard() {
@@ -12,21 +14,35 @@ export default function Dashboard() {
   const logout = userStore((state) => state.logout);
   const isAdmin = user?.role === "admin";
 
+  const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000";
+
+  const [features, setFeatures] = useState({
+    aiForecasting: true,
+    whatsappBot: true,
+    wordExport: true,
+    infografis: true,
+    userRegistration: true,
+  });
+
+  useEffect(() => {
+    const fetchPublicFeatures = async () => {
+      try {
+        const res = await axios.get(`${serverUrl}/api/features/public`);
+        if (res.data?.features) {
+          setFeatures(res.data.features);
+        }
+      } catch (err) {
+        console.warn("Could not fetch public features:", err.message);
+      }
+    };
+    fetchPublicFeatures();
+  }, [serverUrl]);
+
   const handleLogout = () => {
     if (window.confirm("Apakah Anda yakin ingin keluar dari akun?")) {
       logout();
     }
   };
-
-  const [active, setActive] = useState({
-    overview: true,
-    analisis: false,
-    histori: false,
-    sambungkanAkun: false,
-    botKnowledge: false,
-    tentangAkun: false,
-    langgananBilling: false
-  })
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -53,6 +69,16 @@ export default function Dashboard() {
   } else {
     tab = "DASHBOARD"
     keyword = "Overview"
+  }
+
+  // Check if current page is disabled for regular user
+  let disabledFeatureName = null;
+  if (!isAdmin) {
+    if (location.pathname.includes("/bot/") && !features.whatsappBot) {
+      disabledFeatureName = "Bot WhatsApp";
+    } else if (location.pathname.includes("/infografis/") && !features.infografis) {
+      disabledFeatureName = "Infografis";
+    }
   }
 
   return (
@@ -131,15 +157,35 @@ export default function Dashboard() {
             <div className={styles.leftContainer}>
               <p>INFOGRAFIS</p>
               <div className={styles.leftWrapper}>
-                <NavButton keyword="buatInfografis" tab="infografis" />
-                <NavButton keyword="histori" tab="infografis" />
+                <NavButton
+                  keyword="buatInfografis"
+                  tab="infografis"
+                  disabled={!features.infografis}
+                  disabledMessage="Fitur Infografis sedang dinonaktifkan oleh administrator."
+                />
+                <NavButton
+                  keyword="histori"
+                  tab="infografis"
+                  disabled={!features.infografis}
+                  disabledMessage="Fitur Infografis sedang dinonaktifkan oleh administrator."
+                />
               </div>
             </div>
             <div className={styles.leftContainer}>
               <p>BOT WHATSAPP</p>
               <div className={styles.leftWrapper}>
-                <NavButton keyword="sambungkanAkun" tab="bot" />
-                <NavButton keyword="botKnowledge" tab="bot" />
+                <NavButton
+                  keyword="sambungkanAkun"
+                  tab="bot"
+                  disabled={!features.whatsappBot}
+                  disabledMessage="Fitur Bot WhatsApp sedang dinonaktifkan oleh administrator."
+                />
+                <NavButton
+                  keyword="botKnowledge"
+                  tab="bot"
+                  disabled={!features.whatsappBot}
+                  disabledMessage="Fitur Bot WhatsApp sedang dinonaktifkan oleh administrator."
+                />
               </div>
             </div>
             <div className={styles.leftContainer}>
@@ -160,7 +206,7 @@ export default function Dashboard() {
         <div className={styles.indicator}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M13.5379 9.13513H10.6055C10.2168 9.13473 9.84379 9.2885 9.56829 9.56272C9.29279 9.83695 9.13729 10.2092 9.13589 10.5979V13.5304C9.13569 13.7234 9.17357 13.9146 9.24735 14.093C9.32114 14.2714 9.42938 14.4335 9.56589 14.57 C9.7024 14.7065 9.86448 14.8148 10.0429 14.8885C10.2213 14.9623 10.4125 15.0002 10.6055 15H13.5379C13.9265 14.9984 14.2986 14.8428 14.5727 14.5673C14.8467 14.2919 15.0004 13.919 15 13.5304V10.5979C15.0002 10.4059 14.9625 10.2157 14.8891 10.0382C14.8157 9.86073 14.708 9.69948 14.5722 9.56367C14.4364 9.42787 14.2752 9.32018 14.0977 9.24678C13.9202 9.17337 13.73 9.13569 13.5379 9.13589M5.39449 9.13513H2.46205C2.07353 9.13733 1.70167 9.29322 1.42772 9.56873C1.15377 9.84424 0.999995 10.217 1 10.6055V13.5379C0.999802 13.73 1.03748 13.9202 1.11089 14.0977C1.18429 14.2752 1.29198 14.4364 1.42778 14.5722C1.56359 14.708 1.72484 14.8157 1.90232 14.8891C2.07979 14.9625 2.27 15.0002 2.46205 15H5.39449C5.78307 15.0004 6.15596 14.8467 6.43144 14.5727C6.70692 14.2986 6.86251 13.9265 6.86411 13.5379V10.6055C6.86431 10.4125 6.82643 10.2213 6.75265 10.0429C6.67886 9.86448 6.57062 9.7024 6.43411 9.56589C6.2976 9.42938 6.13551 9.32114 5.95712 9.24735C5.77873 9.17357 5.58754 9.13569 5.39449 9.13589M5.39449 1H2.46205C2.27 0.999802 2.07979 1.03748 1.90232 1.11089C1.72484 1.18429 1.56359 1.29198 1.42778 1.42778C1.29198 1.56359 1.18429 1.72484 1.11089 1.90232C1.03748 2.07979 0.999802 2.27 1 2.46205V5.39449C0.999597 5.78307 1.15326 6.15596 1.42732 6.43144C1.70138 6.70692 2.07348 6.86251 2.46205 6.86411H5.39449C5.58754 6.86431 5.77873 6.82643 5.95712 6.75265C6.13551 6.67886 6.2976 6.57062 6.43411 6.43411C6.57062 6.2976 6.67886 6.13551 6.75265 5.95712C6.82643 5.77873 6.86431 5.58754 6.86411 5.39449V2.46205C6.86251 2.07348 6.70692 1.70138 6.43144 1.42732C6.15596 1.15326 5.78307 0.999597 5.39449 1ZM13.5379 1H10.6055C10.2169 0.999597 9.84404 1.15326 9.56856 1.42732C9.29308 1.70138 9.13749 2.07348 9.13589 2.46205V5.39449C9.13609 5.78419 9.29099 6.15788 9.56655 6.43344C9.84212 6.70901 10.2158 6.86391 10.6055 6.86411H13.5379C13.9265 6.86251 14.2986 6.70692 14.5727 6.43144C14.8467 6.15596 15.0004 5.78307 15 5.39449V2.46205C15.0002 2.27 14.9625 2.07979 14.8891 1.90232C14.8157 1.72484 14.708 1.56359 14.5722 1.42778C14.4364 1.29198 14.2752 1.18429 14.0977 1.11089C13.9202 1.03748 13.73 0.999802 13.5379 1Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M13.5379 9.13513H10.6055C10.2168 9.13473 9.84379 9.2885 9.56829 9.56272C9.29279 9.83695 9.13729 10.2092 9.13589 10.5979V13.5304C9.13569 13.7234 9.17357 13.9146 9.24735 14.093C9.32114 14.2714 9.42938 14.4335 9.56589 14.57 C9.7024 14.7065 9.86448 14.8148 10.0429 14.8885C10.2213 14.9623 10.4125 15.0002 10.6055 15H13.5379C13.9265 14.9984 14.2986 14.8428 14.5727 14.5673C14.8467 14.2919 15.0004 13.919 15 13.5304V10.5979C15.0002 10.4059 14.9625 10.2157 14.8891 10.0382C14.8157 9.86073 14.708 9.69948 14.5722 9.56367C14.4364 9.42787 14.2752 9.32018 14.0977 9.24678C13.9202 9.17337 13.73 9.13569 13.5379 9.13589M5.39449 9.13513H2.46205C2.07353 9.13733 1.70167 9.29322 1.42772 9.56873C1.15377 9.84424 0.999995 10.217 1 10.6055V13.5379C0.999802 13.73 1.03748 13.9202 1.11089 14.0977C1.18429 14.2752 1.29198 14.4364 1.42778 14.5722C1.56359 14.708 1.72484 14.8157 1.90232 14.8891C2.07979 14.9625 2.27 15.0002 2.46205 15H5.39449C5.78307 15.0004 6.15596 14.8467 6.43144 14.5727C6.70692 14.2986 6.86251 13.9265 6.86411 13.5379V10.6055C6.86431 10.4125 6.82643 10.2213 6.75265 10.0429C6.67886 9.86448 6.57062 9.7024 6.43411 9.56589C6.2976 9.42938 6.13551 9.32114 5.95712 9.24735C5.77873 9.17357 5.58754 9.13569 5.39449 9.13589M5.39449 1H2.46205C2.27 0.999802 2.07979 1.03748 1.90232 1.11089C1.72484 1.18429 1.56359 1.29198 1.42778 1.42778C1.29198 1.56359 1.18429 1.72484 1.11089 1.90232C1.03748 2.07979 0.999802 2.27 1 2.46205V5.39449C0.999597 5.78307 1.15326 6.15596 1.42732 6.43144C1.70138 6.70692 2.07348 6.86251 2.46205 6.86411H5.39449C5.58754 6.86431 5.77873 6.82643 5.95712 6.75265C6.13551 6.67886 6.2976 6.57062 6.43411 6.43411C6.57062 6.2976 6.67886 6.13551 6.75265 5.95712C6.82643 5.77873 6.86431 5.58754 6.86411 5.39449V2.46205C6.86251 2.07348 6.70692 1.70138 6.43144 1.42732C6.15596 1.15326 5.78307 0.999597 5.39449 1ZM13.5379 1H10.6055C10.2169 0.999597 9.84404 1.15326 9.56856 1.42732C9.29308 1.70138 9.13749 2.07348 9.13589 2.46205V5.39449C9.13609 5.78419 9.29099 6.15788 9.56655 6.43344C9.84212 6.70901 10.2158 6.86391 10.6055 6.86411H13.5379C13.9265 6.86251 14.2986 6.70692 14.5727 6.43144C14.8467 6.15596 15.0004 5.78307 15 5.39449V2.46205C15.0002 2.27 14.9625 2.07979 14.8891 1.90232C14.8157 1.72484 14.708 1.56359 14.5722 1.42778C14.4364 1.29198 14.2752 1.18429 14.0977 1.11089C13.9202 1.03748 13.73 0.999802 13.5379 1Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <p className={styles.tabIndicator}>{tab}</p>
             <p className={styles.keywordIndicator}>/</p>
@@ -171,7 +217,11 @@ export default function Dashboard() {
           </div>
         </div>
         <div className={styles.outlet}>
-          <Outlet />
+          {disabledFeatureName ? (
+            <FeatureDisabled featureName={disabledFeatureName} />
+          ) : (
+            <Outlet />
+          )}
         </div>
       </div>
     </div>

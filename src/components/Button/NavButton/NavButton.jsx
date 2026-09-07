@@ -19,18 +19,15 @@ import {
   ManajemenUserIcon
 } from "../../Icon/Icon";
 
-export default function NavButton({ keyword, tab, onClick }) {
-
+export default function NavButton({
+  keyword,
+  tab,
+  onClick,
+  disabled = false,
+  disabledMessage = ""
+}) {
   const navigate = useNavigate();
-  const location = useLocation()
-
-  const [active, setActive] = useState(false)
-
-  useEffect(() => {
-    if (location.pathname == "/dashboard") {
-
-    }
-  }, [])
+  const location = useLocation();
 
   const arr = {
     overview: OverviewIcon,
@@ -56,30 +53,43 @@ export default function NavButton({ keyword, tab, onClick }) {
       .trim();
   };
 
-  const perSlash = location.pathname.split("/").filter(Boolean)
-
-  const currentTab = perSlash[1]
-  const currentKeyword = perSlash[2]
+  const perSlash = location.pathname.split("/").filter(Boolean);
+  const currentTab = perSlash[1];
+  const currentKeyword = perSlash[2];
 
   const isActive =
-    (location.pathname == "/dashboard" && keyword == "overview") ||
+    (location.pathname === "/dashboard" && keyword === "overview") ||
     (currentTab === tab && currentKeyword === keyword);
 
-  const handleClick = () => {
-    if (keyword == "overview") {
-      navigate(`/dashboard`)
-    } else {
-      navigate(`/dashboard/${tab}/${keyword}`)
+  const handleClick = (e) => {
+    if (disabled) {
+      if (e) e.stopPropagation();
+      alert(disabledMessage || "Fitur ini sedang dinonaktifkan oleh administrator.");
+      return;
     }
-  }
+
+    if (keyword === "overview") {
+      navigate(`/dashboard`);
+    } else {
+      navigate(`/dashboard/${tab}/${keyword}`);
+    }
+  };
 
   return (
     <div
-      className={`${styles.container} ${isActive ? styles.active : ""}`}
-      onClick={onClick ? onClick : handleClick}
+      className={`${styles.container} ${isActive ? styles.active : ""} ${disabled ? styles.disabled : ""}`}
+      onClick={
+        disabled
+          ? () => alert(disabledMessage || "Fitur ini sedang dinonaktifkan oleh administrator.")
+          : onClick || handleClick
+      }
+      title={disabled ? disabledMessage || "Fitur dinonaktifkan oleh administrator" : ""}
     >
-      <div className={`${styles.icon} ${isActive ? styles.iconActive : ""}`}>{IconComponent && <IconComponent />}</div>
+      <div className={`${styles.icon} ${isActive ? styles.iconActive : ""}`}>
+        {IconComponent && <IconComponent />}
+      </div>
       <div>{capitalize(keyword)}</div>
+      {disabled && <span className={styles.disabledBadge}>Off</span>}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Wrapper from "../../../components/Wrapper/Wrapper";
+import MainButton from "../../../components/MainButton/MainButton";
 import styles from "./AdminManageUser.module.css";
 
 export default function AdminManageUser() {
@@ -17,9 +18,9 @@ export default function AdminManageUser() {
   // Edit Subscription Modal State
   const [selectedUser, setSelectedUser] = useState(null);
   const [subForm, setSubForm] = useState({
-    plan: "free",
-    wordQuota: 5,
-    pdfQuota: 5,
+    plan: "wa_analisis_yearly",
+    wordQuota: 30,
+    pdfQuota: 30,
     status: "active"
   });
   const [savingSub, setSavingSub] = useState(false);
@@ -233,7 +234,7 @@ export default function AdminManageUser() {
                 <th>Instansi &amp; Wilayah</th>
                 <th>Peran</th>
                 <th>Paket</th>
-                <th>Sisa Kuota (Word / PDF)</th>
+                <th>Sisa Kuota</th>
                 <th>Terdaftar</th>
                 <th>Aksi</th>
               </tr>
@@ -247,7 +248,7 @@ export default function AdminManageUser() {
                 </tr>
               ) : users.length > 0 ? (
                 users.map((u) => (
-                  <tr key={u._id}>
+                  <tr key={u._id || u.userId}>
                     <td>
                       <div style={{ fontWeight: 600, color: "#fff" }}>
                         {u.profile?.picName || u.profile?.name || "Pengguna"}
@@ -262,15 +263,18 @@ export default function AdminManageUser() {
                     </td>
                     <td>
                       <span
-                        className={
-                          u.role === "admin" ? styles.roleBadgeAdmin : styles.roleBadgeUser
-                        }
+                        style={{
+                          fontWeight: 700,
+                          fontSize: "12px",
+                          color: u.role === "admin" ? "#ef4444" : "#34B34A",
+                          textTransform: "uppercase"
+                        }}
                       >
                         {u.role || "user"}
                       </span>
                     </td>
                     <td>
-                      <span className={styles.planBadge}>
+                      <span style={{ fontFamily: "monospace", fontSize: "12px", color: "#d5d5d5" }}>
                         {u.subscription?.plan || "free"}
                       </span>
                     </td>
@@ -278,45 +282,60 @@ export default function AdminManageUser() {
                       <span style={{ color: "#34B34A", fontWeight: 600 }}>
                         {u.subscription?.quota?.word === -1
                           ? "∞"
-                          : u.subscription?.quota?.word ?? 0}
+                          : u.subscription?.quota?.word ?? u.subscription?.quota ?? 0}
                       </span>{" "}
-                      Word /{" "}
-                      <span style={{ color: "#34B34A", fontWeight: 600 }}>
-                        {u.subscription?.quota?.pdf === -1
-                          ? "∞"
-                          : u.subscription?.quota?.pdf ?? 0}
-                      </span>{" "}
-                      PDF
+                      Kuota
                     </td>
                     <td style={{ fontSize: "12px", color: "#888" }}>
                       {u.createdAt ? new Date(u.createdAt).toLocaleDateString("id-ID") : "-"}
                     </td>
                     <td>
                       <div className={styles.actionsGroup}>
-                        <button
-                          type="button"
-                          className={styles.actionBtn}
+                        <MainButton
                           onClick={() => handleToggleRole(u)}
-                          title={`Ubah ke ${u.role === "admin" ? "User" : "Admin"}`}
+                          style={{
+                            width: "auto",
+                            padding: "6px 12px",
+                            fontSize: "12px",
+                            borderRadius: "6px",
+                            background: u.role === "admin" ? "rgba(255, 255, 255, 0.08)" : "var(--primaryColor)",
+                            color: "#fff",
+                            boxShadow: "none"
+                          }}
                         >
                           {u.role === "admin" ? "Jadikan User" : "Jadikan Admin"}
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.actionBtn}
+                        </MainButton>
+
+                        <MainButton
                           onClick={() => handleOpenEditSub(u)}
-                          title="Kelola Paket & Kuota"
+                          style={{
+                            width: "auto",
+                            padding: "6px 12px",
+                            fontSize: "12px",
+                            borderRadius: "6px",
+                            background: "rgba(255, 255, 255, 0.08)",
+                            color: "#fff",
+                            boxShadow: "none"
+                          }}
                         >
                           Kelola Kuota
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.actionBtnDanger}
+                        </MainButton>
+
+                        <MainButton
                           onClick={() => handleDeleteUser(u)}
-                          title="Hapus Pengguna"
+                          style={{
+                            width: "auto",
+                            padding: "6px 12px",
+                            fontSize: "12px",
+                            borderRadius: "6px",
+                            background: "rgba(239, 68, 68, 0.15)",
+                            color: "#ef4444",
+                            border: "1px solid rgba(239, 68, 68, 0.3)",
+                            boxShadow: "none"
+                          }}
                         >
                           Hapus
-                        </button>
+                        </MainButton>
                       </div>
                     </td>
                   </tr>
@@ -338,22 +357,34 @@ export default function AdminManageUser() {
             Total <strong>{total}</strong> pengguna (Halaman {page} dari {totalPages})
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
-            <button
-              type="button"
-              className={styles.pageBtn}
+            <MainButton
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
+              style={{
+                width: "auto",
+                padding: "6px 14px",
+                fontSize: "12px",
+                borderRadius: "4px",
+                background: "rgba(255, 255, 255, 0.06)",
+                boxShadow: "none"
+              }}
             >
               Sebelumnya
-            </button>
-            <button
-              type="button"
-              className={styles.pageBtn}
+            </MainButton>
+            <MainButton
               disabled={page >= totalPages}
               onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+              style={{
+                width: "auto",
+                padding: "6px 14px",
+                fontSize: "12px",
+                borderRadius: "4px",
+                background: "rgba(255, 255, 255, 0.06)",
+                boxShadow: "none"
+              }}
             >
               Selanjutnya
-            </button>
+            </MainButton>
           </div>
         </div>
       </Wrapper>
@@ -374,9 +405,11 @@ export default function AdminManageUser() {
                   value={subForm.plan}
                   onChange={(e) => setSubForm({ ...subForm, plan: e.target.value })}
                 >
-                  <option value="free">Free</option>
-                  <option value="pro">Pro</option>
-                  <option value="enterprise">Enterprise</option>
+                  <option value="wa_only_monthly">Bot WhatsApp Only (Bulanan)</option>
+                  <option value="wa_only_yearly">Bot WhatsApp Only (Tahunan)</option>
+                  <option value="wa_analisis_monthly">Bot WhatsApp + Analisis (Bulanan)</option>
+                  <option value="wa_analisis_yearly">Bot WhatsApp + Analisis (Tahunan)</option>
+                  <option value="free">Free / Gratis</option>
                 </select>
               </div>
 
@@ -417,21 +450,32 @@ export default function AdminManageUser() {
               </div>
 
               <div className={styles.modalActions}>
-                <button
+                <MainButton
                   type="button"
-                  className={styles.btnCancel}
                   onClick={handleCloseEditSub}
                   disabled={savingSub}
+                  style={{
+                    width: "auto",
+                    padding: "8px 16px",
+                    fontSize: "13px",
+                    background: "transparent",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    boxShadow: "none"
+                  }}
                 >
                   Batal
-                </button>
-                <button
+                </MainButton>
+                <MainButton
                   type="submit"
-                  className={styles.btnSave}
                   disabled={savingSub}
+                  style={{
+                    width: "auto",
+                    padding: "8px 20px",
+                    fontSize: "13px"
+                  }}
                 >
                   {savingSub ? "Menyimpan..." : "Simpan Perubahan"}
-                </button>
+                </MainButton>
               </div>
             </form>
           </div>

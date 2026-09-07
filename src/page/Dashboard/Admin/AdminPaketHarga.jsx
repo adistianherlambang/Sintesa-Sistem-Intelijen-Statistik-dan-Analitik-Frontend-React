@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Wrapper from "../../../components/Wrapper/Wrapper";
+import MainButton from "../../../components/MainButton/MainButton";
 import styles from "./AdminPaketHarga.module.css";
 
 export default function AdminPaketHarga() {
@@ -179,9 +180,11 @@ export default function AdminPaketHarga() {
               const isSaving = savingPlanId === pkg.planId;
               return (
                 <div key={pkg._id || pkg.planId} className={styles.packageCard}>
-                  <div className={styles.packageHeader}>
-                    <span className={styles.planIdBadge}>{pkg.planId}</span>
-                    <span className={styles.subscribersBadge}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontFamily: "monospace", fontSize: "13px", color: "#34B34A", fontWeight: 700 }}>
+                      {pkg.planId}
+                    </span>
+                    <span style={{ fontSize: "12px", color: "#888" }}>
                       {pkg.activeSubscribers || 0} Pelanggan Aktif
                     </span>
                   </div>
@@ -242,14 +245,13 @@ export default function AdminPaketHarga() {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    className={styles.saveBtn}
+                  <MainButton
                     onClick={() => handleSavePackageDirect(pkg)}
                     disabled={isSaving}
+                    style={{ padding: "10px 16px", fontSize: "13px", marginTop: "8px" }}
                   >
                     {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
-                  </button>
+                  </MainButton>
                 </div>
               );
             })}
@@ -294,11 +296,14 @@ export default function AdminPaketHarga() {
                     </td>
                     <td>
                       <span
-                        className={
-                          tx.status === "paid" || tx.status === "settlement" || tx.status === "capture"
-                            ? styles.statusPaid
-                            : styles.statusPending
-                        }
+                        style={{
+                          fontWeight: 600,
+                          fontSize: "12px",
+                          color:
+                            tx.status === "paid" || tx.status === "settlement" || tx.status === "capture"
+                              ? "#34B34A"
+                              : "#f59e0b"
+                        }}
                       >
                         {tx.status}
                       </span>
