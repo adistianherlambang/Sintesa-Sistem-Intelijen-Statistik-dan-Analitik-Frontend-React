@@ -135,21 +135,18 @@ export default function Analisis() {
 function StepConfigAvailable(props) {
   const { setStep, selectedIndicators, setSelectedIndicators, analysisTitle, setAnalysisTitle } = props
 
-  const toggleIndicator = (val) => {
-    if (selectedIndicators.includes(val)) {
-      if (selectedIndicators.length === 1) return
-      setSelectedIndicators(selectedIndicators.filter(item => item !== val))
-    } else {
-      setSelectedIndicators([...selectedIndicators, val])
-    }
+  const selectIndicator = (val) => {
+    setSelectedIndicators([val])
   }
+
+  const selectedOpt = INDICATOR_OPTIONS.find(o => o.value === (selectedIndicators[0] || "komoditas"))
 
   return (
     <div className={styles.container}>
       <Wrapper>
         <p className={styles.sectionTitle}>Konfigurasi Dataset & Indikator</p>
         <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: 14, margin: '0 0 20px 0' }}>
-          Masukkan judul analisis dan pilih indikator dataset yang tersedia dari BPS (centang checkbox) untuk melanjutkan ke tahap edit data.
+          Masukkan judul analisis dan pilih salah satu indikator dataset BPS untuk melanjutkan ke tahap edit data dan pembuatan Berita Resmi Statistik (BRS).
         </p>
 
         <div className={styles.configFormContainer}>
@@ -166,26 +163,29 @@ function StepConfigAvailable(props) {
 
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>
-              Pilih Indikator Dataset <span style={{ color: '#34B34A', fontSize: 12, marginLeft: 4 }}>({selectedIndicators.length} terpilih)</span>
+              Pilih Indikator Dataset <span style={{ color: '#34B34A', fontSize: 12, marginLeft: 4 }}>({selectedOpt?.label || "1 indikator terpilih"})</span>
             </label>
             <div className={styles.checkboxGrid}>
               {INDICATOR_OPTIONS.map((opt) => {
-                const isChecked = selectedIndicators.includes(opt.value)
+                const isChecked = selectedIndicators[0] === opt.value
                 return (
                   <div
                     key={opt.value}
                     className={`${styles.checkboxCard} ${isChecked ? styles.checkboxCardActive : ''}`}
-                    onClick={() => toggleIndicator(opt.value)}
+                    onClick={() => selectIndicator(opt.value)}
+                    style={{ cursor: 'pointer' }}
                   >
-                    <div className={`${styles.checkboxBox} ${isChecked ? styles.checkboxBoxActive : ''}`}>
-                      {isChecked && <span style={{ fontSize: 13, fontWeight: 'bold' }}>✓</span>}
+                    <div className={`${styles.checkboxBox} ${isChecked ? styles.checkboxBoxActive : ''}`} style={{ borderRadius: '50%' }}>
+                      {isChecked && <span style={{ fontSize: 11, fontWeight: 'bold' }}>●</span>}
                     </div>
-                    <span className={styles.checkboxLabel}>{opt.label}</span>
+                    <span className={styles.checkboxLabel} style={{ fontWeight: isChecked ? '600' : '400', color: isChecked ? '#fff' : 'rgba(255,255,255,0.8)' }}>
+                      {opt.label}
+                    </span>
                   </div>
                 )
               })}
             </div>
-            <span className={styles.formSubtext}>Centang satu atau lebih indikator yang ingin Anda analisis dan edit.</span>
+            <span className={styles.formSubtext}>Pilih satu indikator yang ingin Anda analisis (hanya bisa memilih satu indikator).</span>
           </div>
 
           <div style={{ marginTop: '12px' }}>
@@ -806,23 +806,29 @@ function StepTwoAvailable(props) {
       );
     }
 
+    const chosenIndicator = selectedIndicators[0] || "komoditas";
+
     setUploadedDataset({
       valid: "ya",
       fileInfo: {
-        name: `Database BPS (${selectedIndicators.join(", ")})`,
+        name: `Database BPS (${chosenIndicator})`,
         size: "N/A",
         rows: combinedParsedData.length,
         cols: combinedParsedData[0]?.length || 13,
-        sheet: "Sheet Utama"
+        sheet: "Sheet Utama",
+        selectedIndicator: chosenIndicator,
       },
       context: {
         city: userCityName || user?.location?.name || "KOTA METRO",
         period: `${targetMonthName} ${targetYear}`,
         monthIndex: selectedMonthIndex,
         year: targetYear,
-        title: analysisTitle
+        title: analysisTitle,
+        indicator: chosenIndicator,
+        selectedIndicator: chosenIndicator,
+        selectedIndicators: [chosenIndicator]
       },
-      structure: "BPS Multi-Indikator",
+      structure: "BPS Indikator",
       columns: combinedParsedData[0],
       parsedData: combinedParsedData,
       editedData: { inflasiData, ihkData, komoditasData, komoditasIhkData, pdrbDemoMap, forecast: annForecastResult?.forecast || null }
