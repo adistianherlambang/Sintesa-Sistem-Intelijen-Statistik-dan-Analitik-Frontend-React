@@ -33,25 +33,14 @@ const MONTH_NAMES = [
 ]
 
 export default function Analisis() {
-  const [datasetSource, setDatasetSource] = useState("available") // "available" or "manual"
   const [selectedIndicators, setSelectedIndicators] = useState(["komoditas"])
   const [analysisTitle, setAnalysisTitle] = useState("Analisis BPS Kota Metro")
   const [uploadedDataset, setUploadedDataset] = useState(null)
   const [brsPreview, setBrsPreview] = useState(null)
 
-  const item = datasetSource === "available" ? [
+  const item = [
     {
-      label: "Sumber Data",
-      content: (props) => (
-        <StepOne
-          {...props}
-          datasetSource={datasetSource}
-          setDatasetSource={setDatasetSource}
-        />
-      )
-    },
-    {
-      label: "Pilih Indikator",
+      label: "Konfigurasi Dataset & Indikator",
       content: (props) => (
         <StepConfigAvailable
           {...props}
@@ -67,7 +56,7 @@ export default function Analisis() {
       content: (props) => (
         <StepTwoAvailable
           {...props}
-          datasetSource={datasetSource}
+          datasetSource="available"
           selectedIndicators={selectedIndicators}
           analysisTitle={analysisTitle}
           uploadedDataset={uploadedDataset}
@@ -80,42 +69,7 @@ export default function Analisis() {
       content: (props) => (
         <StepThree
           {...props}
-          datasetSource={datasetSource}
-          analysisTitle={analysisTitle}
-          uploadedDataset={uploadedDataset}
-          brsPreview={brsPreview}
-          setBrsPreview={setBrsPreview}
-        />
-      )
-    },
-  ] : [
-    {
-      label: "Sumber Data",
-      content: (props) => (
-        <StepOne
-          {...props}
-          datasetSource={datasetSource}
-          setDatasetSource={setDatasetSource}
-        />
-      )
-    },
-    {
-      label: "Unggah Dataset",
-      content: (props) => (
-        <StepTwoManual
-          {...props}
-          datasetSource={datasetSource}
-          uploadedDataset={uploadedDataset}
-          setUploadedDataset={setUploadedDataset}
-        />
-      )
-    },
-    {
-      label: "Ringkasan & BRS",
-      content: (props) => (
-        <StepThree
-          {...props}
-          datasetSource={datasetSource}
+          datasetSource="available"
           analysisTitle={analysisTitle}
           uploadedDataset={uploadedDataset}
           brsPreview={brsPreview}
@@ -190,7 +144,7 @@ function StepConfigAvailable(props) {
           </div>
 
           <div style={{ marginTop: '12px' }}>
-            <MainButton onClick={() => setStep(2)}>Lanjutkan</MainButton>
+            <MainButton onClick={() => setStep(1)}>Lanjutkan</MainButton>
           </div>
         </div>
       </Wrapper>
@@ -679,7 +633,7 @@ function StepTwoAvailable(props) {
         console.warn("Gagal mengekspor banner:", err);
       }
     }
-    const nextStepIndex = datasetSource === "available" ? 3 : 2;
+    const nextStepIndex = 2;
     const combinedParsedData = [];
 
     const monthIndex = latestDataMonthIndex;
@@ -2439,9 +2393,27 @@ function StepTwoAvailable(props) {
 
       <BannerExporter ref={bannerExporterRef} onReady={setBannerImages} />
 
-      <MainButton onClick={handleSave} disabled={isExportingBanner}>
-        {isExportingBanner ? "Memproses Gambar Banner..." : "Simpan & Lanjutkan"}
-      </MainButton>
+      <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center' }}>
+        <button
+          type="button"
+          onClick={() => setStep(0)}
+          style={{
+            padding: '12px 24px',
+            backgroundColor: 'transparent',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            color: '#fff',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '500'
+          }}
+        >
+          Kembali
+        </button>
+        <MainButton onClick={handleSave} disabled={isExportingBanner}>
+          {isExportingBanner ? "Memproses Gambar Banner..." : "Simpan & Lanjutkan"}
+        </MainButton>
+      </div>
     </div>
   )
 }
