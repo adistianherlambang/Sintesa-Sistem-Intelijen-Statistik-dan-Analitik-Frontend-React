@@ -170,28 +170,14 @@
   border-color: #34B34A;
 }
 
-.saveBtn {
-  background: #34B34A;
-  border: none;
-  color: #fff;
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  width: 100%;
-  transition: all 0.2s;
-  text-align: center;
-  margin-top: 6px;
+.cardActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
 }
 
-.saveBtn:hover {
-  background: #2ea040;
-}
-
-.saveBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.saveBtnWrapper {
+  flex: 1;
 }
 
 /* Transactions Table */

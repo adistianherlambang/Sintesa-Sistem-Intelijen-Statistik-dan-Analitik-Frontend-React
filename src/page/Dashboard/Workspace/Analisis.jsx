@@ -8,7 +8,7 @@ import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tool
 import Stepper from '../../../components/Stepper/Stepper'
 import Wrapper from '../../../components/Wrapper/Wrapper'
 import Hierarchy from '../../../components/Hierarchy/Hierarchy'
-import MainButton from '../../../components/MainButton/MainButton'
+import Button from '../../../components/Button/Button'
 import Input from '../../../components/Input/Input'
 import Skeleton from '../../../components/Skeleton/Skeleton'
 import AILoader from '../../../components/AILoader/AILoader'
@@ -144,7 +144,7 @@ function StepConfigAvailable(props) {
           </div>
 
           <div style={{ marginTop: '12px' }}>
-            <MainButton onClick={() => setStep(1)}>Lanjutkan</MainButton>
+            <Button onClick={() => setStep(1)} fullWidth>Lanjutkan</Button>
           </div>
         </div>
       </Wrapper>
@@ -405,7 +405,7 @@ function StepTwoManual(props) {
             </div>
           </Wrapper>
 
-          <MainButton onClick={() => setStep(2)}>Simpan & Lanjutkan</MainButton>
+          <Button onClick={() => setStep(2)} fullWidth>Simpan & Lanjutkan</Button>
         </>
       )}
     </div>
@@ -2400,27 +2400,19 @@ function StepTwoAvailable(props) {
       <BannerExporter ref={bannerExporterRef} onReady={setBannerImages} />
 
       <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-        <MainButton
+        <Button
+          variant="secondary"
           onClick={() => setStep(0)}
-          style={{
-            width: 'auto',
-            padding: '10px 20px',
-            backgroundColor: 'transparent',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            color: '#fff',
-            fontSize: '14px',
-            fontWeight: '500'
-          }}
         >
           Kembali
-        </MainButton>
-        <MainButton
+        </Button>
+        <Button
+          variant="primary"
           onClick={handleSave}
           disabled={isExportingBanner}
-          style={{ width: 'auto', padding: '10px 24px' }}
         >
           {isExportingBanner ? "Memproses Gambar Banner..." : "Simpan & Lanjutkan"}
-        </MainButton>
+        </Button>
       </div>
     </div>
   )
@@ -2526,18 +2518,12 @@ function StepThree(props) {
             <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: 0, maxWidth: '440px' }}>
               Dataset yang Anda unggah tidak dikenali oleh AI kami sebagai file data IHK atau inflasi BPS daerah yang sah. Silakan kembali dan unggah file yang terstruktur dengan kolom yang sesuai.
             </p>
-            <MainButton
+            <Button
+              variant="secondary"
               onClick={() => setStep(1)}
-              style={{
-                width: 'auto',
-                background: 'rgba(255,255,255,0.06)',
-                color: '#fff',
-                padding: '8px 16px',
-                marginTop: '12px'
-              }}
             >
               Kembali
-            </MainButton>
+            </Button>
           </div>
         </Wrapper>
       </div>

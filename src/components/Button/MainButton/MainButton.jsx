@@ -1,8 +1,6 @@
-import React from 'react'
-import styles from "./MainButton.module.css"
+import React from "react";
+import Button from "../Button";
 
-export default function MainButton({children, width}) {
-  return (
-    <div className={styles.container}>{children}</div>
-  )
+export default function MainButton(props) {
+  return <Button {...props} />;
 }

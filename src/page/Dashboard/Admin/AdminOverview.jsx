@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Wrapper from "../../../components/Wrapper/Wrapper";
-import MainButton from "../../../components/MainButton/MainButton";
+import Button from "../../../components/Button/Button";
 import styles from "./AdminOverview.module.css";
 
 export default function AdminOverview() {
@@ -140,12 +140,12 @@ export default function AdminOverview() {
             <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
               Kontrol Pengguna &amp; Instansi
             </h2>
-            <MainButton
+            <Button
+              size="sm"
               onClick={() => navigate("/dashboard/admin/manajemenUser")}
-              style={{ width: "auto", padding: "6px 14px", fontSize: "12px" }}
             >
               Kelola Pengguna &rarr;
-            </MainButton>
+            </Button>
           </div>
 
           <div className={styles.tableResponsive}>
@@ -251,12 +251,12 @@ export default function AdminOverview() {
             <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
               Kontrol Pendapatan &amp; Transaksi
             </h2>
-            <MainButton
+            <Button
+              size="sm"
               onClick={() => navigate("/dashboard/admin/paketDanHarga")}
-              style={{ width: "auto", padding: "6px 14px", fontSize: "12px" }}
             >
               Monitor Paket &amp; Harga &rarr;
-            </MainButton>
+            </Button>
           </div>
 
           <div className={styles.tableResponsive}>
@@ -313,12 +313,12 @@ export default function AdminOverview() {
             <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
               Status Fitur Sistem ({stats.features?.active || 0}/{stats.features?.total || 5} Aktif)
             </h2>
-            <MainButton
+            <Button
+              size="sm"
               onClick={() => navigate("/dashboard/admin/kontrolFitur")}
-              style={{ width: "auto", padding: "6px 14px", fontSize: "12px" }}
             >
               Sakelar Fitur &rarr;
-            </MainButton>
+            </Button>
           </div>
 
           <div className={styles.datasetList}>

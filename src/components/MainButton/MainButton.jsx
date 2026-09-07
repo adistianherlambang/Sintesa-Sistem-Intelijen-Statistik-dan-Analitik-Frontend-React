@@ -1,23 +1,31 @@
 import React from "react";
-import styles from "./MainButton.module.css";
+import Button from "../Button/Button";
 
 export default function MainButton({
   children,
   onClick,
   type = "button",
   disabled = false,
+  variant = "primary",
+  size = "lg",
+  fullWidth = true,
   className = "",
-  style = {}
+  title,
+  ...props
 }) {
   return (
-    <button
+    <Button
       type={type}
       disabled={disabled}
       onClick={onClick}
-      className={`${styles.button} ${className}`}
-      style={style}
+      variant={variant}
+      size={size}
+      fullWidth={fullWidth}
+      className={className}
+      title={title}
+      {...props}
     >
       {children}
-    </button>
+    </Button>
   );
 }

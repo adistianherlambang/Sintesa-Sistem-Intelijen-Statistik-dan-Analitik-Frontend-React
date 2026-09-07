@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Wrapper from "../../../components/Wrapper/Wrapper";
-import MainButton from "../../../components/MainButton/MainButton";
+import Button from "../../../components/Button/Button";
 import styles from "./AdminPaketHarga.module.css";
 
 const AVAILABLE_FEATURES = [
@@ -297,12 +297,12 @@ export default function AdminPaketHarga() {
               Atur harga, kuota, dan centang fitur yang aktif ketika pengguna berlangganan paket terkait.
             </p>
           </div>
-          <MainButton
+          <Button
+            size="sm"
             onClick={() => setIsAddModalOpen(true)}
-            style={{ width: "auto", padding: "8px 18px", fontSize: "13px" }}
           >
             + Tambah Paket Baru
-          </MainButton>
+          </Button>
         </div>
 
         {loading ? (
@@ -403,30 +403,25 @@ export default function AdminPaketHarga() {
                   </div>
 
                   {/* ACTION BUTTONS */}
-                  <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
-                    <MainButton
-                      onClick={() => handleSavePackageDirect(pkg)}
-                      disabled={isSaving || isDeleting}
-                      style={{ padding: "8px 14px", fontSize: "13px", flex: 1 }}
-                    >
-                      {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
-                    </MainButton>
+                  <div className={styles.cardActions}>
+                    <div className={styles.saveBtnWrapper}>
+                      <Button
+                        fullWidth
+                        variant="primary"
+                        onClick={() => handleSavePackageDirect(pkg)}
+                        disabled={isSaving || isDeleting}
+                      >
+                        {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+                      </Button>
+                    </div>
 
-                    <MainButton
+                    <Button
+                      variant="danger"
                       onClick={() => handleDeletePackage(pkg)}
                       disabled={isSaving || isDeleting}
-                      style={{
-                        width: "auto",
-                        padding: "8px 12px",
-                        fontSize: "13px",
-                        background: "rgba(239, 68, 68, 0.15)",
-                        color: "#ef4444",
-                        border: "1px solid rgba(239, 68, 68, 0.3)",
-                        boxShadow: "none"
-                      }}
                     >
                       {isDeleting ? "..." : "Hapus"}
-                    </MainButton>
+                    </Button>
                   </div>
                 </div>
               );
@@ -538,32 +533,21 @@ export default function AdminPaketHarga() {
               </div>
 
               <div className={styles.modalActions}>
-                <MainButton
+                <Button
                   type="button"
+                  variant="secondary"
                   onClick={() => setIsAddModalOpen(false)}
                   disabled={creatingPkg}
-                  style={{
-                    width: "auto",
-                    padding: "8px 16px",
-                    fontSize: "13px",
-                    background: "transparent",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                    boxShadow: "none"
-                  }}
                 >
                   Batal
-                </MainButton>
-                <MainButton
+                </Button>
+                <Button
                   type="submit"
+                  variant="primary"
                   disabled={creatingPkg}
-                  style={{
-                    width: "auto",
-                    padding: "8px 20px",
-                    fontSize: "13px"
-                  }}
                 >
                   {creatingPkg ? "Menyimpan..." : "Simpan Paket"}
-                </MainButton>
+                </Button>
               </div>
             </form>
           </div>

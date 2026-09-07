@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Wrapper from "../Wrapper/Wrapper";
-import MainButton from "../MainButton/MainButton";
+import Button from "../Button/Button";
 
 export default function FeatureDisabled({
   featureName = "Fitur ini",
@@ -49,9 +49,9 @@ export default function FeatureDisabled({
           </div>
 
           <div style={{ marginTop: "12px", width: "220px" }}>
-            <MainButton onClick={handleBack} style={{ padding: "10px 16px", fontSize: "14px" }}>
+            <Button onClick={handleBack} fullWidth>
               {backText}
-            </MainButton>
+            </Button>
           </div>
         </div>
       </Wrapper>

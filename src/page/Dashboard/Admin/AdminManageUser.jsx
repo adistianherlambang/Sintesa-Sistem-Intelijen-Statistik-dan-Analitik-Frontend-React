@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Wrapper from "../../../components/Wrapper/Wrapper";
-import MainButton from "../../../components/MainButton/MainButton";
+import Button from "../../../components/Button/Button";
 import styles from "./AdminManageUser.module.css";
 
 export default function AdminManageUser() {
@@ -291,51 +291,29 @@ export default function AdminManageUser() {
                     </td>
                     <td>
                       <div className={styles.actionsGroup}>
-                        <MainButton
+                        <Button
+                          size="sm"
+                          variant={u.role === "admin" ? "secondary" : "primary"}
                           onClick={() => handleToggleRole(u)}
-                          style={{
-                            width: "auto",
-                            padding: "6px 12px",
-                            fontSize: "12px",
-                            borderRadius: "6px",
-                            background: u.role === "admin" ? "rgba(255, 255, 255, 0.08)" : "var(--primaryColor)",
-                            color: "#fff",
-                            boxShadow: "none"
-                          }}
                         >
                           {u.role === "admin" ? "Jadikan User" : "Jadikan Admin"}
-                        </MainButton>
+                        </Button>
 
-                        <MainButton
+                        <Button
+                          size="sm"
+                          variant="secondary"
                           onClick={() => handleOpenEditSub(u)}
-                          style={{
-                            width: "auto",
-                            padding: "6px 12px",
-                            fontSize: "12px",
-                            borderRadius: "6px",
-                            background: "rgba(255, 255, 255, 0.08)",
-                            color: "#fff",
-                            boxShadow: "none"
-                          }}
                         >
                           Kelola Kuota
-                        </MainButton>
+                        </Button>
 
-                        <MainButton
+                        <Button
+                          size="sm"
+                          variant="danger"
                           onClick={() => handleDeleteUser(u)}
-                          style={{
-                            width: "auto",
-                            padding: "6px 12px",
-                            fontSize: "12px",
-                            borderRadius: "6px",
-                            background: "rgba(239, 68, 68, 0.15)",
-                            color: "#ef4444",
-                            border: "1px solid rgba(239, 68, 68, 0.3)",
-                            boxShadow: "none"
-                          }}
                         >
                           Hapus
-                        </MainButton>
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -357,34 +335,22 @@ export default function AdminManageUser() {
             Total <strong>{total}</strong> pengguna (Halaman {page} dari {totalPages})
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
-            <MainButton
+            <Button
+              size="sm"
+              variant="secondary"
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
-              style={{
-                width: "auto",
-                padding: "6px 14px",
-                fontSize: "12px",
-                borderRadius: "4px",
-                background: "rgba(255, 255, 255, 0.06)",
-                boxShadow: "none"
-              }}
             >
               Sebelumnya
-            </MainButton>
-            <MainButton
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
               disabled={page >= totalPages}
               onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-              style={{
-                width: "auto",
-                padding: "6px 14px",
-                fontSize: "12px",
-                borderRadius: "4px",
-                background: "rgba(255, 255, 255, 0.06)",
-                boxShadow: "none"
-              }}
             >
               Selanjutnya
-            </MainButton>
+            </Button>
           </div>
         </div>
       </Wrapper>
@@ -450,32 +416,21 @@ export default function AdminManageUser() {
               </div>
 
               <div className={styles.modalActions}>
-                <MainButton
+                <Button
                   type="button"
+                  variant="secondary"
                   onClick={handleCloseEditSub}
                   disabled={savingSub}
-                  style={{
-                    width: "auto",
-                    padding: "8px 16px",
-                    fontSize: "13px",
-                    background: "transparent",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                    boxShadow: "none"
-                  }}
                 >
                   Batal
-                </MainButton>
-                <MainButton
+                </Button>
+                <Button
                   type="submit"
+                  variant="primary"
                   disabled={savingSub}
-                  style={{
-                    width: "auto",
-                    padding: "8px 20px",
-                    fontSize: "13px"
-                  }}
                 >
                   {savingSub ? "Menyimpan..." : "Simpan Perubahan"}
-                </MainButton>
+                </Button>
               </div>
             </form>
           </div>
