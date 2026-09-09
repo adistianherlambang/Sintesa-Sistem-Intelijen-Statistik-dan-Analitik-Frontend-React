@@ -166,7 +166,7 @@ export default function AdminOverview() {
       </div>
 
       {error && (
-        <Wrapper style={{ background: "rgba(239, 68, 68, 0.08)" }}>
+        <Wrapper border={"none"} style={{ background: "rgba(239, 68, 68, 0.08)" }}>
           <p style={{ color: "#ef4444", margin: 0 }}>{error}</p>
         </Wrapper>
       )}
@@ -225,7 +225,7 @@ export default function AdminOverview() {
       </div>
 
       {/* REVENUE GRAPH */}
-      <Wrapper>
+      <Wrapper border={"none"}>
         <div className={styles.chartHeader}>
           <p className={styles.sectionTitle} style={{ margin: 0 }}>
             Tren Pendapatan Langganan
@@ -245,9 +245,16 @@ export default function AdminOverview() {
           </div>
         </div>
 
-        <div className={styles.chartContainer}>
+        <div
+          className={styles.chartContainer}
+          style={{ cursor: "default", userSelect: "none" }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={revenueTrendData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
+            <AreaChart data={revenueTrendData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
               <defs>
                 <linearGradient id="adminRevenueGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#34B34A" stopOpacity={0.4} />
@@ -268,7 +275,7 @@ export default function AdminOverview() {
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={formatYAxisRupiah}
-                width={75}
+                width={55}
               />
               <Tooltip content={<CustomRevenueTooltip />} />
               <Area
@@ -278,7 +285,7 @@ export default function AdminOverview() {
                 strokeWidth={2.5}
                 fillOpacity={1}
                 fill="url(#adminRevenueGradient)"
-                activeDot={{ r: 6, fill: "#34B34A", stroke: "#fff", strokeWidth: 2 }}
+                activeDot={{ r: 6, fill: "#34B34A", stroke: "#fff", strokeWidth: 2, cursor: "default" }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -286,7 +293,7 @@ export default function AdminOverview() {
       </Wrapper>
 
       {/* SERVER USAGE MONITORING (CPU, MEMORY, STORAGE) */}
-      <Wrapper>
+      <Wrapper border={"none"}>
         <div className={styles.serverHeader}>
           <p className={styles.sectionTitle} style={{ margin: 0 }}>
             Status &amp; Utilitas Server
@@ -300,7 +307,7 @@ export default function AdminOverview() {
 
         <div className={styles.serverGrid}>
           {/* CPU USAGE */}
-          <Wrapper className={styles.serverCard} padding="18px">
+          <Wrapper border={"none"} className={styles.serverCard} padding="18px">
             <div className={styles.serverCardTop}>
               <span className={styles.serverCardTitle}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34B34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -336,7 +343,7 @@ export default function AdminOverview() {
           </Wrapper>
 
           {/* MEMORY USAGE */}
-          <Wrapper className={styles.serverCard} padding="18px">
+          <Wrapper border={"none"} className={styles.serverCard} padding="18px">
             <div className={styles.serverCardTop}>
               <span className={styles.serverCardTitle}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34B34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -371,7 +378,7 @@ export default function AdminOverview() {
           </Wrapper>
 
           {/* STORAGE USAGE */}
-          <Wrapper className={styles.serverCard} padding="18px">
+          <Wrapper border={"none"} className={styles.serverCard} padding="18px">
             <div className={styles.serverCardTop}>
               <span className={styles.serverCardTitle}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34B34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -422,7 +429,7 @@ export default function AdminOverview() {
       {/* 2-COLUMN: KONTROL PENGGUNA & KONTROL DATASET */}
       <div className={styles.splitGrid}>
         {/* KONTROL PENGGUNA */}
-        <Wrapper>
+        <Wrapper border={"none"}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
             <p className={styles.sectionTitle} style={{ margin: 0 }}>
               Kontrol Pengguna &amp; Instansi
@@ -487,7 +494,7 @@ export default function AdminOverview() {
         </Wrapper>
 
         {/* KONTROL DATASET STATISTIK */}
-        <Wrapper>
+        <Wrapper border={"none"}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
             <p className={styles.sectionTitle} style={{ margin: 0 }}>
               Kontrol Dataset &amp; Indikator BPS
@@ -532,7 +539,7 @@ export default function AdminOverview() {
       {/* 2-COLUMN: KONTROL REVENUE & KONTROL FITUR */}
       <div className={styles.splitGrid}>
         {/* KONTROL REVENUE & TRANSAKSI */}
-        <Wrapper>
+        <Wrapper border={"none"}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
             <p className={styles.sectionTitle} style={{ margin: 0 }}>
               Kontrol Pendapatan &amp; Transaksi
@@ -594,7 +601,7 @@ export default function AdminOverview() {
         </Wrapper>
 
         {/* KONTROL SAKELAR FITUR */}
-        <Wrapper>
+        <Wrapper border={"none"}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
             <p className={styles.sectionTitle} style={{ margin: 0 }}>
               Status Fitur Sistem ({stats.features?.active || 0}/{stats.features?.total || 5} Aktif)

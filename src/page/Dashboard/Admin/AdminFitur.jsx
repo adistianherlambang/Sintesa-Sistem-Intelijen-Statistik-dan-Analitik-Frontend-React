@@ -82,19 +82,19 @@ export default function AdminFitur() {
       </div>
 
       {error && (
-        <Wrapper style={{ background: "rgba(239, 68, 68, 0.08)" }}>
+        <Wrapper border={"none"} style={{ background: "rgba(239, 68, 68, 0.08)" }}>
           <p style={{ color: "#ef4444", margin: 0 }}>{error}</p>
         </Wrapper>
       )}
 
       {successMsg && (
-        <Wrapper style={{ background: "rgba(52, 179, 74, 0.08)" }}>
+        <Wrapper border={"none"} style={{ background: "rgba(52, 179, 74, 0.08)" }}>
           <p style={{ color: "#34B34A", margin: 0, fontWeight: 500 }}>{successMsg}</p>
         </Wrapper>
       )}
 
       {/* CAUTION BOX */}
-      <Wrapper className={styles.alertBox} padding="16px">
+      <Wrapper border={"none"} className={styles.alertBox} padding="16px">
         <div>
           <h4 className={styles.alertTitle}>Peringatan Kontrol Global</h4>
           <p className={styles.alertDesc}>
@@ -103,7 +103,7 @@ export default function AdminFitur() {
         </div>
       </Wrapper>
 
-      <Wrapper>
+      <Wrapper border={"none"}>
         <p className={styles.sectionTitle}>Daftar Fitur Platform</p>
 
         {loading ? (

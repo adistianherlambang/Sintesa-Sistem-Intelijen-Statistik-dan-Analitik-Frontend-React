@@ -251,14 +251,14 @@ export default function AdminPaketHarga() {
       </div>
 
       {error && (
-        <Wrapper style={{ background: "rgba(239, 68, 68, 0.08)" }}>
+        <Wrapper border={"none"} style={{ background: "rgba(239, 68, 68, 0.08)" }}>
           <p style={{ color: "#ef4444", margin: 0 }}>{error}</p>
         </Wrapper>
       )}
 
       {successMsg && (
-        <Wrapper style={{ background: "rgba(52, 179, 74, 0.08)" }}>
-          <p style={{ color: "#34B34A", margin: 0, fontWeight: 600 }}>{successMsg}</p>
+        <Wrapper border={"none"} style={{ background: "rgba(52, 179, 74, 0.08)" }}>
+          <p style={{ color: "#34B34A", margin: 0, fontWeight: 500 }}>{successMsg}</p>
         </Wrapper>
       )}
 
@@ -305,7 +305,7 @@ export default function AdminPaketHarga() {
       </div>
 
       {/* KONFIGURASI PAKET (LANGSUNG INPUT & KELOLA FITUR) */}
-      <Wrapper>
+      <Wrapper border={"none"}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "12px" }}>
           <p className={styles.sectionTitle} style={{ margin: 0 }}>
             Konfigurasi Paket &amp; Harga
@@ -327,7 +327,7 @@ export default function AdminPaketHarga() {
               const isDeleting = deletingPlanId === pkg.planId;
 
               return (
-                <Wrapper key={pkg._id || pkg.planId} className={styles.packageCard} padding="20px">
+                <Wrapper border={"none"} key={pkg._id || pkg.planId} className={styles.packageCard} padding="20px">
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{ fontFamily: "monospace", fontSize: "13px", color: "#34B34A", fontWeight: 700 }}>
                       {pkg.planId}
@@ -444,7 +444,7 @@ export default function AdminPaketHarga() {
       {/* MODAL TAMBAH PAKET BARU */}
       {isAddModalOpen && (
         <div className={styles.modalOverlay} onClick={() => setIsAddModalOpen(false)}>
-          <Wrapper className={styles.modalBox} padding="24px" style={{ height: "auto" }} onClick={(e) => e.stopPropagation()}>
+          <Wrapper border={"none"} className={styles.modalBox} padding="24px" style={{ height: "auto" }} onClick={(e) => e.stopPropagation()}>
             <h3 className={styles.modalTitle}>Tambah Paket Langganan Baru</h3>
 
             <form onSubmit={handleCreatePackage} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
@@ -564,7 +564,7 @@ export default function AdminPaketHarga() {
       )}
 
       {/* RIWAYAT TRANSAKSI TERAKHIR */}
-      <Wrapper>
+      <Wrapper border={"none"}>
         <p className={styles.sectionTitle}>Riwayat Transaksi Terbaru</p>
 
         <div className={styles.tableResponsive}>

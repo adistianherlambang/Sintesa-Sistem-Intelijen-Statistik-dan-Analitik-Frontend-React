@@ -339,8 +339,8 @@
 .chartHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
+  align-items: center;
+  margin-bottom: 16px;
   flex-wrap: wrap;
   gap: 16px;
 }
@@ -372,6 +372,30 @@
   width: 100%;
   height: 280px;
   margin-bottom: 8px;
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.chartContainer :global(svg) {
+  outline: none;
+  user-select: none;
+  cursor: default !important;
+}
+
+.chartContainer :global(.recharts-surface) {
+  cursor: default !important;
+  outline: none;
+}
+
+.chartContainer :global(.recharts-layer),
+.chartContainer :global(.recharts-area),
+.chartContainer :global(.recharts-curve),
+.chartContainer :global(.recharts-dot),
+.chartContainer :global(.recharts-active-dot) {
+  cursor: default !important;
 }
 
 .chartTooltip {
@@ -381,6 +405,8 @@
   padding: 10px 14px;
   border-radius: 6px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  user-select: none;
 }
 
 .chartTooltipTitle {

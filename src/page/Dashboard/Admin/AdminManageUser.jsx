@@ -177,18 +177,18 @@ export default function AdminManageUser() {
       </div>
 
       {error && (
-        <Wrapper style={{ background: "rgba(239, 68, 68, 0.08)" }}>
+        <Wrapper border={"none"} style={{ background: "rgba(239, 68, 68, 0.08)" }}>
           <p style={{ color: "#ef4444", margin: 0 }}>{error}</p>
         </Wrapper>
       )}
 
       {message && (
-        <Wrapper style={{ background: "rgba(52, 179, 74, 0.08)" }}>
+        <Wrapper border={"none"} style={{ background: "rgba(52, 179, 74, 0.08)" }}>
           <p style={{ color: "#34B34A", margin: 0, fontWeight: 500 }}>{message}</p>
         </Wrapper>
       )}
 
-      <Wrapper>
+      <Wrapper border={"none"}>
         {/* CONTROLS */}
         <div className={styles.controlsBar}>
           <form onSubmit={handleSearchSubmit} className={styles.searchBox}>
