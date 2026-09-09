@@ -20,10 +20,24 @@ export default function LogIn() {
   const login = userStore((state) => state.login);
   const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000";
 
+  const isValidEmail = (val) => {
+    if (!val || typeof val !== "string") return false;
+    const trimmed = val.trim();
+    if (trimmed.length > 254) return false;
+    const emailRegex =
+      /^[a-zA-Z0-9_%+-]+(\.[a-zA-Z0-9_%+-]+)*@[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(trimmed);
+  };
+
   const handleLoginSubmit = async (e) => {
     if (e) e.preventDefault();
     if (!email || !password) {
       setError("Email dan kata sandi wajib diisi");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setError("Format email tidak valid. Harap gunakan format email yang benar (contoh: nama@domain.com)");
       return;
     }
 

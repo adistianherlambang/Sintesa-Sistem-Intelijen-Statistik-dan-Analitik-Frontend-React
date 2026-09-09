@@ -436,3 +436,219 @@
   color: #34B34A;
   margin-top: 4px;
 }
+
+/* =======================================================
+   LLM TOKEN USAGE STYLES
+   ======================================================= */
+.tokenHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.tokenHeaderStats {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.tokenHeaderStatItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.tokenStatMiniLabel {
+  font-size: 11px;
+  color: #888888;
+}
+
+.tokenStatMiniValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.tokenGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .tokenGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 680px) {
+  .tokenGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tokenCard {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.tokenCard:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.tokenCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.tokenCardTitleCol {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+}
+
+.tokenModelName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f3f4f6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tokenModelId {
+  font-size: 11px;
+  color: #888888;
+  font-family: monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tokenBadge {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: rgba(52, 179, 74, 0.12);
+  color: #34B34A;
+  border: 1px solid rgba(52, 179, 74, 0.25);
+}
+
+.tokenBadgeGemini {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.tokenBadgeMistral {
+  background: rgba(249, 115, 22, 0.12);
+  color: #fb923c;
+  border: 1px solid rgba(249, 115, 22, 0.25);
+}
+
+.tokenBadgeCloudflare {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.tokenStatsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.tokenStatBox {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tokenStatLabel {
+  font-size: 10px;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tokenStatValue {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.tokenStatValueInput {
+  color: #38bdf8;
+}
+
+.tokenStatValueOutput {
+  color: #34B34A;
+}
+
+.tokenStatValueTotal {
+  color: #f9fafb;
+}
+
+.tokenRatioContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tokenRatioTrack {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  overflow: hidden;
+}
+
+.tokenRatioInputFill {
+  background: #38bdf8;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.tokenRatioOutputFill {
+  background: #34B34A;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.tokenRatioLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #888888;
+}
+
+.tokenCardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+

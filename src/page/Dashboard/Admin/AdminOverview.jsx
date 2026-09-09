@@ -254,6 +254,40 @@ export default function AdminOverview() {
   const totalPeriodRevenue = revenueTrendData.reduce((acc, curr) => acc + (curr.revenue || 0), 0);
   const avgPeriodRevenue = Math.round(totalPeriodRevenue / Math.max(1, revenueTrendData.length));
 
+  // LLM Token Usage data
+  const llmUsage = stats.llmUsage || {
+    totalInputTokens: 0,
+    totalOutputTokens: 0,
+    totalTokens: 0,
+    totalRequests: 0,
+    models: []
+  };
+
+  const formatTokens = (num = 0) => {
+    if (!num) return "0";
+    if (num >= 1000000) return (num / 1000000).toFixed(2) + "M";
+    if (num >= 1000) return (num / 1000).toFixed(1) + "k";
+    return num.toLocaleString("id-ID");
+  };
+
+  const getProviderBadgeClass = (provider = "") => {
+    const p = provider.toLowerCase();
+    if (p.includes("gemini")) return styles.tokenBadgeGemini;
+    if (p.includes("mistral")) return styles.tokenBadgeMistral;
+    if (p.includes("cloudflare")) return styles.tokenBadgeCloudflare;
+    return "";
+  };
+
+  const formatLastActive = (dateString) => {
+    if (!dateString) return "Belum ada panggilan";
+    try {
+      const d = new Date(dateString);
+      return d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) + ", " + d.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+    } catch {
+      return "-";
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div>
@@ -513,6 +547,128 @@ export default function AdminOverview() {
             <span>Node.js:</span>
             <span className={styles.serverMetaValue}>{serverUsage.nodeVersion || "-"}</span>
           </div>
+        </div>
+      </Wrapper>
+
+      {/* LLM TOKEN USAGE MONITORING (PER MODEL) */}
+      <Wrapper border={"none"}>
+        <div className={styles.tokenHeader}>
+          <p className={styles.sectionTitle} style={{ margin: 0 }}>
+            Penggunaan Token LLM
+          </p>
+
+          <div className={styles.tokenHeaderStats}>
+            <div className={styles.tokenHeaderStatItem}>
+              <span className={styles.tokenStatMiniLabel}>Total Token</span>
+              <span className={styles.tokenStatMiniValue} style={{ color: "#ffffff" }}>
+                {formatTokens(llmUsage.totalTokens)}
+              </span>
+            </div>
+            <div className={styles.tokenHeaderStatItem}>
+              <span className={styles.tokenStatMiniLabel}>Input (Prompt)</span>
+              <span className={styles.tokenStatMiniValue} style={{ color: "#38bdf8" }}>
+                {formatTokens(llmUsage.totalInputTokens)}
+              </span>
+            </div>
+            <div className={styles.tokenHeaderStatItem}>
+              <span className={styles.tokenStatMiniLabel}>Output (Completion)</span>
+              <span className={styles.tokenStatMiniValue} style={{ color: "#34B34A" }}>
+                {formatTokens(llmUsage.totalOutputTokens)}
+              </span>
+            </div>
+            <div className={styles.tokenHeaderStatItem}>
+              <span className={styles.tokenStatMiniLabel}>Total Panggilan</span>
+              <span className={styles.tokenStatMiniValue} style={{ color: "#e5e5e5" }}>
+                {llmUsage.totalRequests || 0}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.tokenGrid}>
+          {(llmUsage.models || []).map((m) => {
+            const inputPct = m.totalTokens > 0 ? Math.round((m.inputTokens / m.totalTokens) * 100) : 50;
+            const outputPct = m.totalTokens > 0 ? 100 - inputPct : 50;
+
+            return (
+              <Wrapper key={m.model} border={"none"} className={styles.tokenCard} padding="18px">
+                <div className={styles.tokenCardTop}>
+                  <div className={styles.tokenCardTitleCol}>
+                    <div className={styles.tokenModelName} title={m.displayName || m.model}>
+                      {m.displayName || m.model}
+                    </div>
+                    <div className={styles.tokenModelId} title={m.model}>
+                      {m.model}
+                    </div>
+                  </div>
+                  <span className={`${styles.tokenBadge} ${getProviderBadgeClass(m.provider)}`}>
+                    {m.provider}
+                  </span>
+                </div>
+
+                <div className={styles.tokenStatsRow}>
+                  <div className={styles.tokenStatBox}>
+                    <span className={styles.tokenStatLabel}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <polyline points="19 12 12 19 5 12" />
+                      </svg>
+                      Input
+                    </span>
+                    <span className={`${styles.tokenStatValue} ${styles.tokenStatValueInput}`}>
+                      {formatTokens(m.inputTokens)}
+                    </span>
+                  </div>
+
+                  <div className={styles.tokenStatBox}>
+                    <span className={styles.tokenStatLabel}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#34B34A" strokeWidth="2.5">
+                        <line x1="12" y1="19" x2="12" y2="5" />
+                        <polyline points="5 12 12 5 19 12" />
+                      </svg>
+                      Output
+                    </span>
+                    <span className={`${styles.tokenStatValue} ${styles.tokenStatValueOutput}`}>
+                      {formatTokens(m.outputTokens)}
+                    </span>
+                  </div>
+
+                  <div className={styles.tokenStatBox}>
+                    <span className={styles.tokenStatLabel}>
+                      Total
+                    </span>
+                    <span className={`${styles.tokenStatValue} ${styles.tokenStatValueTotal}`}>
+                      {formatTokens(m.totalTokens)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className={styles.tokenRatioContainer}>
+                  <div className={styles.tokenRatioTrack}>
+                    <div
+                      className={styles.tokenRatioInputFill}
+                      style={{ width: m.totalTokens > 0 ? `${inputPct}%` : "0%" }}
+                      title={`Input: ${inputPct}%`}
+                    />
+                    <div
+                      className={styles.tokenRatioOutputFill}
+                      style={{ width: m.totalTokens > 0 ? `${outputPct}%` : "0%" }}
+                      title={`Output: ${outputPct}%`}
+                    />
+                  </div>
+                  <div className={styles.tokenRatioLabels}>
+                    <span>In: {m.totalTokens > 0 ? `${inputPct}%` : "0%"}</span>
+                    <span>Out: {m.totalTokens > 0 ? `${outputPct}%` : "0%"}</span>
+                  </div>
+                </div>
+
+                <div className={styles.tokenCardFooter}>
+                  <span>{m.totalRequests || 0} Request</span>
+                  <span>{formatLastActive(m.lastUsed)}</span>
+                </div>
+              </Wrapper>
+            );
+          })}
         </div>
       </Wrapper>
 

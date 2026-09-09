@@ -58,11 +58,25 @@ export default function SignUp() {
     fetchCities();
   }, [serverUrl]);
 
+  const isValidEmail = (val) => {
+    if (!val || typeof val !== "string") return false;
+    const trimmed = val.trim();
+    if (trimmed.length > 254) return false;
+    const emailRegex =
+      /^[a-zA-Z0-9_%+-]+(\.[a-zA-Z0-9_%+-]+)*@[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(trimmed);
+  };
+
   // Submit form directly without OTP
   const handleSubmitForm = async (e) => {
     if (e) e.preventDefault();
     if (!name || !email || !password || !selectedCity) {
       setError("Semua kolom wajib diisi");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setError("Format email tidak valid. Harap gunakan format email yang benar (contoh: nama@domain.com)");
       return;
     }
 

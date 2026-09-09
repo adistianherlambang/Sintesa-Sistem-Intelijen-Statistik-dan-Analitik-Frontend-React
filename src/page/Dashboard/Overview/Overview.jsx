@@ -25,10 +25,13 @@ export default function Overview() {
     return <AdminOverview />;
   }
 
+  const userCity = user?.location?.name || "KOTA METRO"
+
   return (
     <>
       <div className={styles.container}>
         <p className={styles.tabTitle}>Overview</p>
+        {userCity}
 
         <div className={styles.containerr}>
           <div className={styles.wrapper}>
