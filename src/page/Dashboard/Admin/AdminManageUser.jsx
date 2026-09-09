@@ -78,7 +78,7 @@ export default function AdminManageUser() {
 
   const handleToggleRole = async (user) => {
     const newRole = user.role === "admin" ? "user" : "admin";
-    const confirmMsg = `Apakah Anda yakin ingin mengubah peran pengguna "${user.email}" menjadi "${newRole.toUpperCase()}"?`;
+    const confirmMsg = `Apakah Anda yakin ingin mengubah peran pengguna "${user.email}" menjadi "${newRole}"?`;
     if (!window.confirm(confirmMsg)) return;
 
     try {
@@ -177,13 +177,13 @@ export default function AdminManageUser() {
       </div>
 
       {error && (
-        <Wrapper style={{ borderColor: "#ef4444", background: "rgba(239, 68, 68, 0.08)" }}>
+        <Wrapper style={{ background: "rgba(239, 68, 68, 0.08)" }}>
           <p style={{ color: "#ef4444", margin: 0 }}>{error}</p>
         </Wrapper>
       )}
 
       {message && (
-        <Wrapper style={{ borderColor: "#34B34A", background: "rgba(52, 179, 74, 0.08)" }}>
+        <Wrapper style={{ background: "rgba(52, 179, 74, 0.08)" }}>
           <p style={{ color: "#34B34A", margin: 0, fontWeight: 500 }}>{message}</p>
         </Wrapper>
       )}
@@ -270,8 +270,7 @@ export default function AdminManageUser() {
                         style={{
                           fontWeight: 700,
                           fontSize: "12px",
-                          color: u.role === "admin" ? "#ef4444" : "#34B34A",
-                          textTransform: "uppercase"
+                          color: u.role === "admin" ? "#ef4444" : "#34B34A"
                         }}
                       >
                         {u.role || "user"}

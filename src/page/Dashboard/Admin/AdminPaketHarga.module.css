@@ -49,7 +49,6 @@
 
 .metricCard {
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   padding: 20px;
   display: flex;
@@ -60,8 +59,6 @@
 .metricLabel {
   font-size: 12px;
   color: #888888;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .metricValue {
@@ -86,18 +83,12 @@
 
 .packageCard {
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
   position: relative;
-  transition: transform 0.2s, border-color 0.2s;
-}
-
-.packageCard:hover {
-  border-color: rgba(52, 179, 74, 0.35);
 }
 
 .packageHeader {
@@ -231,7 +222,6 @@
   flex-direction: column;
   gap: 8px;
   background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 6px;
   padding: 10px 12px;
 }
@@ -256,7 +246,6 @@
 
 .modalBox {
   background: #141414;
-  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   padding: 24px;
   width: 100%;

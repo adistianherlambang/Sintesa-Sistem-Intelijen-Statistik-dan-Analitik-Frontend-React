@@ -166,7 +166,7 @@ export default function AdminOverview() {
       </div>
 
       {error && (
-        <Wrapper style={{ borderColor: "#ef4444", background: "rgba(239, 68, 68, 0.08)" }}>
+        <Wrapper style={{ background: "rgba(239, 68, 68, 0.08)" }}>
           <p style={{ color: "#ef4444", margin: 0 }}>{error}</p>
         </Wrapper>
       )}
@@ -451,8 +451,7 @@ export default function AdminOverview() {
                           style={{
                             fontSize: "12px",
                             fontWeight: 700,
-                            color: u.role === "admin" ? "#ef4444" : "#34B34A",
-                            textTransform: "uppercase"
+                            color: u.role === "admin" ? "#ef4444" : "#34B34A"
                           }}
                         >
                           {u.role || "user"}

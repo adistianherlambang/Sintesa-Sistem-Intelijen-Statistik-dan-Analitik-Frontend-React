@@ -82,13 +82,13 @@ export default function AdminFitur() {
       </div>
 
       {error && (
-        <Wrapper style={{ borderColor: "#ef4444", background: "rgba(239, 68, 68, 0.08)" }}>
+        <Wrapper style={{ background: "rgba(239, 68, 68, 0.08)" }}>
           <p style={{ color: "#ef4444", margin: 0 }}>{error}</p>
         </Wrapper>
       )}
 
       {successMsg && (
-        <Wrapper style={{ borderColor: "#34B34A", background: "rgba(52, 179, 74, 0.08)" }}>
+        <Wrapper style={{ background: "rgba(52, 179, 74, 0.08)" }}>
           <p style={{ color: "#34B34A", margin: 0, fontWeight: 500 }}>{successMsg}</p>
         </Wrapper>
       )}
