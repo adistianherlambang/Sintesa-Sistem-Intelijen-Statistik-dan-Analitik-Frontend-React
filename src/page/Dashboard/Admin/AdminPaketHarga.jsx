@@ -264,41 +264,52 @@ export default function AdminPaketHarga() {
 
       {/* METRIC OVERVIEW */}
       <div className={styles.metricGrid}>
-        <Wrapper className={styles.metricCard} padding="20px">
-          <span className={styles.metricLabel}>Total Pengguna</span>
-          <h2 className={styles.metricValue}>{stats.totalUsers || 0}</h2>
-          <span className={styles.metricSub}>Akun terdaftar</span>
+        <Wrapper border={"none"}>
+          <div className={styles.kpiUtama}>
+            <div className={styles.kpiContainer}>
+              <p className={styles.kpiTitle}>Total Pengguna</p>
+              <h1 className={styles.kpiValue}>{stats.totalUsers || 0}</h1>
+              <div className={styles.kpiComparison}>Akun terdaftar</div>
+            </div>
+          </div>
         </Wrapper>
-        <Wrapper className={styles.metricCard} padding="20px">
-          <span className={styles.metricLabel}>Langganan Aktif</span>
-          <h2 className={styles.metricValue}>{stats.activeSubscribers || 0}</h2>
-          <span className={styles.metricSub}>Instansi aktif langganan</span>
+        <Wrapper border={"none"}>
+          <div className={styles.kpiUtama}>
+            <div className={styles.kpiContainer}>
+              <p className={styles.kpiTitle}>Langganan Aktif</p>
+              <h1 className={styles.kpiValue}>{stats.activeSubscribers || 0}</h1>
+              <div className={styles.kpiComparison}>Instansi aktif langganan</div>
+            </div>
+          </div>
         </Wrapper>
-        <Wrapper className={styles.metricCard} padding="20px">
-          <span className={styles.metricLabel}>Total Pendapatan</span>
-          <h2 className={styles.metricValue}>{formatRupiah(stats.totalRevenue)}</h2>
-          <span className={styles.metricSub}>Dari transaksi berhasil</span>
+        <Wrapper border={"none"}>
+          <div className={styles.kpiUtama}>
+            <div className={styles.kpiContainer}>
+              <p className={styles.kpiTitle}>Total Pendapatan</p>
+              <h1 className={styles.kpiValue}>{formatRupiah(stats.totalRevenue)}</h1>
+              <div className={styles.kpiComparison}>Dari transaksi berhasil</div>
+            </div>
+          </div>
         </Wrapper>
-        <Wrapper className={styles.metricCard} padding="20px">
-          <span className={styles.metricLabel}>Status Paket</span>
-          <h2 className={styles.metricValue}>
-            {packages.filter((p) => p.isActive).length} Aktif
-          </h2>
-          <span className={styles.metricSub}>Dari {packages.length} tier paket</span>
+        <Wrapper border={"none"}>
+          <div className={styles.kpiUtama}>
+            <div className={styles.kpiContainer}>
+              <p className={styles.kpiTitle}>Status Paket</p>
+              <h1 className={styles.kpiValue}>
+                {packages.filter((p) => p.isActive).length} Aktif
+              </h1>
+              <div className={styles.kpiComparison}>Dari {packages.length} tier paket</div>
+            </div>
+          </div>
         </Wrapper>
       </div>
 
       {/* KONFIGURASI PAKET (LANGSUNG INPUT & KELOLA FITUR) */}
       <Wrapper>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "12px" }}>
-          <div>
-            <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
-              Konfigurasi Paket &amp; Harga
-            </h2>
-            <p className={styles.subText} style={{ margin: "4px 0 0 0" }}>
-              Atur harga, kuota, dan centang fitur yang aktif ketika pengguna berlangganan paket terkait.
-            </p>
-          </div>
+          <p className={styles.sectionTitle} style={{ margin: 0 }}>
+            Konfigurasi Paket &amp; Harga
+          </p>
           <Button
             size="sm"
             onClick={() => setIsAddModalOpen(true)}
@@ -554,8 +565,7 @@ export default function AdminPaketHarga() {
 
       {/* RIWAYAT TRANSAKSI TERAKHIR */}
       <Wrapper>
-        <h2 className={styles.sectionTitle}>Riwayat Transaksi Terbaru</h2>
-        <p className={styles.subText}>Transaksi langganan terkini yang tercatat pada sistem.</p>
+        <p className={styles.sectionTitle}>Riwayat Transaksi Terbaru</p>
 
         <div className={styles.tableResponsive}>
           <table className={styles.customTable}>

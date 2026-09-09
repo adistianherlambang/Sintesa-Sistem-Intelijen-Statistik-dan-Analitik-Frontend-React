@@ -104,9 +104,7 @@ export default function AdminFitur() {
       </Wrapper>
 
       <Wrapper>
-        <h2 style={{ fontSize: "18px", fontWeight: "600", color: "#D5D5D5", margin: "0 0 16px 0" }}>
-          Daftar Fitur Platform
-        </h2>
+        <p className={styles.sectionTitle}>Daftar Fitur Platform</p>
 
         {loading ? (
           <p style={{ color: "#888" }}>Memuat status fitur...</p>

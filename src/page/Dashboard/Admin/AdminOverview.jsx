@@ -173,48 +173,63 @@ export default function AdminOverview() {
 
       {/* KPI METRICS */}
       <div className={styles.kpiGrid}>
-        <Wrapper className={styles.kpiCard} padding="20px">
-          <span className={styles.kpiLabel}>Total Pengguna</span>
-          <h2 className={styles.kpiValue}>{stats.totalUsers || 0}</h2>
-          <span className={styles.kpiSub}>
-            {stats.regularUsers || 0} Instansi &bull; {stats.adminUsers || 1} Admin
-          </span>
+        <Wrapper border={"none"}>
+          <div className={styles.kpiUtama}>
+            <div className={styles.kpiContainer}>
+              <p className={styles.kpiTitle}>Total Pengguna</p>
+              <h1 className={styles.kpiValue}>{stats.totalUsers || 0}</h1>
+              <div className={styles.kpiComparison}>
+                {stats.regularUsers || 0} Instansi &bull; {stats.adminUsers || 1} Admin
+              </div>
+            </div>
+          </div>
         </Wrapper>
 
-        <Wrapper className={styles.kpiCard} padding="20px">
-          <span className={styles.kpiLabel}>Langganan Aktif</span>
-          <h2 className={styles.kpiValue}>{stats.activeSubscribers || 0}</h2>
-          <span className={styles.kpiSub}>Instansi dengan paket aktif</span>
+        <Wrapper border={"none"}>
+          <div className={styles.kpiUtama}>
+            <div className={styles.kpiContainer}>
+              <p className={styles.kpiTitle}>Langganan Aktif</p>
+              <h1 className={styles.kpiValue}>{stats.activeSubscribers || 0}</h1>
+              <div className={styles.kpiComparison}>
+                Instansi dengan paket aktif
+              </div>
+            </div>
+          </div>
         </Wrapper>
 
-        <Wrapper className={styles.kpiCard} padding="20px">
-          <span className={styles.kpiLabel}>Total Revenue</span>
-          <h2 className={styles.kpiValue}>{formatRupiah(stats.totalRevenue)}</h2>
-          <span className={styles.kpiSub}>Dari transaksi pembayaran berhasil</span>
+        <Wrapper border={"none"}>
+          <div className={styles.kpiUtama}>
+            <div className={styles.kpiContainer}>
+              <p className={styles.kpiTitle}>Total Revenue</p>
+              <h1 className={styles.kpiValue}>{formatRupiah(stats.totalRevenue)}</h1>
+              <div className={styles.kpiComparison}>
+                Transaksi pembayaran berhasil
+              </div>
+            </div>
+          </div>
         </Wrapper>
 
-        <Wrapper className={styles.kpiCard} padding="20px">
-          <span className={styles.kpiLabel}>Dokumen BRS &amp; Infografis</span>
-          <h2 className={styles.kpiValue}>
-            {(stats.totalAnalyses || 0) + (stats.totalInfografis || 0)}
-          </h2>
-          <span className={styles.kpiSub}>
-            {stats.totalAnalyses || 0} Analisis BRS &bull; {stats.totalInfografis || 0} Infografis
-          </span>
+        <Wrapper border={"none"}>
+          <div className={styles.kpiUtama}>
+            <div className={styles.kpiContainer}>
+              <p className={styles.kpiTitle}>Dokumen BRS &amp; Infografis</p>
+              <h1 className={styles.kpiValue}>
+                {(stats.totalAnalyses || 0) + (stats.totalInfografis || 0)}
+              </h1>
+              <div className={styles.kpiComparison}>
+                {stats.totalAnalyses || 0} Analisis BRS &bull; {stats.totalInfografis || 0} Infografis
+              </div>
+            </div>
+          </div>
         </Wrapper>
       </div>
 
       {/* REVENUE GRAPH */}
       <Wrapper>
         <div className={styles.chartHeader}>
-          <div>
-            <h2 className={styles.sectionTitle} style={{ margin: "0 0 4px 0" }}>
-              Tren Pendapatan Langganan
-            </h2>
-            <span style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.55)" }}>
-              Performa penerimaan revenue 6 bulan terakhir
-            </span>
-          </div>
+          <p className={styles.sectionTitle} style={{ margin: 0 }}>
+            Tren Pendapatan Langganan
+          </p>
 
           <div className={styles.chartHeaderStats}>
             <div className={styles.chartHeaderStatItem}>
@@ -273,14 +288,9 @@ export default function AdminOverview() {
       {/* SERVER USAGE MONITORING (CPU, MEMORY, STORAGE) */}
       <Wrapper>
         <div className={styles.serverHeader}>
-          <div>
-            <h2 className={styles.sectionTitle} style={{ margin: "0 0 4px 0" }}>
-              Status &amp; Utilitas Server
-            </h2>
-            <span style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.55)" }}>
-              Pemantauan konsumsi sumber daya komputasi server backend
-            </span>
-          </div>
+          <p className={styles.sectionTitle} style={{ margin: 0 }}>
+            Status &amp; Utilitas Server
+          </p>
 
           <div className={styles.serverStatusBadge}>
             <span className={styles.pulseDot} />
@@ -414,9 +424,9 @@ export default function AdminOverview() {
         {/* KONTROL PENGGUNA */}
         <Wrapper>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
-            <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
+            <p className={styles.sectionTitle} style={{ margin: 0 }}>
               Kontrol Pengguna &amp; Instansi
-            </h2>
+            </p>
             <Button
               size="sm"
               onClick={() => navigate("/dashboard/admin/manajemenUser")}
@@ -479,9 +489,9 @@ export default function AdminOverview() {
         {/* KONTROL DATASET STATISTIK */}
         <Wrapper>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-            <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
+            <p className={styles.sectionTitle} style={{ margin: 0 }}>
               Kontrol Dataset &amp; Indikator BPS
-            </h2>
+            </p>
             <span style={{ fontSize: "12px", color: "#34B34A", fontWeight: 600 }}>API BPS Terhubung</span>
           </div>
 
@@ -524,9 +534,9 @@ export default function AdminOverview() {
         {/* KONTROL REVENUE & TRANSAKSI */}
         <Wrapper>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
-            <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
+            <p className={styles.sectionTitle} style={{ margin: 0 }}>
               Kontrol Pendapatan &amp; Transaksi
-            </h2>
+            </p>
             <Button
               size="sm"
               onClick={() => navigate("/dashboard/admin/paketDanHarga")}
@@ -586,9 +596,9 @@ export default function AdminOverview() {
         {/* KONTROL SAKELAR FITUR */}
         <Wrapper>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
-            <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
+            <p className={styles.sectionTitle} style={{ margin: 0 }}>
               Status Fitur Sistem ({stats.features?.active || 0}/{stats.features?.total || 5} Aktif)
-            </h2>
+            </p>
             <Button
               size="sm"
               onClick={() => navigate("/dashboard/admin/kontrolFitur")}

@@ -21,20 +21,17 @@
 }
 
 .sectionTitle {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 24px;
   color: #D5D5D5;
-  margin: 0 0 16px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  margin: 0;
+  margin-bottom: 0.5rem;
 }
 
-/* KPI Grid */
+/* KPI Grid matching User Overview */
 .kpiGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  gap: 1rem;
   width: 100%;
 }
 
@@ -50,30 +47,39 @@
   }
 }
 
-.kpiCard {
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 8px;
-  padding: 20px;
+.kpiUtama {
+  width: 100%;
+  padding-top: 2rem;
+}
+
+.kpiContainer {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  line-height: 1.2;
 }
 
-.kpiLabel {
-  font-size: 12px;
-  color: #888888;
-}
-
-.kpiValue {
-  font-size: 26px;
-  font-weight: 700;
-  color: #34B34A;
+.kpiTitle {
+  font-size: 14px;
+  color: inherit;
+  opacity: 0.7;
   margin: 0;
 }
 
-.kpiSub {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.5);
+.kpiValue {
+  font-size: 32px;
+  font-weight: bold;
+  color: inherit;
+  margin: 0;
+}
+
+.kpiComparison {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+  color: inherit;
+  opacity: 0.85;
 }
 
 /* 2-Column Split */
