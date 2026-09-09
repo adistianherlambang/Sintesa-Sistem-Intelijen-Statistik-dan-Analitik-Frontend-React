@@ -29,6 +29,8 @@ export default function AdminOverview() {
     revenueTrend: [],
     serverUsage: null
   });
+  const [liveServerUsage, setLiveServerUsage] = useState(null);
+  const [isRealtimeActive, setIsRealtimeActive] = useState(false);
   const [users, setUsers] = useState([]);
   const [features, setFeatures] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,6 +64,9 @@ export default function AdminOverview() {
             ...statsData,
             activeSubscribers: statsData.activeSubscribers ?? statsData.activeSubscriptions ?? 0
           });
+          if (statsData.serverUsage) {
+            setLiveServerUsage(statsData.serverUsage);
+          }
         }
 
         const usersData = usersRes.data?.data?.users || usersRes.data?.users;
@@ -85,6 +90,102 @@ export default function AdminOverview() {
     };
 
     fetchAdminOverviewData();
+  }, [serverUrl]);
+
+  // Real-time server utility metrics subscriber (SSE with automatic polling fallback)
+  useEffect(() => {
+    let isMounted = true;
+    let eventSource = null;
+    let pollInterval = null;
+
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    const startPolling = () => {
+      if (pollInterval) return;
+      const poll = async () => {
+        if (!isMounted || (typeof document !== "undefined" && document.visibilityState === "hidden")) {
+          return;
+        }
+        try {
+          const res = await axios.get(`${serverUrl}/api/admin/server-usage`, getHeaders());
+          if (isMounted && res.data?.serverUsage) {
+            setLiveServerUsage(res.data.serverUsage);
+            setIsRealtimeActive(true);
+          }
+        } catch (err) {
+          // ignore poll error
+        }
+      };
+
+      poll();
+      pollInterval = setInterval(poll, 2000);
+    };
+
+    const startSSE = () => {
+      try {
+        const sseUrl = `${serverUrl}/api/admin/server-usage/stream?token=${encodeURIComponent(token)}`;
+        eventSource = new EventSource(sseUrl);
+
+        eventSource.onopen = () => {
+          if (isMounted) setIsRealtimeActive(true);
+        };
+
+        eventSource.onmessage = (event) => {
+          if (!isMounted) return;
+          try {
+            const data = JSON.parse(event.data);
+            if (data && data.cpu) {
+              setLiveServerUsage(data);
+              setIsRealtimeActive(true);
+            }
+          } catch (e) {}
+        };
+
+        eventSource.onerror = () => {
+          if (eventSource) {
+            eventSource.close();
+            eventSource = null;
+          }
+          if (isMounted) {
+            startPolling();
+          }
+        };
+      } catch (err) {
+        startPolling();
+      }
+    };
+
+    if (typeof EventSource !== "undefined") {
+      startSSE();
+    } else {
+      startPolling();
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible" && isMounted && !eventSource) {
+        axios.get(`${serverUrl}/api/admin/server-usage`, getHeaders())
+          .then((res) => {
+            if (isMounted && res.data?.serverUsage) {
+              setLiveServerUsage(res.data.serverUsage);
+            }
+          })
+          .catch(() => {});
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      isMounted = false;
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (eventSource) {
+        eventSource.close();
+      }
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+    };
   }, [serverUrl]);
 
   const formatRupiah = (num) => {
@@ -125,12 +226,13 @@ export default function AdminOverview() {
     return null;
   };
 
-  // Safe server usage values
-  const serverUsage = stats.serverUsage || {};
-  const cpu = serverUsage.cpu || { usagePercent: 0, cores: 1, model: "-", loadAvg: ["0.00", "0.00", "0.00"] };
-  const memory = serverUsage.memory || { usagePercent: 0, totalFormatted: "-", usedFormatted: "-", freeFormatted: "-" };
-  const storage = serverUsage.storage || { usagePercent: 0, totalFormatted: "-", usedFormatted: "-", freeFormatted: "-" };
-  const uptime = serverUsage.uptime || { formatted: "-" };
+  // Safe server usage values (supports real-time live streaming)
+  const currentServerUsage = liveServerUsage || stats.serverUsage || {};
+  const serverUsage = currentServerUsage;
+  const cpu = currentServerUsage.cpu || { usagePercent: 0, cores: 1, model: "-", loadAvg: ["0.00", "0.00", "0.00"] };
+  const memory = currentServerUsage.memory || { usagePercent: 0, totalFormatted: "-", usedFormatted: "-", freeFormatted: "-" };
+  const storage = currentServerUsage.storage || { usagePercent: 0, totalFormatted: "-", usedFormatted: "-", freeFormatted: "-" };
+  const uptime = currentServerUsage.uptime || { formatted: "-" };
 
   // Helper for progress bar classes based on load percentage
   const getPercentClass = (val) => {
@@ -301,7 +403,7 @@ export default function AdminOverview() {
 
           <div className={styles.serverStatusBadge}>
             <span className={styles.pulseDot} />
-            <span>Sistem Operasional</span>
+            <span>{isRealtimeActive ? "Realtime Aktif (2s)" : "Sistem Operasional"}</span>
           </div>
         </div>
 
