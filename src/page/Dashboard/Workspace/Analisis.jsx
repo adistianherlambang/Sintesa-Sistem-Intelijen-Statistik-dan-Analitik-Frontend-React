@@ -100,10 +100,7 @@ function StepConfigAvailable(props) {
   return (
     <div className={styles.container}>
       <Wrapper>
-        <p className={styles.sectionTitle}>Konfigurasi Dataset & Indikator</p>
-        <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: 14, margin: '0 0 20px 0' }}>
-          Masukkan judul analisis dan pilih salah satu indikator dataset BPS untuk melanjutkan ke tahap edit data dan pembuatan Berita Resmi Statistik (BRS).
-        </p>
+        <p className={styles.sectionTitle}>Konfigurasi Indikator</p>
 
         <div className={styles.configFormContainer}>
           <div className={styles.formGroup}>
@@ -114,12 +111,11 @@ function StepConfigAvailable(props) {
               value={analysisTitle}
               setValue={setAnalysisTitle}
             />
-            <span className={styles.formSubtext}>Judul ini akan digunakan pada laporan Berita Resmi Statistik (BRS).</span>
           </div>
 
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>
-              Pilih Indikator Dataset <span style={{ color: '#34B34A', fontSize: 12, marginLeft: 4 }}>({selectedOpt?.label || "1 indikator terpilih"})</span>
+              Pilih Indikator Dataset
             </label>
             <div className={styles.checkboxGrid}>
               {INDICATOR_OPTIONS.map((opt) => {
@@ -141,12 +137,11 @@ function StepConfigAvailable(props) {
                 )
               })}
             </div>
-            <span className={styles.formSubtext}>Pilih satu indikator yang ingin Anda analisis (hanya bisa memilih satu indikator).</span>
           </div>
+        </div>
 
-          <div style={{ marginTop: '12px' }}>
-            <Button onClick={() => setStep(1)} fullWidth>Lanjutkan</Button>
-          </div>
+        <div style={{ marginTop: '20px' }}>
+          <Button onClick={() => setStep(1)} fullWidth>Lanjutkan</Button>
         </div>
       </Wrapper>
     </div>

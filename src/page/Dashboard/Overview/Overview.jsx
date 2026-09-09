@@ -31,7 +31,6 @@ export default function Overview() {
     <>
       <div className={styles.container}>
         <p className={styles.tabTitle}>Overview</p>
-        {userCity}
 
         <div className={styles.containerr}>
           <div className={styles.wrapper}>

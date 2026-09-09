@@ -291,8 +291,7 @@
   cursor: pointer;
 }
 
-.sliderTrackActive {
-}
+.sliderTrackActive {}
 
 /* sliding pill */
 .sliderPill {
@@ -477,9 +476,8 @@
 
 .configFormContainer {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 24px;
-  max-width: 640px;
   width: 100%;
   margin: 0 auto;
   padding: 12px 0;
@@ -489,6 +487,9 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1 1 50%;
+  width: 50%;
+  min-width: 0;
 }
 
 .formLabel {
@@ -777,3 +778,14 @@
   margin-top: 20px;
 }
 
+@media (max-width: 768px) {
+  .configFormContainer {
+    flex-direction: column !important;
+    gap: 16px;
+  }
+
+  .formGroup {
+    width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+}

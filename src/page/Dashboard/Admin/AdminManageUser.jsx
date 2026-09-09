@@ -11,7 +11,6 @@ export default function AdminManageUser() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -44,8 +43,7 @@ export default function AdminManageUser() {
       const params = {
         page,
         limit: 10,
-        search: search.trim(),
-        role: roleFilter
+        search: search.trim()
       };
       const res = await axios.get(`${serverUrl}/api/admin/users`, {
         ...getHeaders(),
@@ -54,7 +52,9 @@ export default function AdminManageUser() {
 
       const payload = res.data?.data || res.data;
       if (payload) {
-        setUsers(payload.users || res.data?.users || []);
+        const rawUsers = payload.users || res.data?.users || [];
+        const nonAdminUsers = rawUsers.filter((u) => u.role !== "admin");
+        setUsers(nonAdminUsers);
         setTotal(payload.total ?? payload.pagination?.total ?? 0);
         setTotalPages(payload.totalPages ?? payload.pagination?.totalPages ?? 1);
       }
@@ -68,7 +68,7 @@ export default function AdminManageUser() {
 
   useEffect(() => {
     fetchUsers();
-  }, [page, roleFilter]);
+  }, [page]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -76,39 +76,17 @@ export default function AdminManageUser() {
     fetchUsers();
   };
 
-  const handleToggleRole = async (user) => {
-    const newRole = user.role === "admin" ? "user" : "admin";
-    const confirmMsg = `Apakah Anda yakin ingin mengubah peran pengguna "${user.email}" menjadi "${newRole}"?`;
+  const handleDeleteUser = async (user) => {
+    const confirmMsg = `PERINGATAN: Apakah Anda yakin ingin menghapus akun pengguna "${user.email}" secara permanen? Seluruh riwayat dan transaksi akun ini akan dihapus.`;
     if (!window.confirm(confirmMsg)) return;
 
     try {
       setMessage("");
       setError("");
-      const res = await axios.put(
-        `${serverUrl}/api/admin/users/${user._id || user.userId}/role`,
-        { role: newRole },
+      const res = await axios.delete(
+        `${serverUrl}/api/admin/users/${user._id || user.userId}`,
         getHeaders()
       );
-
-      if (res.data?.success) {
-        setMessage(`Peran ${user.email} berhasil diubah menjadi ${newRole}.`);
-        fetchUsers();
-        setTimeout(() => setMessage(""), 3000);
-      }
-    } catch (err) {
-      console.error("Gagal mengubah role:", err);
-      setError(err.response?.data?.message || "Gagal mengubah peran pengguna.");
-    }
-  };
-
-  const handleDeleteUser = async (user) => {
-    const confirmMsg = `PERINGATAN: Apakah Anda yakin ingin menghapus akun "${user.email}"? Tindakan ini tidak dapat dibatalkan!`;
-    if (!window.confirm(confirmMsg)) return;
-
-    try {
-      setMessage("");
-      setError("");
-      const res = await axios.delete(`${serverUrl}/api/admin/users/${user._id || user.userId}`, getHeaders());
       if (res.data?.success) {
         setMessage(`Pengguna ${user.email} berhasil dihapus.`);
         fetchUsers();
@@ -116,17 +94,18 @@ export default function AdminManageUser() {
       }
     } catch (err) {
       console.error("Gagal menghapus user:", err);
-      setError(err.response?.data?.message || "Gagal menghapus pengguna.");
+      setError(err.response?.data?.message || "Gagal menghapus akun pengguna.");
     }
   };
 
   const handleOpenEditSub = (user) => {
     setSelectedUser(user);
+    const sub = user.subscription;
     setSubForm({
-      plan: user.subscription?.plan || "wa_analisis_yearly",
-      wordQuota: user.subscription?.quota?.word ?? user.subscription?.quota ?? 30,
-      pdfQuota: user.subscription?.quota?.pdf ?? user.subscription?.quota ?? 30,
-      status: user.subscription?.status || "active"
+      plan: sub?.plan || "wa_analisis_yearly",
+      wordQuota: sub?.quota?.word ?? 30,
+      pdfQuota: sub?.quota?.pdf ?? 30,
+      status: sub?.status || "active"
     });
   };
 
@@ -172,7 +151,7 @@ export default function AdminManageUser() {
       <div>
         <h1 className={styles.tabTitle}>Manajemen Pengguna</h1>
         <p className={styles.subText}>
-          Kelola seluruh akun pengguna terdaftar, peran akses sistem (Admin/User), dan kuota langganan.
+          Kelola seluruh akun pengguna terdaftar, status langganan, dan alokasi kuota fitur.
         </p>
       </div>
 
@@ -191,7 +170,7 @@ export default function AdminManageUser() {
       <Wrapper border={"none"}>
         {/* CONTROLS */}
         <div className={styles.controlsBar}>
-          <form onSubmit={handleSearchSubmit} className={styles.searchBox}>
+          <form onSubmit={handleSearchSubmit} className={styles.searchBox} style={{ maxWidth: "460px" }}>
             <svg
               width="16"
               height="16"
@@ -211,22 +190,6 @@ export default function AdminManageUser() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </form>
-
-          <div style={{ width: "220px" }}>
-            <SearchableSelect
-              value={roleFilter}
-              onChange={(val) => {
-                setRoleFilter(val);
-                setPage(1);
-              }}
-              options={[
-                { value: "", label: "Semua Peran (All Roles)" },
-                { value: "admin", label: "Admin" },
-                { value: "user", label: "User Biasa" }
-              ]}
-              placeholder="Filter peran..."
-            />
-          </div>
         </div>
 
         {/* TABLE */}
@@ -294,13 +257,6 @@ export default function AdminManageUser() {
                     </td>
                     <td>
                       <div className={styles.actionsGroup}>
-                        <Button
-                          size="sm"
-                          variant={u.role === "admin" ? "secondary" : "primary"}
-                          onClick={() => handleToggleRole(u)}
-                        >
-                          {u.role === "admin" ? "Jadikan User" : "Jadikan Admin"}
-                        </Button>
 
                         <Button
                           size="sm"

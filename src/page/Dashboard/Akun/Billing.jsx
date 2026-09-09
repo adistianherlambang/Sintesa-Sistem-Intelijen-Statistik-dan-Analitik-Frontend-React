@@ -11,7 +11,7 @@ export default function Billing() {
   const [billingHistory, setBillingHistory] = useState([]);
   const [loadingSub, setLoadingSub] = useState(true);
   const [loadingHistory, setLoadingHistory] = useState(true);
-  
+
   // Payment States
   const [activePayment, setActivePayment] = useState(null); // stores invoice/QRIS info
   const [checkingPayment, setCheckingPayment] = useState(false);
@@ -190,50 +190,47 @@ export default function Billing() {
 
       {/* 1. STATUS LANGGANAN SAAT INI */}
       <div className={styles.section}>
-        <Wrapper>
-          <div className={styles.content}>
-            <p className={styles.sectionTitle}>Informasi Paket Aktif</p>
-            {loadingSub ? (
-              <p className={styles.loadingText}>Memuat status langganan...</p>
-            ) : subStatus && subStatus.status === "active" ? (
-              <div className={styles.activeSubCard}>
-                <div className={styles.activeSubMain}>
-                  <h3>{formatPlanName(subStatus.subscriptionId)}</h3>
-                  <span className={styles.activeBadge}>Aktif</span>
-                </div>
-                <div className={styles.activeSubDetails}>
-                  <div className={styles.detailItem}>
-                    <span>Limit Pesan Bot WA:</span>
-                    <strong>
-                      {subStatus.subscriptionId?.startsWith("wa_only")
-                        ? "1.000 Pesan"
-                        : subStatus.subscriptionId?.startsWith("wa_analisis")
+        <div className={styles.content}>
+          {loadingSub ? (
+            <p className={styles.loadingText}>Memuat status langganan...</p>
+          ) : subStatus && subStatus.status === "active" ? (
+            <div className={styles.activeSubCard}>
+              <div className={styles.activeSubMain}>
+                <h3>{formatPlanName(subStatus.subscriptionId)}</h3>
+                <span className={styles.activeBadge}>Aktif</span>
+              </div>
+              <div className={styles.activeSubDetails}>
+                <div className={styles.detailItem}>
+                  <span>Limit Pesan Bot WA:</span>
+                  <strong>
+                    {subStatus.subscriptionId?.startsWith("wa_only")
+                      ? "1.000 Pesan"
+                      : subStatus.subscriptionId?.startsWith("wa_analisis")
                         ? "1.500 Pesan"
                         : "-"}
-                    </strong>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span>Sisa Kuota Analisis:</span>
-                    <strong>{subStatus.quota} Laporan/Aksi</strong>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span>Mulai Berlangganan:</span>
-                    <strong>{formatDateTime(subStatus.startedAt)}</strong>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span>Berlaku Hingga:</span>
-                    <strong>{formatDateTime(subStatus.expiredAt)}</strong>
-                  </div>
+                  </strong>
+                </div>
+                <div className={styles.detailItem}>
+                  <span>Sisa Kuota Analisis:</span>
+                  <strong>{subStatus.quota} Laporan/Aksi</strong>
+                </div>
+                <div className={styles.detailItem}>
+                  <span>Mulai Berlangganan:</span>
+                  <strong>{formatDateTime(subStatus.startedAt)}</strong>
+                </div>
+                <div className={styles.detailItem}>
+                  <span>Berlaku Hingga:</span>
+                  <strong>{formatDateTime(subStatus.expiredAt)}</strong>
                 </div>
               </div>
-            ) : (
-              <div className={styles.noSubCard}>
-                <p>Anda saat ini menggunakan <strong>Sistem Gratis (Bukan Premium)</strong>.</p>
-                <p className={styles.noSubDesc}>Silakan pilih salah satu paket di bawah untuk mengaktifkan Bot WhatsApp dan fitur Analisis penuh.</p>
-              </div>
-            )}
-          </div>
-        </Wrapper>
+            </div>
+          ) : (
+            <div className={styles.noSubCard}>
+              <p>Anda belum memiliki paket aktif</p>
+              <p className={styles.noSubDesc}>Silakan pilih salah satu paket di bawah untuk mengaktifkan Bot WhatsApp dan fitur Analisis penuh.</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 2. QRIS PAYMENT AREA (IF ACTIVE INVOICE) */}
@@ -250,7 +247,7 @@ export default function Billing() {
                     <h2 className={styles.finalAmount}>{formatPrice(activePayment.finalAmount)}</h2>
                   </div>
                   <p className={styles.hintText}>* Silakan scan kode QRIS di samping menggunakan aplikasi e-wallet pilihan Anda (GoPay, OVO, Dana, LinkAja, atau m-Banking).</p>
-                  
+
                   <div className={styles.actionBlock}>
                     {paymentError && <span className={styles.errorText}>{paymentError}</span>}
                     {paymentMessage && <span className={styles.successText}>{paymentMessage}</span>}
@@ -258,7 +255,7 @@ export default function Billing() {
                       <MainButton onClick={handleCheckStatus}>
                         {checkingPayment ? "Memverifikasi..." : "Cek Status Pembayaran"}
                       </MainButton>
-                      <button 
+                      <button
                         onClick={() => setActivePayment(null)}
                         className={styles.cancelBtn}
                       >
@@ -268,9 +265,9 @@ export default function Billing() {
                   </div>
                 </div>
                 <div className={styles.qrisWrapper}>
-                  <img 
-                    src={activePayment.qrisImageUrl} 
-                    alt="Scan QRIS bayar.gg" 
+                  <img
+                    src={activePayment.qrisImageUrl}
+                    alt="Scan QRIS bayar.gg"
                     className={styles.qrisImage}
                   />
                   <small className={styles.qrisLogoLabel}>bayar.gg QRIS Paspor</small>
@@ -285,7 +282,7 @@ export default function Billing() {
       <div className={styles.section}>
         <Wrapper>
           <div className={styles.content}>
-            <p className={styles.sectionTitle}>Pilih Paket Langganan Premium</p>
+            <p className={styles.sectionTitle}>Pilih Paket Langganan</p>
             <div className={styles.plansGrid}>
               {plans.map((plan) => (
                 <div key={plan.id} className={styles.planCard}>
@@ -300,7 +297,7 @@ export default function Billing() {
                       <li key={idx}>✓ {feat}</li>
                     ))}
                   </ul>
-                  <button 
+                  <button
                     onClick={() => handleInitiatePayment(plan.id)}
                     className={styles.buyBtn}
                   >
@@ -340,9 +337,8 @@ export default function Billing() {
                         <td>{formatPlanName(invoice.subscriptionId?.subscriptionId)}</td>
                         <td>{formatPrice(invoice.finalAmount || invoice.amount)}</td>
                         <td>
-                          <span className={`${styles.statusLabel} ${
-                            invoice.status === "paid" ? styles.statusPaid : styles.statusPending
-                          }`}>
+                          <span className={`${styles.statusLabel} ${invoice.status === "paid" ? styles.statusPaid : styles.statusPending
+                            }`}>
                             {invoice.status === "paid" ? "Sukses" : "Pending / Menunggu"}
                           </span>
                         </td>

@@ -601,9 +601,9 @@ export default function AdminOverview() {
                       {m.model}
                     </div>
                   </div>
-                  <span className={`${styles.tokenBadge} ${getProviderBadgeClass(m.provider)}`}>
+                  {/* <span className={`${styles.tokenBadge} ${getProviderBadgeClass(m.provider)}`}>
                     {m.provider}
-                  </span>
+                  </span> */}
                 </div>
 
                 <div className={styles.tokenStatsRow}>
