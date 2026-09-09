@@ -236,22 +236,7 @@
   padding: 10px 12px;
 }
 
-.featureCheckboxLabel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #e5e5e5;
-  cursor: pointer;
-  user-select: none;
-}
 
-.featureCheckboxLabel input[type="checkbox"] {
-  accent-color: #34B34A;
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
 
 /* Modal Add Package */
 .modalOverlay {

@@ -3,6 +3,7 @@ import axios from "axios";
 import Wrapper from "../../../components/Wrapper/Wrapper";
 import Button from "../../../components/Button/Button";
 import SearchableSelect from "../../../components/SearchableSelect/SearchableSelect";
+import Checkbox from "../../../components/Checkbox/Checkbox";
 import styles from "./AdminPaketHarga.module.css";
 
 const AVAILABLE_FEATURES = [
@@ -390,14 +391,12 @@ export default function AdminPaketHarga() {
                       {AVAILABLE_FEATURES.map((feat) => {
                         const isChecked = (pkg.editFeatures || []).includes(feat.id);
                         return (
-                          <label key={feat.id} className={styles.featureCheckboxLabel}>
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => handleTogglePackageFeature(pkg.planId, feat.id)}
-                            />
-                            <span>{feat.label}</span>
-                          </label>
+                          <Checkbox
+                            key={feat.id}
+                            checked={isChecked}
+                            onChange={() => handleTogglePackageFeature(pkg.planId, feat.id)}
+                            label={feat.label}
+                          />
                         );
                       })}
                     </div>
@@ -520,14 +519,12 @@ export default function AdminPaketHarga() {
                   {AVAILABLE_FEATURES.map((feat) => {
                     const isChecked = newPkgForm.features.includes(feat.id);
                     return (
-                      <label key={feat.id} className={styles.featureCheckboxLabel}>
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => handleToggleNewPkgFeature(feat.id)}
-                        />
-                        <span>{feat.label}</span>
-                      </label>
+                      <Checkbox
+                        key={feat.id}
+                        checked={isChecked}
+                        onChange={() => handleToggleNewPkgFeature(feat.id)}
+                        label={feat.label}
+                      />
                     );
                   })}
                 </div>
