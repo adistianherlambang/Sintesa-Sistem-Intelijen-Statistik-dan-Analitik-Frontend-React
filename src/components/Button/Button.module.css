@@ -20,14 +20,12 @@
 .primary {
   background-color: #34B34A;
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(52, 179, 74, 0.25);
   border-color: #34B34A;
 }
 
 .primary:hover:not(:disabled) {
   background-color: #2ea040;
   border-color: #2ea040;
-  box-shadow: 0 4px 14px rgba(52, 179, 74, 0.4);
 }
 
 .primary:active:not(:disabled) {
@@ -78,7 +76,7 @@
 
 .md {
   font-size: 13px;
-  padding: 8px 16px;
+  padding: 16px 16px;
   border-radius: 6px;
 }
 

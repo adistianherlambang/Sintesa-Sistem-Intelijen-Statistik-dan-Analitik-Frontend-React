@@ -9,6 +9,7 @@ import Stepper from '../../../components/Stepper/Stepper'
 import Wrapper from '../../../components/Wrapper/Wrapper'
 import Hierarchy from '../../../components/Hierarchy/Hierarchy'
 import Button from '../../../components/Button/Button'
+import MainButton from '../../../components/Button/MainButton/MainButton'
 import Input from '../../../components/Input/Input'
 import Skeleton from '../../../components/Skeleton/Skeleton'
 import AILoader from '../../../components/AILoader/AILoader'
@@ -809,12 +810,12 @@ function StepTwoAvailable(props) {
       columns: combinedParsedData[0],
       parsedData: combinedParsedData,
       images: finalImages || {},
-      editedData: { 
-        inflasiData, 
-        ihkData, 
-        komoditasData, 
-        komoditasIhkData, 
-        pdrbDemoMap, 
+      editedData: {
+        inflasiData,
+        ihkData,
+        komoditasData,
+        komoditasIhkData,
+        pdrbDemoMap,
         forecastingEnabled: Boolean(forecastingEnabled),
         isForecastOn: Boolean(forecastingEnabled),
         forecast: forecastingEnabled ? (annForecastResult?.forecast || null) : null,
@@ -1326,7 +1327,7 @@ function StepTwoAvailable(props) {
       const lastVal = validVals.length > 0 ? validVals[validVals.length - 1] : (parseFloat(c.value) || 0);
       const maxVal = validVals.length > 0 ? Math.max(...validVals) : 0;
       const minVal = validVals.length > 0 ? Math.min(...validVals) : 0;
-      
+
       const hasSimulatedLarge = maxVal > 50;
       const hasSimulatedSmall = minVal < -50;
       const anchorVal = hasSimulatedLarge ? maxVal : (hasSimulatedSmall ? minVal : lastVal);
@@ -2400,16 +2401,17 @@ function StepTwoAvailable(props) {
       <BannerExporter ref={bannerExporterRef} onReady={setBannerImages} />
 
       <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-        <Button
+        {/* <Button
           variant="secondary"
           onClick={() => setStep(0)}
         >
           Kembali
-        </Button>
+        </Button> */}
         <Button
           variant="primary"
           onClick={handleSave}
           disabled={isExportingBanner}
+          fullWidth="true"
         >
           {isExportingBanner ? "Memproses Gambar Banner..." : "Simpan & Lanjutkan"}
         </Button>

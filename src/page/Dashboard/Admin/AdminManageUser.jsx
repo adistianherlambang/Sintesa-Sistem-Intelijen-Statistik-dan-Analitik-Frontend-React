@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Wrapper from "../../../components/Wrapper/Wrapper";
 import Button from "../../../components/Button/Button";
+import SearchableSelect from "../../../components/SearchableSelect/SearchableSelect";
 import styles from "./AdminManageUser.module.css";
 
 export default function AdminManageUser() {
@@ -211,18 +212,21 @@ export default function AdminManageUser() {
             />
           </form>
 
-          <select
-            className={styles.filterSelect}
-            value={roleFilter}
-            onChange={(e) => {
-              setRoleFilter(e.target.value);
-              setPage(1);
-            }}
-          >
-            <option value="">Semua Peran (All Roles)</option>
-            <option value="admin">Admin</option>
-            <option value="user">User Biasa</option>
-          </select>
+          <div style={{ width: "220px" }}>
+            <SearchableSelect
+              value={roleFilter}
+              onChange={(val) => {
+                setRoleFilter(val);
+                setPage(1);
+              }}
+              options={[
+                { value: "", label: "Semua Peran (All Roles)" },
+                { value: "admin", label: "Admin" },
+                { value: "user", label: "User Biasa" }
+              ]}
+              placeholder="Filter peran..."
+            />
+          </div>
         </div>
 
         {/* TABLE */}
@@ -366,17 +370,18 @@ export default function AdminManageUser() {
             <form onSubmit={handleSaveSub} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Tingkat Paket (Plan)</label>
-                <select
-                  className={styles.formInput}
+                <SearchableSelect
                   value={subForm.plan}
-                  onChange={(e) => setSubForm({ ...subForm, plan: e.target.value })}
-                >
-                  <option value="wa_only_monthly">Bot WhatsApp Only (Bulanan)</option>
-                  <option value="wa_only_yearly">Bot WhatsApp Only (Tahunan)</option>
-                  <option value="wa_analisis_monthly">Bot WhatsApp + Analisis (Bulanan)</option>
-                  <option value="wa_analisis_yearly">Bot WhatsApp + Analisis (Tahunan)</option>
-                  <option value="free">Free / Gratis</option>
-                </select>
+                  onChange={(val) => setSubForm({ ...subForm, plan: val })}
+                  options={[
+                    { value: "wa_only_monthly", label: "Bot WhatsApp Only (Bulanan)" },
+                    { value: "wa_only_yearly", label: "Bot WhatsApp Only (Tahunan)" },
+                    { value: "wa_analisis_monthly", label: "Bot WhatsApp + Analisis (Bulanan)" },
+                    { value: "wa_analisis_yearly", label: "Bot WhatsApp + Analisis (Tahunan)" },
+                    { value: "free", label: "Free / Gratis" }
+                  ]}
+                  placeholder="Pilih paket..."
+                />
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
@@ -404,15 +409,16 @@ export default function AdminManageUser() {
 
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Status Langganan</label>
-                <select
-                  className={styles.formInput}
+                <SearchableSelect
                   value={subForm.status}
-                  onChange={(e) => setSubForm({ ...subForm, status: e.target.value })}
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="expired">Expired</option>
-                </select>
+                  onChange={(val) => setSubForm({ ...subForm, status: val })}
+                  options={[
+                    { value: "active", label: "Active" },
+                    { value: "inactive", label: "Inactive" },
+                    { value: "expired", label: "Expired" }
+                  ]}
+                  placeholder="Pilih status..."
+                />
               </div>
 
               <div className={styles.modalActions}>

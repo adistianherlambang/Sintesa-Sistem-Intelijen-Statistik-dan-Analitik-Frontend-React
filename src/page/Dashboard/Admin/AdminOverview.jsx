@@ -87,10 +87,7 @@ export default function AdminOverview() {
   return (
     <div className={styles.container}>
       <div>
-        <h1 className={styles.tabTitle}>Overview Administrator</h1>
-        <p className={styles.subText}>
-          Pusat pemantauan kontrol pengguna, dataset statistik BPS, metrik revenue, dan operasional sistem.
-        </p>
+        <h1 className={styles.tabTitle}>Overview</h1>
       </div>
 
       {error && (

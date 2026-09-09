@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Wrapper from "../../../components/Wrapper/Wrapper";
 import Button from "../../../components/Button/Button";
+import SearchableSelect from "../../../components/SearchableSelect/SearchableSelect";
 import styles from "./AdminPaketHarga.module.css";
 
 const AVAILABLE_FEATURES = [
@@ -363,20 +364,20 @@ export default function AdminPaketHarga() {
                     </div>
                     <div className={styles.inputGroup}>
                       <label className={styles.inputLabel}>Status Layanan</label>
-                      <select
-                        className={styles.cardSelect}
+                      <SearchableSelect
                         value={pkg.editIsActive ? "true" : "false"}
-                        onChange={(e) =>
+                        onChange={(val) =>
                           handlePackageFieldChange(
                             pkg.planId,
                             "editIsActive",
-                            e.target.value === "true"
+                            val === "true"
                           )
                         }
-                      >
-                        <option value="true">Aktif</option>
-                        <option value="false">Nonaktif</option>
-                      </select>
+                        options={[
+                          { value: "true", label: "Aktif" },
+                          { value: "false", label: "Nonaktif" }
+                        ]}
+                      />
                     </div>
                   </div>
 
@@ -499,14 +500,14 @@ export default function AdminPaketHarga() {
                 </div>
                 <div className={styles.inputGroup}>
                   <label className={styles.inputLabel}>Status Layanan</label>
-                  <select
-                    className={styles.cardSelect}
+                  <SearchableSelect
                     value={newPkgForm.isActive ? "true" : "false"}
-                    onChange={(e) => setNewPkgForm({ ...newPkgForm, isActive: e.target.value === "true" })}
-                  >
-                    <option value="true">Aktif</option>
-                    <option value="false">Nonaktif</option>
-                  </select>
+                    onChange={(val) => setNewPkgForm({ ...newPkgForm, isActive: val === "true" })}
+                    options={[
+                      { value: "true", label: "Aktif" },
+                      { value: "false", label: "Nonaktif" }
+                    ]}
+                  />
                 </div>
               </div>
 
