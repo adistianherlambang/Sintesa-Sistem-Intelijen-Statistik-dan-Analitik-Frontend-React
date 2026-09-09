@@ -264,28 +264,28 @@ export default function AdminPaketHarga() {
 
       {/* METRIC OVERVIEW */}
       <div className={styles.metricGrid}>
-        <div className={styles.metricCard}>
+        <Wrapper className={styles.metricCard} padding="20px">
           <span className={styles.metricLabel}>Total Pengguna</span>
           <h2 className={styles.metricValue}>{stats.totalUsers || 0}</h2>
           <span className={styles.metricSub}>Akun terdaftar</span>
-        </div>
-        <div className={styles.metricCard}>
+        </Wrapper>
+        <Wrapper className={styles.metricCard} padding="20px">
           <span className={styles.metricLabel}>Langganan Aktif</span>
           <h2 className={styles.metricValue}>{stats.activeSubscribers || 0}</h2>
           <span className={styles.metricSub}>Instansi aktif langganan</span>
-        </div>
-        <div className={styles.metricCard}>
+        </Wrapper>
+        <Wrapper className={styles.metricCard} padding="20px">
           <span className={styles.metricLabel}>Total Pendapatan</span>
           <h2 className={styles.metricValue}>{formatRupiah(stats.totalRevenue)}</h2>
           <span className={styles.metricSub}>Dari transaksi berhasil</span>
-        </div>
-        <div className={styles.metricCard}>
+        </Wrapper>
+        <Wrapper className={styles.metricCard} padding="20px">
           <span className={styles.metricLabel}>Status Paket</span>
           <h2 className={styles.metricValue}>
             {packages.filter((p) => p.isActive).length} Aktif
           </h2>
           <span className={styles.metricSub}>Dari {packages.length} tier paket</span>
-        </div>
+        </Wrapper>
       </div>
 
       {/* KONFIGURASI PAKET (LANGSUNG INPUT & KELOLA FITUR) */}
@@ -316,7 +316,7 @@ export default function AdminPaketHarga() {
               const isDeleting = deletingPlanId === pkg.planId;
 
               return (
-                <div key={pkg._id || pkg.planId} className={styles.packageCard}>
+                <Wrapper key={pkg._id || pkg.planId} className={styles.packageCard} padding="20px">
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{ fontFamily: "monospace", fontSize: "13px", color: "#34B34A", fontWeight: 700 }}>
                       {pkg.planId}
@@ -423,7 +423,7 @@ export default function AdminPaketHarga() {
                       {isDeleting ? "..." : "Hapus"}
                     </Button>
                   </div>
-                </div>
+                </Wrapper>
               );
             })}
           </div>
@@ -433,7 +433,7 @@ export default function AdminPaketHarga() {
       {/* MODAL TAMBAH PAKET BARU */}
       {isAddModalOpen && (
         <div className={styles.modalOverlay} onClick={() => setIsAddModalOpen(false)}>
-          <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
+          <Wrapper className={styles.modalBox} padding="24px" style={{ height: "auto" }} onClick={(e) => e.stopPropagation()}>
             <h3 className={styles.modalTitle}>Tambah Paket Langganan Baru</h3>
 
             <form onSubmit={handleCreatePackage} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
@@ -548,7 +548,7 @@ export default function AdminPaketHarga() {
                 </Button>
               </div>
             </form>
-          </div>
+          </Wrapper>
         </div>
       )}
 

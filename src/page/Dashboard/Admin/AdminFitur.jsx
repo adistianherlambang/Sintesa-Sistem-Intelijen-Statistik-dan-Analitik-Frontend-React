@@ -94,14 +94,14 @@ export default function AdminFitur() {
       )}
 
       {/* CAUTION BOX */}
-      <div className={styles.alertBox}>
+      <Wrapper className={styles.alertBox} padding="16px">
         <div>
           <h4 className={styles.alertTitle}>Peringatan Kontrol Global</h4>
           <p className={styles.alertDesc}>
             Menonaktifkan sakelar di bawah ini akan secara instan men-disable tombol tab di sidebar dan mengunci halaman terkait bagi seluruh pengguna umum (role user).
           </p>
         </div>
-      </div>
+      </Wrapper>
 
       <Wrapper>
         <h2 style={{ fontSize: "18px", fontWeight: "600", color: "#D5D5D5", margin: "0 0 16px 0" }}>
@@ -115,7 +115,7 @@ export default function AdminFitur() {
             {features.map((item) => {
               const isTogglingThis = toggling[item.featureId];
               return (
-                <div key={item.featureId} className={styles.featureCard}>
+                <Wrapper key={item.featureId} className={styles.featureCard} padding="20px 24px">
                   <div className={styles.featureInfo}>
                     <div className={styles.featureHeader}>
                       <h3 className={styles.featureName}>{item.name}</h3>
@@ -143,7 +143,7 @@ export default function AdminFitur() {
                       <span className={styles.slider}></span>
                     </label>
                   </div>
-                </div>
+                </Wrapper>
               );
             })}
           </div>

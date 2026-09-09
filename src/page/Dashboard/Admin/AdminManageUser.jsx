@@ -362,7 +362,7 @@ export default function AdminManageUser() {
       {/* MODAL EDIT SUBSCRIPTION */}
       {selectedUser && (
         <div className={styles.modalOverlay} onClick={handleCloseEditSub}>
-          <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
+          <Wrapper className={styles.modalBox} padding="24px" style={{ height: "auto" }} onClick={(e) => e.stopPropagation()}>
             <h3 className={styles.modalTitle}>
               Kelola Kuota &amp; Langganan: {selectedUser.email}
             </h3>
@@ -439,7 +439,7 @@ export default function AdminManageUser() {
                 </Button>
               </div>
             </form>
-          </div>
+          </Wrapper>
         </div>
       )}
     </div>

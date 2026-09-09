@@ -173,27 +173,27 @@ export default function AdminOverview() {
 
       {/* KPI METRICS */}
       <div className={styles.kpiGrid}>
-        <div className={styles.kpiCard}>
+        <Wrapper className={styles.kpiCard} padding="20px">
           <span className={styles.kpiLabel}>Total Pengguna</span>
           <h2 className={styles.kpiValue}>{stats.totalUsers || 0}</h2>
           <span className={styles.kpiSub}>
             {stats.regularUsers || 0} Instansi &bull; {stats.adminUsers || 1} Admin
           </span>
-        </div>
+        </Wrapper>
 
-        <div className={styles.kpiCard}>
+        <Wrapper className={styles.kpiCard} padding="20px">
           <span className={styles.kpiLabel}>Langganan Aktif</span>
           <h2 className={styles.kpiValue}>{stats.activeSubscribers || 0}</h2>
           <span className={styles.kpiSub}>Instansi dengan paket aktif</span>
-        </div>
+        </Wrapper>
 
-        <div className={styles.kpiCard}>
+        <Wrapper className={styles.kpiCard} padding="20px">
           <span className={styles.kpiLabel}>Total Revenue</span>
           <h2 className={styles.kpiValue}>{formatRupiah(stats.totalRevenue)}</h2>
           <span className={styles.kpiSub}>Dari transaksi pembayaran berhasil</span>
-        </div>
+        </Wrapper>
 
-        <div className={styles.kpiCard}>
+        <Wrapper className={styles.kpiCard} padding="20px">
           <span className={styles.kpiLabel}>Dokumen BRS &amp; Infografis</span>
           <h2 className={styles.kpiValue}>
             {(stats.totalAnalyses || 0) + (stats.totalInfografis || 0)}
@@ -201,7 +201,7 @@ export default function AdminOverview() {
           <span className={styles.kpiSub}>
             {stats.totalAnalyses || 0} Analisis BRS &bull; {stats.totalInfografis || 0} Infografis
           </span>
-        </div>
+        </Wrapper>
       </div>
 
       {/* REVENUE GRAPH */}
@@ -290,7 +290,7 @@ export default function AdminOverview() {
 
         <div className={styles.serverGrid}>
           {/* CPU USAGE */}
-          <div className={styles.serverCard}>
+          <Wrapper className={styles.serverCard} padding="18px">
             <div className={styles.serverCardTop}>
               <span className={styles.serverCardTitle}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34B34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -323,10 +323,10 @@ export default function AdminOverview() {
                 Load Avg: {cpu.loadAvg?.join(" • ") || "-"}
               </div>
             </div>
-          </div>
+          </Wrapper>
 
           {/* MEMORY USAGE */}
-          <div className={styles.serverCard}>
+          <Wrapper className={styles.serverCard} padding="18px">
             <div className={styles.serverCardTop}>
               <span className={styles.serverCardTitle}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34B34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -358,10 +358,10 @@ export default function AdminOverview() {
                 Tersedia: {memory.freeFormatted}
               </div>
             </div>
-          </div>
+          </Wrapper>
 
           {/* STORAGE USAGE */}
-          <div className={styles.serverCard}>
+          <Wrapper className={styles.serverCard} padding="18px">
             <div className={styles.serverCardTop}>
               <span className={styles.serverCardTitle}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34B34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -388,7 +388,7 @@ export default function AdminOverview() {
                 Tersedia: {storage.freeFormatted}
               </div>
             </div>
-          </div>
+          </Wrapper>
         </div>
 
         <div className={styles.serverFooterMeta}>
