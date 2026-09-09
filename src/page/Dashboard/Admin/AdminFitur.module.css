@@ -29,7 +29,6 @@
 
 .featuresList {
   display: flex;
-  flex-direction: column;
   gap: 16px;
 }
 
@@ -39,7 +38,6 @@
   padding: 20px 24px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
   gap: 20px;
   transition: all 0.2s ease;
 }
@@ -142,15 +140,15 @@
   border-radius: 50%;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: #34B34A;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(24px);
 }
 
-input:disabled + .slider {
+input:disabled+.slider {
   opacity: 0.4;
   cursor: not-allowed;
 }

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
-import { Outlet, Link, useLocation } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import axios from 'axios'
 import styles from "./Dashboard.module.css"
 
@@ -21,20 +21,30 @@ export default function Dashboard() {
     bot: true,
     infografis: true,
   });
+  const [featureReasons, setFeatureReasons] = useState({
+    analisis: null,
+    bot: null,
+    infografis: null,
+  });
 
   useEffect(() => {
     const fetchPublicFeatures = async () => {
       try {
-        const res = await axios.get(`${serverUrl}/api/features/public`);
+        const token = localStorage.getItem("token");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await axios.get(`${serverUrl}/api/features/public`, { headers });
         if (res.data?.features) {
           setFeatures(res.data.features);
+        }
+        if (res.data?.reasons) {
+          setFeatureReasons(res.data.reasons);
         }
       } catch (err) {
         console.warn("Could not fetch public features:", err.message);
       }
     };
     fetchPublicFeatures();
-  }, [serverUrl]);
+  }, [serverUrl, user]);
 
   const handleLogout = () => {
     if (window.confirm("Apakah Anda yakin ingin keluar dari akun?")) {
@@ -71,15 +81,26 @@ export default function Dashboard() {
 
   // Check if current page is disabled for regular user
   let disabledFeatureName = null;
+  let disabledReason = null;
   if (!isAdmin) {
     if (location.pathname.includes("/workspace/") && !features.analisis) {
       disabledFeatureName = "Workspace Analisis";
+      disabledReason = featureReasons.analisis;
     } else if (location.pathname.includes("/bot/") && !features.bot) {
       disabledFeatureName = "Bot WhatsApp";
+      disabledReason = featureReasons.bot;
     } else if (location.pathname.includes("/infografis/") && !features.infografis) {
       disabledFeatureName = "Infografis";
+      disabledReason = featureReasons.infografis;
     }
   }
+
+  const getDisabledMessage = (featKey, featName) => {
+    if (featureReasons[featKey] === "subscription_required") {
+      return `Fitur ${featName} memerlukan paket langganan aktif. Silakan berlangganan untuk mengakses.`;
+    }
+    return `Fitur ${featName} sedang dinonaktifkan oleh administrator.`;
+  };
 
   return (
     <div className={styles.container}>
@@ -154,13 +175,13 @@ export default function Dashboard() {
                   keyword="analisis"
                   tab="workspace"
                   disabled={!features.analisis}
-                  disabledMessage="Fitur Analisis sedang dinonaktifkan oleh administrator."
+                  disabledMessage={getDisabledMessage("analisis", "Workspace Analisis")}
                 />
                 <NavButton
                   keyword="histori"
                   tab="workspace"
                   disabled={!features.analisis}
-                  disabledMessage="Fitur Histori Analisis sedang dinonaktifkan oleh administrator."
+                  disabledMessage={getDisabledMessage("analisis", "Histori Analisis")}
                 />
               </div>
             </div>
@@ -171,13 +192,13 @@ export default function Dashboard() {
                   keyword="buatInfografis"
                   tab="infografis"
                   disabled={!features.infografis}
-                  disabledMessage="Fitur Infografis sedang dinonaktifkan oleh administrator."
+                  disabledMessage={getDisabledMessage("infografis", "Infografis")}
                 />
                 <NavButton
                   keyword="histori"
                   tab="infografis"
                   disabled={!features.infografis}
-                  disabledMessage="Fitur Infografis sedang dinonaktifkan oleh administrator."
+                  disabledMessage={getDisabledMessage("infografis", "Histori Infografis")}
                 />
               </div>
             </div>
@@ -188,13 +209,13 @@ export default function Dashboard() {
                   keyword="sambungkanAkun"
                   tab="bot"
                   disabled={!features.bot}
-                  disabledMessage="Fitur Bot WhatsApp sedang dinonaktifkan oleh administrator."
+                  disabledMessage={getDisabledMessage("bot", "Bot WhatsApp")}
                 />
                 <NavButton
                   keyword="botKnowledge"
                   tab="bot"
                   disabled={!features.bot}
-                  disabledMessage="Fitur Bot WhatsApp sedang dinonaktifkan oleh administrator."
+                  disabledMessage={getDisabledMessage("bot", "Bot Knowledge")}
                 />
               </div>
             </div>
@@ -228,7 +249,7 @@ export default function Dashboard() {
         </div>
         <div className={styles.outlet}>
           {disabledFeatureName ? (
-            <FeatureDisabled featureName={disabledFeatureName} />
+            <FeatureDisabled featureName={disabledFeatureName} reason={disabledReason} />
           ) : (
             <Outlet />
           )}

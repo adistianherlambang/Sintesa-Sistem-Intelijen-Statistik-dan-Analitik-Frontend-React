@@ -148,6 +148,11 @@ export default function AdminPaketHarga() {
   };
 
   const handleDeletePackage = async (pkg) => {
+    if (pkg.planId === "free_user") {
+      alert("Paket Pengguna Gratis (Free Tier) adalah paket bawaan sistem dan tidak dapat dihapus.");
+      return;
+    }
+
     const confirmMsg = `PERINGATAN: Apakah Anda yakin ingin menghapus paket "${pkg.name || pkg.editName}" (${pkg.planId})?`;
     if (!window.confirm(confirmMsg)) return;
 
@@ -245,9 +250,6 @@ export default function AdminPaketHarga() {
     <div className={styles.container}>
       <div>
         <h1 className={styles.tabTitle}>Monitor Paket &amp; Harga</h1>
-        <p className={styles.subText}>
-          Kelola paket langganan, besaran harga, kuota, serta pilih fitur apa saja yang aktif saat pengguna berlangganan.
-        </p>
       </div>
 
       {error && (
@@ -325,17 +327,70 @@ export default function AdminPaketHarga() {
             {packages.map((pkg) => {
               const isSaving = savingPlanId === pkg.planId;
               const isDeleting = deletingPlanId === pkg.planId;
+              const isFreeTier = pkg.planId === "free_user";
 
               return (
-                <Wrapper border={"none"} key={pkg._id || pkg.planId} className={styles.packageCard} padding="20px">
+                <Wrapper
+                  border={"none"}
+                  key={pkg._id || pkg.planId}
+                  className={styles.packageCard}
+                  padding="20px"
+                  style={
+                    isFreeTier
+                      ? {
+                          border: "1px solid rgba(234, 179, 8, 0.35)",
+                          background: "rgba(234, 179, 8, 0.03)",
+                        }
+                      : {}
+                  }
+                >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontFamily: "monospace", fontSize: "13px", color: "#34B34A", fontWeight: 700 }}>
-                      {pkg.planId}
-                    </span>
-                    <span style={{ fontSize: "12px", color: "#888" }}>
-                      {pkg.activeSubscribers || 0} Pelanggan Aktif
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span
+                        style={{
+                          fontFamily: "monospace",
+                          fontSize: "13px",
+                          color: isFreeTier ? "#eab308" : "#34B34A",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {pkg.planId}
+                      </span>
+                      {isFreeTier && (
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            color: "#eab308",
+                            background: "rgba(234, 179, 8, 0.15)",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            fontWeight: 600,
+                          }}
+                        >
+                          Default Free Tier
+                        </span>
+                      )}
+                    </div>
+                    <span style={{ fontSize: "12px", color: isFreeTier ? "#eab308" : "#888" }}>
+                      {isFreeTier ? "Semua Pengguna Gratis" : `${pkg.activeSubscribers || 0} Pelanggan Aktif`}
                     </span>
                   </div>
+
+                  {isFreeTier && (
+                    <div
+                      style={{
+                        background: "rgba(234, 179, 8, 0.08)",
+                        border: "1px solid rgba(234, 179, 8, 0.2)",
+                        borderRadius: "6px",
+                        padding: "10px 12px",
+                        fontSize: "12px",
+                        color: "#fef08a",
+                        lineHeight: "1.5",
+                      }}
+                    >
+                      💡 <strong>Pengaturan Hak Akses Free User:</strong> Centang fitur di bawah untuk mengizinkan pengguna gratis/tanpa langganan mengakses fitur tersebut. Kosongkan jika ingin membatasi fitur hanya untuk pelanggan berbayar.
+                    </div>
+                  )}
 
                   <div className={styles.inputGroup}>
                     <label className={styles.inputLabel}>Nama Tampilan Paket</label>
@@ -356,6 +411,8 @@ export default function AdminPaketHarga() {
                       className={styles.cardInput}
                       value={pkg.editAmount}
                       min="0"
+                      disabled={isFreeTier}
+                      placeholder={isFreeTier ? "0 (Selalu Gratis)" : "0"}
                       onChange={(e) =>
                         handlePackageFieldChange(pkg.planId, "editAmount", e.target.value)
                       }
@@ -364,7 +421,9 @@ export default function AdminPaketHarga() {
 
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                     <div className={styles.inputGroup}>
-                      <label className={styles.inputLabel}>Kuota Bulanan/Harian</label>
+                      <label className={styles.inputLabel}>
+                        {isFreeTier ? "Kuota Bebas" : "Kuota Bulanan/Harian"}
+                      </label>
                       <input
                         type="number"
                         className={styles.cardInput}
@@ -387,16 +446,21 @@ export default function AdminPaketHarga() {
                         }
                         options={[
                           { value: "true", label: "Aktif" },
-                          { value: "false", label: "Nonaktif" }
+                          { value: "false", label: "Nonaktif" },
                         ]}
                       />
                     </div>
                   </div>
 
-                  {/* CHECKLIST FITUR YANG ON SAAT BERLANGGANAN */}
+                  {/* CHECKLIST FITUR */}
                   <div className={styles.inputGroup}>
-                    <label className={styles.inputLabel}>
-                      Fitur yang Aktif (ON) Saat Berlangganan:
+                    <label
+                      className={styles.inputLabel}
+                      style={isFreeTier ? { color: "#eab308", fontWeight: 600 } : {}}
+                    >
+                      {isFreeTier
+                        ? "Fitur yang Diizinkan untuk Pengguna Gratis:"
+                        : "Fitur yang Aktif (ON) Saat Berlangganan:"}
                     </label>
                     <div className={styles.featuresChecklist}>
                       {AVAILABLE_FEATURES.map((feat) => {
@@ -426,13 +490,15 @@ export default function AdminPaketHarga() {
                       </Button>
                     </div>
 
-                    <Button
-                      variant="danger"
-                      onClick={() => handleDeletePackage(pkg)}
-                      disabled={isSaving || isDeleting}
-                    >
-                      {isDeleting ? "..." : "Hapus"}
-                    </Button>
+                    {!isFreeTier && (
+                      <Button
+                        variant="danger"
+                        onClick={() => handleDeletePackage(pkg)}
+                        disabled={isSaving || isDeleting}
+                      >
+                        {isDeleting ? "..." : "Hapus"}
+                      </Button>
+                    )}
                   </div>
                 </Wrapper>
               );

@@ -75,10 +75,7 @@ export default function AdminFitur() {
   return (
     <div className={styles.container}>
       <div>
-        <h1 className={styles.tabTitle}>Kontrol &amp; Sakelar Fitur</h1>
-        <p className={styles.subText}>
-          Matikan atau hidupkan akses halaman serta tombol tab (Workspace Analisis, Bot WhatsApp, Infografis) pada akun pengguna (role user).
-        </p>
+        <h1 className={styles.tabTitle}>Kontrol Fitur</h1>
       </div>
 
       {error && (
@@ -93,60 +90,45 @@ export default function AdminFitur() {
         </Wrapper>
       )}
 
-      {/* CAUTION BOX */}
-      <Wrapper border={"none"} className={styles.alertBox} padding="16px">
-        <div>
-          <h4 className={styles.alertTitle}>Peringatan Kontrol Global</h4>
-          <p className={styles.alertDesc}>
-            Menonaktifkan sakelar di bawah ini akan secara instan men-disable tombol tab di sidebar dan mengunci halaman terkait bagi seluruh pengguna umum (role user).
-          </p>
-        </div>
-      </Wrapper>
-
-      <Wrapper border={"none"}>
-        <p className={styles.sectionTitle}>Daftar Fitur Platform</p>
-
-        {loading ? (
-          <p style={{ color: "#888" }}>Memuat status fitur...</p>
-        ) : (
-          <div className={styles.featuresList}>
-            {features.map((item) => {
-              const isTogglingThis = toggling[item.featureId];
-              return (
-                <Wrapper key={item.featureId} className={styles.featureCard} padding="20px 24px">
-                  <div className={styles.featureInfo}>
-                    <div className={styles.featureHeader}>
-                      <h3 className={styles.featureName}>{item.name}</h3>
-                      <span className={styles.featureKey}>{item.featureId}</span>
-                    </div>
-                    <p className={styles.featureDesc}>{item.description}</p>
+      {loading ? (
+        <p style={{ color: "#888" }}>Memuat status fitur...</p>
+      ) : (
+        <div className={styles.featuresList}>
+          {features.map((item) => {
+            const isTogglingThis = toggling[item.featureId];
+            return (
+              <Wrapper key={item.featureId} className={styles.featureCard} padding="20px 24px">
+                <div className={styles.featureInfo}>
+                  <div className={styles.featureHeader}>
+                    <h3 className={styles.featureName}>{item.name}</h3>
+                    <span className={styles.featureKey}>{item.featureId}</span>
                   </div>
+                  <p className={styles.featureDesc}>{item.description}</p>
+                </div>
 
-                  <div className={styles.toggleWrapper}>
-                    <span
-                      className={`${styles.statusText} ${
-                        item.enabled ? styles.statusOn : styles.statusOff
+                <div className={styles.toggleWrapper}>
+                  <span
+                    className={`${styles.statusText} ${item.enabled ? styles.statusOn : styles.statusOff
                       }`}
-                    >
-                      {item.enabled ? "Aktif" : "Nonaktif"}
-                    </span>
+                  >
+                    {item.enabled ? "Aktif" : "Nonaktif"}
+                  </span>
 
-                    <label className={styles.switch}>
-                      <input
-                        type="checkbox"
-                        checked={item.enabled}
-                        disabled={isTogglingThis}
-                        onChange={() => handleToggle(item.featureId, item.enabled)}
-                      />
-                      <span className={styles.slider}></span>
-                    </label>
-                  </div>
-                </Wrapper>
-              );
-            })}
-          </div>
-        )}
-      </Wrapper>
+                  <label className={styles.switch}>
+                    <input
+                      type="checkbox"
+                      checked={item.enabled}
+                      disabled={isTogglingThis}
+                      onChange={() => handleToggle(item.featureId, item.enabled)}
+                    />
+                    <span className={styles.slider}></span>
+                  </label>
+                </div>
+              </Wrapper>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

@@ -136,8 +136,6 @@ export default function HistoriInfografisPage() {
             </svg>
           </div>
           <p className={styles.emptyTitle}>Belum ada infografis</p>
-          <p className={styles.emptyDesc}>Klik "Buat Baru" untuk mulai membuat infografis pertama Anda</p>
-          <button className={styles.newBtn} onClick={handleNew}>Buat Infografis Pertama</button>
         </div>
       ) : (
         <div className={styles.grid}>

@@ -565,13 +565,13 @@ export default function AdminOverview() {
               </span>
             </div>
             <div className={styles.tokenHeaderStatItem}>
-              <span className={styles.tokenStatMiniLabel}>Input (Prompt)</span>
+              <span className={styles.tokenStatMiniLabel}>Input</span>
               <span className={styles.tokenStatMiniValue} style={{ color: "#38bdf8" }}>
                 {formatTokens(llmUsage.totalInputTokens)}
               </span>
             </div>
             <div className={styles.tokenHeaderStatItem}>
-              <span className={styles.tokenStatMiniLabel}>Output (Completion)</span>
+              <span className={styles.tokenStatMiniLabel}>Output</span>
               <span className={styles.tokenStatMiniValue} style={{ color: "#34B34A" }}>
                 {formatTokens(llmUsage.totalOutputTokens)}
               </span>
