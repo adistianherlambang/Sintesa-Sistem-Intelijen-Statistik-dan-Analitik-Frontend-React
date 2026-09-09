@@ -139,7 +139,7 @@ export default function AdminOverview() {
               setLiveServerUsage(data);
               setIsRealtimeActive(true);
             }
-          } catch (e) {}
+          } catch (e) { }
         };
 
         eventSource.onerror = () => {
@@ -170,7 +170,7 @@ export default function AdminOverview() {
               setLiveServerUsage(res.data.serverUsage);
             }
           })
-          .catch(() => {});
+          .catch(() => { });
       }
     };
 
@@ -250,13 +250,13 @@ export default function AdminOverview() {
   const revenueTrendData = stats.revenueTrend && stats.revenueTrend.length > 0
     ? stats.revenueTrend
     : [
-        { label: "Bulan 1", revenue: 0, count: 0 },
-        { label: "Bulan 2", revenue: 0, count: 0 },
-        { label: "Bulan 3", revenue: 0, count: 0 },
-        { label: "Bulan 4", revenue: 0, count: 0 },
-        { label: "Bulan 5", revenue: 0, count: 0 },
-        { label: "Bulan 6", revenue: 0, count: 0 }
-      ];
+      { label: "Bulan 1", revenue: 0, count: 0 },
+      { label: "Bulan 2", revenue: 0, count: 0 },
+      { label: "Bulan 3", revenue: 0, count: 0 },
+      { label: "Bulan 4", revenue: 0, count: 0 },
+      { label: "Bulan 5", revenue: 0, count: 0 },
+      { label: "Bulan 6", revenue: 0, count: 0 }
+    ];
 
   const totalPeriodRevenue = revenueTrendData.reduce((acc, curr) => acc + (curr.revenue || 0), 0);
   const avgPeriodRevenue = Math.round(totalPeriodRevenue / Math.max(1, revenueTrendData.length));
@@ -400,11 +400,6 @@ export default function AdminOverview() {
           <p className={styles.sectionTitle} style={{ margin: 0 }}>
             Status &amp; Utilitas Server
           </p>
-
-          <div className={styles.serverStatusBadge}>
-            <span className={styles.pulseDot} />
-            <span>{isRealtimeActive ? "Realtime Aktif (2s)" : "Sistem Operasional"}</span>
-          </div>
         </div>
 
         <div className={styles.serverGrid}>
@@ -534,7 +529,7 @@ export default function AdminOverview() {
         <Wrapper border={"none"}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
             <p className={styles.sectionTitle} style={{ margin: 0 }}>
-              Kontrol Pengguna &amp; Instansi
+              Kontrol Pengguna
             </p>
             <Button
               size="sm"
@@ -599,7 +594,7 @@ export default function AdminOverview() {
         <Wrapper border={"none"}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
             <p className={styles.sectionTitle} style={{ margin: 0 }}>
-              Kontrol Dataset &amp; Indikator BPS
+              Kontrol Dataset
             </p>
             <span style={{ fontSize: "12px", color: "#34B34A", fontWeight: 600 }}>API BPS Terhubung</span>
           </div>
@@ -644,7 +639,7 @@ export default function AdminOverview() {
         <Wrapper border={"none"}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
             <p className={styles.sectionTitle} style={{ margin: 0 }}>
-              Kontrol Pendapatan &amp; Transaksi
+              Kontrol Pendapatan
             </p>
             <Button
               size="sm"
