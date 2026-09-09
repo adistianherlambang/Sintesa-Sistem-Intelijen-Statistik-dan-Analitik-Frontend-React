@@ -30,7 +30,6 @@ export default function AdminOverview() {
     serverUsage: null
   });
   const [liveServerUsage, setLiveServerUsage] = useState(null);
-  const [isRealtimeActive, setIsRealtimeActive] = useState(false);
   const [users, setUsers] = useState([]);
   const [features, setFeatures] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -111,7 +110,6 @@ export default function AdminOverview() {
           const res = await axios.get(`${serverUrl}/api/admin/server-usage`, getHeaders());
           if (isMounted && res.data?.serverUsage) {
             setLiveServerUsage(res.data.serverUsage);
-            setIsRealtimeActive(true);
           }
         } catch (err) {
           // ignore poll error
@@ -127,17 +125,12 @@ export default function AdminOverview() {
         const sseUrl = `${serverUrl}/api/admin/server-usage/stream?token=${encodeURIComponent(token)}`;
         eventSource = new EventSource(sseUrl);
 
-        eventSource.onopen = () => {
-          if (isMounted) setIsRealtimeActive(true);
-        };
-
         eventSource.onmessage = (event) => {
           if (!isMounted) return;
           try {
             const data = JSON.parse(event.data);
             if (data && data.cpu) {
               setLiveServerUsage(data);
-              setIsRealtimeActive(true);
             }
           } catch (e) { }
         };
