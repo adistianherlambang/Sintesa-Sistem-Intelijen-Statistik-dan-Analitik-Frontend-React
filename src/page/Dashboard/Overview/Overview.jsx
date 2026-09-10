@@ -62,7 +62,7 @@ export default function Overview() {
 
         <div className={styles.containerr}>
           <div className={styles.section}>
-            <Wrapper><HitoriAnalisis /></Wrapper>
+            <Wrapper><HitoriAnalisis isOverview={true} limit={5} /></Wrapper>
           </div>
         </div>
 

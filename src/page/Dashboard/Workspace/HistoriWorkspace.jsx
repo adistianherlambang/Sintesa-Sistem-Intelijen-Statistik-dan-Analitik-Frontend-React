@@ -9,11 +9,11 @@ import HitoriAnalisis from '../../../components/FromPage/Overview/HitoriAnalisis
 export default function HistoriWorkspace() {
   return (
     <div className={styles.container}>
-      <p className={styles.tabTitle}>Histori Workspace</p>
+      <p className={styles.tabTitle}>Histori Analisis</p>
 
       <div className={styles.containerr}>
         <div className={styles.wrapper}>
-          <Wrapper><HitoriAnalisis /></Wrapper>
+          <Wrapper><HitoriAnalisis isOverview={false} /></Wrapper>
         </div>
       </div>
     </div>

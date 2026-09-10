@@ -2,7 +2,26 @@
   font-size: 24px;
   color: #D5D5D5;
   margin: 0;
-  margin-bottom: 0.5rem;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.seeAllBtn {
+  background: transparent;
+  color: #34B34A;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: opacity 0.15s;
+}
+
+.seeAllBtn:hover {
+  opacity: 0.7;
 }
 
 .content {
@@ -25,7 +44,6 @@
 
 .historyTable th {
   font-size: 12px;
-
   color: #888888;
   padding: 12px 16px;
 }
@@ -38,4 +56,52 @@
 
 .noCol {
   width: 50px;
+}
+
+.btnDownloadPdf {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.btnDownloadPdf:hover {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(239, 68, 68, 0.7);
+  transform: translateY(-1px);
+}
+
+.btnDownloadDocx {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #60a5fa;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.btnDownloadDocx:hover {
+  background: rgba(59, 130, 246, 0.22);
+  border-color: rgba(59, 130, 246, 0.7);
+  transform: translateY(-1px);
+}
+
+.btnDownloadDisabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
 }

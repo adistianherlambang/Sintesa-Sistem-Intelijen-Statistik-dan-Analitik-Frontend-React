@@ -64,12 +64,6 @@ export default function HistoriInfografis({ onLoad }) {
       {projects.length === 0 ? (
         <div className={style.emptyState}>
           <p className={style.emptyText}>Belum ada infografis. </p>
-          <button
-            className={style.createBtn}
-            onClick={() => navigate('/dashboard/infografis/buatInfografis')}
-          >
-            Buat Sekarang
-          </button>
         </div>
       ) : (
         <div className={style.cardRow}>
