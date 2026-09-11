@@ -26,6 +26,24 @@ const AdminPaketHarga = lazy(() => import('./page/Dashboard/Admin/AdminPaketHarg
 const AdminFitur = lazy(() => import('./page/Dashboard/Admin/AdminFitur'));
 const AdminManageUser = lazy(() => import('./page/Dashboard/Admin/AdminManageUser'));
 
+// Automatically rewrite insecure HTTP calls to the backend when running on HTTPS (e.g. Vercel)
+// to prevent browser Mixed Content blocking ("XMLHttpRequest cannot load ... due to access control checks")
+axios.interceptors.request.use(
+  (config) => {
+    if (
+      typeof window !== "undefined" &&
+      window.location.protocol === "https:" &&
+      config.url
+    ) {
+      if (/^http:\/\/43\.156\.54\.94(:[0-9]+)?/i.test(config.url)) {
+        config.url = config.url.replace(/^http:\/\/43\.156\.54\.94(:[0-9]+)?/i, "");
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Global Axios interceptor to handle expired/invalid session tokens (401 Unauthorized)
 axios.interceptors.response.use(
   (response) => response,

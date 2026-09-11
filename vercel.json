@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:match*",
+      "destination": "http://43.156.54.94/api/:match*"
+    },
+    {
+      "source": "/analysis-files/:match*",
+      "destination": "http://43.156.54.94/analysis-files/:match*"
+    },
+    {
+      "source": "/word-editor/:match*",
+      "destination": "http://43.156.54.94/word-editor/:match*"
+    }
+  ]
+}
