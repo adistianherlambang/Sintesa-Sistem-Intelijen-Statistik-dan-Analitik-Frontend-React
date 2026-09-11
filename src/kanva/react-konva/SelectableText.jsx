@@ -349,8 +349,6 @@ export default function SelectableText({ shape, selected, onSelect, onChange}) {
                     ]}
                     boundBoxFunc={(oldBox, newBox) => {
                         if (newBox.width < 20 || newBox.height < 10) return oldBox;
-                        newBox.width = newBox.width;
-                        newBox.height = newBox.height;
                         return newBox;
                     }}
                     onTransformStart={(e) => {
