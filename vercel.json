@@ -11,6 +11,10 @@
     {
       "source": "/word-editor/:match*",
       "destination": "http://43.156.54.94/word-editor/:match*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }

@@ -7,6 +7,37 @@ const MONTH_NAMES = [
   "Juli", "Agustus", "September", "Oktober", "November", "Desember"
 ];
 
+// Helper: Resolve backend URL safely under HTTPS/Mixed Content restrictions
+export const resolveBackendUrl = (url) => {
+  if (!url) return "";
+  if (typeof window !== "undefined" && window.location.protocol === "https:") {
+    // If the frontend is loaded over HTTPS, prevent calling insecure HTTP backends directly
+    // which triggers browser Mixed Content blocks. Instead, use relative path (rewritten by Vercel/reverse proxy)
+    if (/^http:\/\//i.test(url)) {
+      return "";
+    }
+  }
+  return String(url).replace(/\/+$/, "");
+};
+
+// Helper: Resolve asset/file URLs safely (e.g. /analysis-files/..., /word-editor/...)
+export const resolveAssetUrl = (url, fallbackServerUrl = "") => {
+  if (!url) return "";
+  if (typeof window !== "undefined" && window.location.protocol === "https:") {
+    // If absolute HTTP URL on HTTPS page, convert to same-origin relative path
+    const relativeMatch = String(url).match(/^https?:\/\/[^/]+(\/.*)$/i);
+    if (relativeMatch) {
+      return relativeMatch[1];
+    }
+  }
+  if (String(url).startsWith("/")) {
+    const safeBase = resolveBackendUrl(fallbackServerUrl);
+    return safeBase ? `${safeBase}${url}` : url;
+  }
+  return url;
+};
+
+
 /**
  * Reusable Word Editor Component
  * Engine ditempatkan di public/word-editor/ dan disematkan via iframe yang dapat berkomunikasi
@@ -20,7 +51,8 @@ export default function WordEditor({
   editorBasePath = ""
 }) {
   const editorIframeRef = useRef(null);
-  const editorUrl = editorBasePath || `${serverUrl}/word-editor`;
+  const safeServerUrl = resolveBackendUrl(serverUrl);
+  const editorUrl = editorBasePath || (safeServerUrl ? `${safeServerUrl}/word-editor` : "/word-editor");
   const [, setEditorReady] = useState(false);
   const [generatingDoc, setGeneratingDoc] = useState(false);
   const [, setPopulatedDocUrl] = useState(null);
@@ -40,7 +72,7 @@ export default function WordEditor({
     if (!editorIframeRef.current?.contentWindow) return;
     const sanitizedCity = (uploadedDataset?.context?.city || "Kota Metro").replace(/[^a-zA-Z0-9]/g, "_");
     const sanitizedPeriod = (uploadedDataset?.context?.period || currentCalPeriod).replace(/[^a-zA-Z0-9]/g, "_");
-    const docUrl = `${serverUrl}/word-editor/template/${templateFile}`;
+    const docUrl = resolveAssetUrl(`/word-editor/template/${templateFile}`, serverUrl);
 
     editorIframeRef.current.contentWindow.postMessage(
       {
@@ -68,7 +100,7 @@ export default function WordEditor({
         Boolean(uploadedDataset?.editedData?.forecast);
 
       const res = await axios.post(
-        `${serverUrl}/api/analisis/word/generate`,
+        `${safeServerUrl}/api/analisis/word/generate`,
         {
           city: targetCity,
           periode: targetPeriod,
@@ -82,21 +114,23 @@ export default function WordEditor({
         }
       );
 
-      if (res.data?.success && res.data?.fullUrl) {
-        setPopulatedDocUrl(res.data.fullUrl);
+      if (res.data?.success && (res.data?.url || res.data?.fullUrl)) {
+        const rawUrl = res.data.url || res.data.fullUrl;
+        const targetDocUrl = resolveAssetUrl(rawUrl, serverUrl);
+        setPopulatedDocUrl(targetDocUrl);
         if (editorIframeRef.current?.contentWindow) {
           editorIframeRef.current.contentWindow.postMessage(
             {
               type: "document:open-url",
               payload: {
-                url: res.data.fullUrl,
+                url: targetDocUrl,
                 fileName: res.data.filename,
               },
             },
             "*"
           );
         }
-        return res.data.fullUrl;
+        return targetDocUrl;
       }
     } catch (err) {
       console.error("Gagal generate dokumen BRS terisi:", err.message);
@@ -217,7 +251,7 @@ export default function WordEditor({
 
       // 3. Post to backend
       const res = await axios.post(
-        `${serverUrl}/api/analisis/word/save`,
+        `${safeServerUrl}/api/analisis/word/save`,
         {
           title: reportTitle,
           city: targetCity,
@@ -250,7 +284,7 @@ export default function WordEditor({
   const handleDownloadDocx = async () => {
     if (savedDocxUrl) {
       const link = document.createElement("a");
-      link.href = `${serverUrl}${savedDocxUrl}`;
+      link.href = resolveAssetUrl(savedDocxUrl, serverUrl);
       link.download = `Laporan_BRS_${(uploadedDataset?.context?.city || "Kota_Metro").replace(/\s+/g, "_")}.docx`;
       link.click();
       return;
@@ -272,7 +306,7 @@ export default function WordEditor({
   const handleDownloadPdf = async () => {
     if (savedPdfUrl) {
       const link = document.createElement("a");
-      link.href = `${serverUrl}${savedPdfUrl}`;
+      link.href = resolveAssetUrl(savedPdfUrl, serverUrl);
       link.download = `Laporan_BRS_${(uploadedDataset?.context?.city || "Kota_Metro").replace(/\s+/g, "_")}.pdf`;
       link.click();
       return;

@@ -33,6 +33,17 @@ const MONTH_NAMES = [
   "Juli", "Agustus", "September", "Oktober", "November", "Desember"
 ]
 
+const getServerUrl = () => {
+  if (typeof window !== "undefined" && window.location.protocol === "https:") {
+    const envUrl = process.env.REACT_APP_URL_SERVER || "";
+    if (/^http:\/\//i.test(envUrl)) {
+      return "";
+    }
+    return envUrl.replace(/\/+$/, "");
+  }
+  return (process.env.REACT_APP_URL_SERVER || "").replace(/\/+$/, "");
+};
+
 export default function Analisis() {
   const [selectedIndicators, setSelectedIndicators] = useState(["komoditas"])
   const [analysisTitle, setAnalysisTitle] = useState("Analisis BPS Kota Metro")
@@ -224,7 +235,7 @@ function StepTwoManual(props) {
       try {
         const base64 = e.target.result.split(',')[1];
         const userCity = user?.location?.name || "KOTA METRO";
-        const response = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/upload-dataset`, {
+        const response = await axios.post(`${getServerUrl()}/api/dashboard/overview/upload-dataset`, {
           fileData: base64,
           fileName: file.name,
           city: userCity
@@ -528,14 +539,14 @@ function StepTwoAvailable(props) {
 
         await Promise.all(nonCommodityIndicators.map(async (key) => {
           let endpoint = ""
-          if (key === "pdrb-pengeluaran-adhk") endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/pdrb/pengeluaran-adhk`
-          else if (key === "pdrb-pengeluaran-adhb") endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/pdrb/pengeluaran-adhb`
-          else if (key === "pdrb-lapangan-usaha-adhk") endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/pdrb/lapangan-usaha-adhk`
-          else if (key === "pdrb-lapangan-usaha-adhb") endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/pdrb/lapangan-usaha-adhb`
-          else if (key === "demografi-penduduk") endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/demografi/penduduk`
-          else if (key === "demografi-laki") endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/demografi/penduduk-laki-laki`
-          else if (key === "demografi-perempuan") endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/demografi/penduduk-perempuan`
-          else if (key === "demografi-kemiskinan") endpoint = `${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/demografi/kemiskinan`
+          if (key === "pdrb-pengeluaran-adhk") endpoint = `${getServerUrl()}/api/dashboard/overview/pdrb/pengeluaran-adhk`
+          else if (key === "pdrb-pengeluaran-adhb") endpoint = `${getServerUrl()}/api/dashboard/overview/pdrb/pengeluaran-adhb`
+          else if (key === "pdrb-lapangan-usaha-adhk") endpoint = `${getServerUrl()}/api/dashboard/overview/pdrb/lapangan-usaha-adhk`
+          else if (key === "pdrb-lapangan-usaha-adhb") endpoint = `${getServerUrl()}/api/dashboard/overview/pdrb/lapangan-usaha-adhb`
+          else if (key === "demografi-penduduk") endpoint = `${getServerUrl()}/api/dashboard/overview/demografi/penduduk`
+          else if (key === "demografi-laki") endpoint = `${getServerUrl()}/api/dashboard/overview/demografi/penduduk-laki-laki`
+          else if (key === "demografi-perempuan") endpoint = `${getServerUrl()}/api/dashboard/overview/demografi/penduduk-perempuan`
+          else if (key === "demografi-kemiskinan") endpoint = `${getServerUrl()}/api/dashboard/overview/demografi/kemiskinan`
 
           if (endpoint) {
             const res = await axios.post(endpoint, { kota: userCity })
@@ -898,7 +909,7 @@ function StepTwoAvailable(props) {
         }
 
         const res = await axios
-          .post(`${process.env.REACT_APP_URL_SERVER}/api/analisis/inflasi-ihk`, { kota: userCity })
+          .post(`${getServerUrl()}/api/analisis/inflasi-ihk`, { kota: userCity })
           .catch(() => ({ data: null }))
 
         if (res?.data) {
@@ -2470,14 +2481,15 @@ function StepThree(props) {
 
   // Fetch structured JSON AI summary on mount/load
   useEffect(() => {
+    let isMounted = true;
     if (uploadedDataset && uploadedDataset.valid === "ya" && !aiSummary) {
       const fetchSummary = async () => {
         setLoadingSummary(true);
         setError("");
         try {
-          const res = await axios.post(`${process.env.REACT_APP_URL_SERVER}/api/dashboard/overview/generate-summary`, {
-            city: uploadedDataset.context.city,
-            periode: uploadedDataset.context.period,
+          const res = await axios.post(`${getServerUrl()}/api/dashboard/overview/generate-summary`, {
+            city: uploadedDataset.context?.city,
+            periode: uploadedDataset.context?.period,
             inflasiMoM: inflasiValue,
             inflasiYoY: yoyValue,
             ihkNow: ihkValue,
@@ -2486,16 +2498,26 @@ function StepThree(props) {
             editedData: uploadedDataset?.editedData,
             parsedData: uploadedDataset?.parsedData
           });
-          setAiSummary(res.data);
+          if (isMounted) {
+            setAiSummary(res.data);
+          }
         } catch (err) {
-          console.error("Error generating AI summary:", err.message);
-          setError("Gagal menghasilkan ringkasan AI: " + err.message);
+          console.warn("Error generating AI summary (continuing to editor):", err.message);
+          if (isMounted) {
+            // Set error state so it will not infinitely re-trigger
+            setAiSummary({ error: err.message });
+          }
         } finally {
-          setLoadingSummary(false);
+          if (isMounted) {
+            setLoadingSummary(false);
+          }
         }
       };
       fetchSummary();
     }
+    return () => {
+      isMounted = false;
+    };
   }, [uploadedDataset, datasetSource, aiSummary, inflasiValue, yoyValue, ihkValue, pendorong, divisionData]);
 
   // Manual Dataset validation branch
@@ -2529,7 +2551,7 @@ function StepThree(props) {
 
   return (
     <div className={styles.container}>
-      {loadingSummary ? (
+      {loadingSummary && !aiSummary ? (
         <Wrapper>
           <AILoader text="Menganalisis data & memuat editor laporan BRS..." minHeight="220px" />
         </Wrapper>
@@ -2537,7 +2559,7 @@ function StepThree(props) {
         <WordEditor
           uploadedDataset={uploadedDataset}
           analysisTitle={analysisTitle}
-          serverUrl={process.env.REACT_APP_URL_SERVER}
+          serverUrl={getServerUrl()}
         />
       )}
       {error && <p style={{ color: '#ef4444', marginTop: 16, fontSize: 14 }}>{error}</p>}
