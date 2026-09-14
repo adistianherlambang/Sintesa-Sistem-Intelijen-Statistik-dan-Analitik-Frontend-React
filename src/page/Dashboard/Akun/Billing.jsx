@@ -18,7 +18,7 @@ export default function Billing() {
   const [paymentMessage, setPaymentMessage] = useState("");
   const [paymentError, setPaymentError] = useState("");
 
-  const plans = [
+  const DEFAULT_PLANS = [
     {
       id: "wa_only_monthly",
       name: "Bot WhatsApp Only",
@@ -75,6 +75,67 @@ export default function Billing() {
     },
   ];
 
+  const [plans, setPlans] = useState(DEFAULT_PLANS);
+  const [loadingPlans, setLoadingPlans] = useState(true);
+
+  const formatPlanFromApi = (pkg) => {
+    const def = DEFAULT_PLANS.find((d) => d.id === pkg.planId);
+
+    let period = "Bulanan";
+    if (
+      pkg.durationDays >= 365 ||
+      pkg.planId?.includes("yearly") ||
+      pkg.name?.toLowerCase().includes("tahunan")
+    ) {
+      period = "Tahunan";
+    } else if (def?.period) {
+      period = def.period;
+    }
+
+    let features = def?.features || [];
+    if (Array.isArray(pkg.features) && pkg.features.length > 0) {
+      if (pkg.features.some((f) => f.length > 20 || f.includes(" "))) {
+        features = pkg.features;
+      } else {
+        const featureMap = {
+          bot: "Akses Layanan Bot WhatsApp AI",
+          analisis: "Modul Analisis Interaktif & Naskah BRS",
+          infografis: "Template Desain Infografis InDesign",
+        };
+        const mapped = pkg.features.map((f) => featureMap[f] || f);
+        if (!def) {
+          features = mapped;
+        }
+      }
+    }
+
+    return {
+      id: pkg.planId,
+      name: def?.name || pkg.name.replace(/\s*\((Bulanan|Tahunan)\)/i, ""),
+      period,
+      price: pkg.amount ?? pkg.price ?? def?.price ?? 0,
+      badge: pkg.badge || def?.badge || "",
+      features: features.length > 0 ? features : ["Akses Fitur Sistem Sintesa"],
+    };
+  };
+
+  const fetchPackages = async () => {
+    try {
+      const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000";
+      const token = localStorage.getItem("token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const response = await axios.get(`${serverUrl}/api/users/packages`, { headers });
+      const pkgs = response.data?.packages;
+      if (Array.isArray(pkgs) && pkgs.length > 0) {
+        setPlans(pkgs.map(formatPlanFromApi));
+      }
+    } catch (err) {
+      console.error("Gagal memuat daftar paket terkini:", err.message);
+    } finally {
+      setLoadingPlans(false);
+    }
+  };
+
   const fetchSubscription = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -106,8 +167,10 @@ export default function Billing() {
   };
 
   useEffect(() => {
+    fetchPackages();
     fetchSubscription();
     fetchHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleInitiatePayment = async (planId) => {
@@ -283,29 +346,33 @@ export default function Billing() {
         <Wrapper>
           <div className={styles.content}>
             <p className={styles.sectionTitle}>Pilih Paket Langganan</p>
-            <div className={styles.plansGrid}>
-              {plans.map((plan) => (
-                <div key={plan.id} className={styles.planCard}>
-                  {plan.badge && <span className={styles.planBadge}>{plan.badge}</span>}
-                  <div className={styles.planHeader}>
-                    <h4>{plan.name}</h4>
-                    <span className={styles.planPeriod}>{plan.period}</span>
-                    <h3 className={styles.planPrice}>{formatPrice(plan.price)}</h3>
+            {loadingPlans && plans.length === 0 ? (
+              <p className={styles.loadingText}>Memuat paket langganan...</p>
+            ) : (
+              <div className={styles.plansGrid}>
+                {plans.map((plan) => (
+                  <div key={plan.id} className={styles.planCard}>
+                    {plan.badge && <span className={styles.planBadge}>{plan.badge}</span>}
+                    <div className={styles.planHeader}>
+                      <h4>{plan.name}</h4>
+                      <span className={styles.planPeriod}>{plan.period}</span>
+                      <h3 className={styles.planPrice}>{formatPrice(plan.price)}</h3>
+                    </div>
+                    <ul className={styles.featuresList}>
+                      {plan.features.map((feat, idx) => (
+                        <li key={idx}>✓ {feat}</li>
+                      ))}
+                    </ul>
+                    <button
+                      onClick={() => handleInitiatePayment(plan.id)}
+                      className={styles.buyBtn}
+                    >
+                      Beli Sekarang (QRIS)
+                    </button>
                   </div>
-                  <ul className={styles.featuresList}>
-                    {plan.features.map((feat, idx) => (
-                      <li key={idx}>✓ {feat}</li>
-                    ))}
-                  </ul>
-                  <button
-                    onClick={() => handleInitiatePayment(plan.id)}
-                    className={styles.buyBtn}
-                  >
-                    Beli Sekarang (QRIS)
-                  </button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </Wrapper>
       </div>
