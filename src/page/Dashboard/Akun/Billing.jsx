@@ -15,6 +15,7 @@ export default function Billing() {
   // Payment States
   const [activePayment, setActivePayment] = useState(null); // stores invoice/QRIS info
   const [checkingPayment, setCheckingPayment] = useState(false);
+  const [payingPlanId, setPayingPlanId] = useState(null);
   const [paymentMessage, setPaymentMessage] = useState("");
   const [paymentError, setPaymentError] = useState("");
 
@@ -173,9 +174,19 @@ export default function Billing() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Temporary flag: set to false when payment gateway is ready
+  const PAYMENT_GATEWAY_UNAVAILABLE = true;
+
   const handleInitiatePayment = async (planId) => {
     setPaymentError("");
     setPaymentMessage("");
+
+    if (PAYMENT_GATEWAY_UNAVAILABLE) {
+      setPaymentError("Payment gateway unavailable");
+      return;
+    }
+
+    setPayingPlanId(planId);
     try {
       const token = localStorage.getItem("token");
       const serverUrl = process.env.REACT_APP_URL_SERVER || "http://localhost:5000";
@@ -185,10 +196,13 @@ export default function Billing() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setActivePayment(response.data.payment);
+      window.scrollTo({ top: 280, behavior: "smooth" });
     } catch (err) {
       setPaymentError(
         err.response?.data?.message || "Gagal menginisiasi pembayaran QRIS."
       );
+    } finally {
+      setPayingPlanId(null);
     }
   };
 
@@ -346,6 +360,22 @@ export default function Billing() {
         <Wrapper>
           <div className={styles.content}>
             <p className={styles.sectionTitle}>Pilih Paket Langganan</p>
+            {paymentError && !activePayment && (
+              <div
+                style={{
+                  backgroundColor: "rgba(239, 68, 68, 0.15)",
+                  border: "1px solid rgba(239, 68, 68, 0.4)",
+                  borderRadius: "8px",
+                  padding: "10px 14px",
+                  color: "#f87171",
+                  marginBottom: "16px",
+                  fontSize: "13px",
+                  fontWeight: "500",
+                }}
+              >
+                ⚠️ {paymentError}
+              </div>
+            )}
             {loadingPlans && plans.length === 0 ? (
               <p className={styles.loadingText}>Memuat paket langganan...</p>
             ) : (
@@ -366,8 +396,16 @@ export default function Billing() {
                     <button
                       onClick={() => handleInitiatePayment(plan.id)}
                       className={styles.buyBtn}
+                      disabled={payingPlanId === plan.id}
+                      style={
+                        payingPlanId === plan.id
+                          ? { opacity: 0.7, cursor: "not-allowed" }
+                          : undefined
+                      }
                     >
-                      Beli Sekarang (QRIS)
+                      {payingPlanId === plan.id
+                        ? "Memproses QRIS..."
+                        : "Beli Sekarang (QRIS)"}
                     </button>
                   </div>
                 ))}
