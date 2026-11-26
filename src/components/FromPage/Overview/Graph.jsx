@@ -63,7 +63,7 @@ export default function Graph({ onLoad }) {
       }
     };
     getData();
-  }, []);
+  }, [user?.location?.name]);
 
   const monthShort = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
   const month = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
@@ -86,7 +86,13 @@ export default function Graph({ onLoad }) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <p className={styles.subtitle}>Grafik Inflasi {user?.location?.name} <i className={styles.monthInfo}>{month[data.length - 1]}</i> {year}</p>
+        <p className={styles.subtitle}>
+          Grafik Inflasi {user?.location?.name || "KOTA METRO"}{" "}
+          <i className={styles.monthInfo}>
+            {data.length > 0 ? month[(data.length - 1) % 12] : ""}
+          </i>{" "}
+          {year}
+        </p>
         <div className={styles.legendContainer}>
           <div className={styles.legendItem}>
             <span className={styles.dotMom} />
@@ -103,7 +109,7 @@ export default function Graph({ onLoad }) {
         </div>
       </div>
       <div className={styles.chartWrapper}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height={210} minWidth={0}>
           <AreaChart
             data={data}
             margin={{
